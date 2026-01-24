@@ -391,38 +391,6 @@
 					</OnClick>
 				</Scripts>
 			</CheckButton>
-			<!-- Enable Zone Check for Raid Queue -->
-			<CheckButton name="$parentEnableZonecheck" inherits="OptionsCheckButtonTemplate">
-				<Anchors>
-					<Anchor point="TOPLEFT">
-						<Offset x="32" y="-224"/>
-					</Anchor>
-				</Anchors>
-				<Scripts>
-					<OnLoad>
-						getglobal(this:GetName().."Text"):SetText("Enable Raid Queue Zone Check")
-					</OnLoad>
-					<OnClick>
-						SOTA_HandleCheckbox(this);
-					</OnClick>
-				</Scripts>
-			</CheckButton>
-			<!-- Enable Online Check -->
-			<CheckButton name="$parentEnableOnlinecheck" inherits="OptionsCheckButtonTemplate">
-				<Anchors>
-					<Anchor point="TOPLEFT">
-						<Offset x="32" y="-250"/>
-					</Anchor>
-				</Anchors>
-				<Scripts>
-					<OnLoad>
-						getglobal(this:GetName().."Text"):SetText("Enable Raid Queue Online Check")
-					</OnLoad>
-					<OnClick>
-						SOTA_HandleCheckbox(this);
-					</OnClick>
-				</Scripts>
-			</CheckButton>
 			<!-- Allow players to Pass ? -->
 			<CheckButton name="$parentAllowPlayerPass" inherits="OptionsCheckButtonTemplate">
 				<Anchors>

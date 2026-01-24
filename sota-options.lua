@@ -34,7 +34,7 @@ end;
 --[[
 --	Get configurable message and fill out placeholders:
 --	Parameters:
---	%i: Item, %d: DKP, %b: Bidder, %r: Rank, $1,$2,$3: params (percent, players in range, players in queue etc)
+--	%i: Item, %d: DKP, %b: Bidder, %r: Rank, $1,$2,$3: params (percent, players in range etc)
 --	Automatic gathered:
 --	%m: Min DKP, %s: SotA master
 --]]
@@ -299,8 +299,6 @@ function SOTA_InitializeConfigSettings()
 
 	
 	getglobal("FrameConfigBiddingMSoverOSPriority"):SetChecked(SOTA_CONFIG_EnableOSBidding);
-	getglobal("FrameConfigBiddingEnableZonecheck"):SetChecked(SOTA_CONFIG_EnableZoneCheck);
-	getglobal("FrameConfigBiddingEnableOnlinecheck"):SetChecked(SOTA_CONFIG_EnableOnlineCheck);
 	getglobal("FrameConfigBiddingAllowPlayerPass"):SetChecked(SOTA_CONFIG_AllowPlayerPass);
 	getglobal("FrameConfigBiddingDisableDashboard"):SetChecked(SOTA_CONFIG_DisableDashboard);
 
@@ -350,14 +348,11 @@ function SOTA_VerifyEventMessages()
 		{ SOTA_MSG_OnDKPAdded		, 1, "$d DKP was added to $b" },
 		{ SOTA_MSG_OnDKPAddedRaid	, 1, "$d DKP was added to all players in raid" },
 		{ SOTA_MSG_OnDKPAddedRange	, 1, "$d DKP has been added for $1 players in range." },
-		{ SOTA_MSG_OnDKPAddedQueue	, 1, "$d DKP has been added for $1 players in range (incl $2 in queue)." },
 		{ SOTA_MSG_OnDKPSubtract	, 1, "$d DKP was subtracted from $b" },
 		{ SOTA_MSG_OnDKPSubtractRaid, 1, "$d DKP was subtracted from all players in raid" },
 		{ SOTA_MSG_OnDKPPercent		, 1, "$1 % ($d DKP) was subtracted from $b" },
 		{ SOTA_MSG_OnDKPShared		, 1, "$1 DKP was shared ($d DKP per player)" },
-		{ SOTA_MSG_OnDKPSharedQueue , 1, "$1 DKP was shared ($d DKP per player plus $2 in queue)" },
 		{ SOTA_MSG_OnDKPSharedRange , 1, "$1 DKP was shared for $2 players in range ($d DKP per player)" },
-		{ SOTA_MSG_OnDKPSharedRangeQ, 1, "$1 DKP was shared for $2 players in range ($d DKP per player, incl $3 in queue)" },
 		{ SOTA_MSG_OnDKPReplaced	, 1, "$1 was replaced with $2 ($d DKP)" }
 	}
 
@@ -398,26 +393,6 @@ function SOTA_HandleCheckbox(checkbox)
 			SOTA_CONFIG_EnableOSBidding = 1;
 		else
 			SOTA_CONFIG_EnableOSBidding = 0;
-		end
-		return;
-	end
-		
-	--	Enable RQ Zonecheck:		
-	if checkboxname == "FrameConfigBiddingEnableZonecheck" then
-		if checkbox:GetChecked() then
-			SOTA_CONFIG_EnableZoneCheck = 1;
-		else
-			SOTA_CONFIG_EnableZoneCheck = 0;
-		end
-		return;
-	end
-
-	--	Enable RQ Onlinecheck:		
-	if checkboxname == "FrameConfigBiddingEnableOnlinecheck" then
-		if checkbox:GetChecked() then
-			SOTA_CONFIG_EnableOnlineCheck = 1;
-		else
-			SOTA_CONFIG_EnableOnlineCheck = 0;
 		end
 		return;
 	end

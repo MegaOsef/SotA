@@ -459,11 +459,6 @@ function SOTA_RefreshTransactionDetails()
 		totalPlayers[totalCount] = { raidRoster[n][1], raidRoster[n][3] };
 	end	
 
-	for n=1, table.getn(SOTA_RaidQueue), 1 do
-		totalCount = totalCount + 1
-		totalPlayers[totalCount] = { SOTA_RaidQueue[n][1], SOTA_RaidQueue[n][4] };
-	end	
-
 	totalPlayers = SOTA_SortTableAscending(totalPlayers, 1);
 
 

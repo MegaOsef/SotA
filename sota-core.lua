@@ -43,10 +43,6 @@ local GuildRosterTable			= { }
 local RaidRosterTable			= { }
 local RaidRosterLazyUpdate		= false;
 
--- Table of Queued raid members:			{ Name, QueueID, Role, Class, Guild rank, Offline time }
-SOTA_RaidQueue					= { }
-
-
 SOTA_CHANNELS = {
 	{ 'Raid Warning (/rw)',			WARN_CHANNEL },
 	{ 'Raid channel (/raid)',		RAID_CHANNEL },
@@ -102,14 +98,11 @@ SOTA_MSG_OnCancel			= "OnCancel";
 SOTA_MSG_OnDKPAdded			= "OnDKPAddedPlayer";
 SOTA_MSG_OnDKPAddedRaid		= "OnDKPAddedRaid";
 SOTA_MSG_OnDKPAddedRange	= "OnDKPAddedRange";
-SOTA_MSG_OnDKPAddedQueue	= "OnDKPAddedQueue";
 SOTA_MSG_OnDKPSubtract		= "OnDKPSubtractedPlayer";
 SOTA_MSG_OnDKPSubtractRaid	= "OnDKPSubtractedRaid";
 SOTA_MSG_OnDKPPercent		= "OnDKPSubtractedPercent";
 SOTA_MSG_OnDKPShared		= "OnDKPShared";
-SOTA_MSG_OnDKPSharedQueue	= "OnDKPSharedQueue";
 SOTA_MSG_OnDKPSharedRange	= "OnDKPSharedRange";
-SOTA_MSG_OnDKPSharedRangeQ	= "OnDKPSharedRangeQueue";
 SOTA_MSG_OnDKPReplaced		= "OnDKPReplaced";
 
 
@@ -119,8 +112,6 @@ SOTA_MSG_OnDKPReplaced		= "OnDKPReplaced";
 SOTA_CONFIG_AuctionTime			= 8
 SOTA_CONFIG_AuctionExtension	= 8
 SOTA_CONFIG_EnableOSBidding		= 1;	-- Enable MS bidding over OS
-SOTA_CONFIG_EnableZoneCheck		= 1;	-- Enable zone check when doing raid queue DKP
-SOTA_CONFIG_EnableOnlineCheck	= 1;	-- Enable online check when doing raid queue DKP
 SOTA_CONFIG_AllowPlayerPass     = 1;	-- 0: No pass, 1: can pass latest bid
 SOTA_CONFIG_DisableDashboard	= 0;	-- Disable Dashboard in UI (hide it)
 SOTA_CONFIG_OutputChannel		= WARN_CHANNEL;
@@ -410,7 +401,6 @@ end
 
 function SOTA_OnGuildRosterUpdate()
 	SOTA_RefreshGuildRoster();
-	SOTA_UpdateQueueOfflineTimers();
 
 	if SOTA_CanReadNotes() then
 		if not JobIsRunning then	
@@ -430,7 +420,6 @@ function SOTA_OnGuildRosterUpdate()
 		end
 	end
 	
-	SOTA_RefreshRaidQueue();
 	SOTA_RefreshLogElements();
 end
 
@@ -509,14 +498,12 @@ end
 function SOTA_OnRaidRosterUpdate(event, arg1, arg2, arg3, arg4, arg5)
 	RaidRosterLazyUpdate = true;
 
-	SOTA_RefreshRaidQueue();
 	SOTA_RefreshLogElements();
 	
 	if SOTA_IsInRaid(true) then
 		SOTA_Synchronize();
 	else
 		SOTA_transactionLog = { };
-		SOTA_RaidQueue = { };
 		
 		SOTA_ClearMaster();		
 	end	
@@ -812,7 +799,7 @@ function SOTA_SubtractPlayerDKPPercent(playername, percent, silentmode)
 end
 
 --[[
---	Add <n> DKP to all players in raid and in queue
+--	Add <n> DKP to all players in raid
 --]]
 function SOTA_Call_AddRaidDKP(dkp)
 	if SOTA_IsInRaid(true) then
@@ -822,10 +809,7 @@ function SOTA_Call_AddRaidDKP(dkp)
 		SOTA_RequestUpdateGuildRoster();
 	end
 end
-local SOTA_QueuedPlayersImpacted;
 function SOTA_AddRaidDKP(dkp, silentmode, callMethod)
-	SOTA_QueuedPlayersImpacteded = 0;
-
 	if SOTA_IsInRaid(true) then	
 		dkp = 1 * dkp;
 		
@@ -854,35 +838,6 @@ function SOTA_AddRaidDKP(dkp, silentmode, callMethod)
 			end
 		end
 		
-		for n=1, table.getn(SOTA_RaidQueue), 1 do
-			local guildInfo = SOTA_GetGuildPlayerInfo(SOTA_RaidQueue[n][1]);
-
-			if guildInfo then
-				local eligibleForDKP = true;
-	
-				-- Player is OFFLINE, skip if not allowed
-				if guildInfo[5] == 0 and onlinecheck == 1 then
-					localEcho(string.format("No queue DKP for %s (Offline)", SOTA_RaidQueue[n][1]));
-					eligibleForDKP = false;
-				end
-				
-				-- Player is not in raid zone
-				if eligibleForDKP and guildInfo[5] == 1 and zonecheck == 1 then
-						if not(guildInfo[6] == instance or guildInfo[6] == zonename) then
-							localEcho(string.format("No queue DKP for %s (location: %s)", SOTA_RaidQueue[n][1], guildInfo[6]));
-							eligibleForDKP = false;
-						end;
-				end;
-								
-				if eligibleForDKP then				   
-					SOTA_ApplyPlayerDKP(SOTA_RaidQueue[n][1], dkp);				
-					tidChanges[tidIndex] = { SOTA_RaidQueue[n][1], dkp };
-					tidIndex = tidIndex + 1;
-					SOTA_QueuedPlayersImpacteded = SOTA_QueuedPlayersImpacteded + 1;
-				end
-			end
-		end
-		
 		if not silentmode then
 --			publicEcho(string.format("%d DKP was added to all players in raid", dkp));
 			SOTA_EchoEvent(SOTA_MSG_OnDKPAddedRaid, "", dkp);
@@ -895,7 +850,7 @@ function SOTA_AddRaidDKP(dkp, silentmode, callMethod)
 end
 
 --[[
---	Subtract <n> DKP from each raid and queue member.
+--	Subtract <n> DKP from each raid
 --]]
 function SOTA_Call_SubtractRaidDKP(dkp)
 	if SOTA_IsInRaid(true) then
@@ -924,16 +879,6 @@ function SOTA_SubtractRaidDKP(dkp, silentmode, callMethod)
 			tidIndex = tidIndex + 1;
 		end
 
-		for n=1, table.getn(SOTA_RaidQueue), 1 do
-			local guildInfo = SOTA_GetGuildPlayerInfo(SOTA_RaidQueue[n][1]);
-			if guildInfo and guildInfo[5] == 1 then
-				SOTA_ApplyPlayerDKP(SOTA_RaidQueue[n][1], dkp);
-				
-				tidChanges[tidIndex] = { SOTA_RaidQueue[n][1], dkp };
-				tidIndex = tidIndex + 1;
-			end
-		end
-		
 		if not silentmode then
 --			publicEcho(string.format("%d DKP was subtracted from all players in raid", abs(dkp)));
 			SOTA_EchoEvent(SOTA_MSG_OnDKPSubtractRaid, "", dkp);
@@ -961,7 +906,6 @@ end
 function SOTA_AddRangedDKP(dkp, silentmode, dkpLabel, shareTheDKP)
 	dkp = 1 * dkp;
 
-	SOTA_QueuedPlayersImpacted = 0;
 	local raidUpdateCount = 0;
 	local tidIndex = 1;
 	local tidChanges = { };
@@ -1007,25 +951,9 @@ function SOTA_AddRangedDKP(dkp, silentmode, dkpLabel, shareTheDKP)
 		end
 	end
 	
-	for n=1, table.getn(SOTA_RaidQueue), 1 do
-		local guildInfo = SOTA_GetGuildPlayerInfo(SOTA_RaidQueue[n][1]);
-		if guildInfo and (SOTA_CONFIG_EnableOnlineCheck == 0 or guildInfo[5] == 1) then
-			SOTA_ApplyPlayerDKP(SOTA_RaidQueue[n][1], dkp);
-			
-			tidChanges[tidIndex] = { SOTA_RaidQueue[n][1], dkp };
-			tidIndex = tidIndex + 1;
-			SOTA_QueuedPlayersImpacted = SOTA_QueuedPlayersImpacted + 1;
-		end;
-	end
-	
 	if not silentmode then
-		if SOTA_QueuedPlayersImpacted == 0 then
---			publicEcho(string.format("%d DKP has been added for %d players in range.", dkp, raidUpdateCount));
-			SOTA_EchoEvent(SOTA_MSG_OnDKPAddedRange, "", dkp, "", "", raidUpdateCount);
-		else
---			publicEcho(string.format("%d DKP has been added for %d players in range (plus %d in queue).", dkp, raidUpdateCount, SOTA_QueuedPlayersImpacted));
-			SOTA_EchoEvent(SOTA_MSG_OnDKPAddedQueue, "", dkp, "", "", raidUpdateCount, SOTA_QueuedPlayersImpacted);
-		end;
+--		publicEcho(string.format("%d DKP has been added for %d players in range.", dkp, raidUpdateCount));
+		SOTA_EchoEvent(SOTA_MSG_OnDKPAddedRange, "", dkp, "", "", raidUpdateCount);
 	end
 	
 	SOTA_LogMultipleTransactions(dkpLabel, tidChanges)	
@@ -1070,7 +998,7 @@ end
 
 
 --[[
---	Share <n> DKP to all members in raid and queue
+--	Share <n> DKP to all members in raid
 --]]
 function SOTA_Call_ShareDKP(dkp)
 	if SOTA_IsInRaid(true) then
@@ -1095,13 +1023,8 @@ function SOTA_ShareDKP(sharedDkp)
 		end
 		
 		if SOTA_AddRaidDKP(dkp, true, "+Share") then
-			if SOTA_QueuedPlayersImpacteded == 0 then
---				publicEcho(string.format("%d DKP was shared (%s DKP per player)", sharedDkp, dkp));
-				SOTA_EchoEvent(SOTA_MSG_OnDKPShared, "", dkp, "", "", sharedDkp);
-			else
---				publicEcho(string.format("%d DKP was shared (%s DKP per player plus %d in queue)", sharedDkp, dkp, SOTA_QueuedPlayersImpacteded));
-				SOTA_EchoEvent(SOTA_MSG_OnDKPSharedQueue, "", dkp, "", "", sharedDkp, SOTA_QueuedPlayersImpacteded);
-			end;
+--			publicEcho(string.format("%d DKP was shared (%s DKP per player)", sharedDkp, dkp));
+			SOTA_EchoEvent(SOTA_MSG_OnDKPShared, "", dkp, "", "", sharedDkp);
 		end
 		return true;
 	end
@@ -1109,7 +1032,7 @@ function SOTA_ShareDKP(sharedDkp)
 end
 
 --[[
---	Share <n> DKP to all members in range in raid and queue.
+--	Share <n> DKP to all members in range in raid
 --	Added in 1.0.2.
 --]]
 function SOTA_Call_ShareRangedDKP(dkp)
@@ -1127,13 +1050,7 @@ function SOTA_ShareRangedDKP(sharedDkp)
 		local inRange = SOTA_AddRangedDKP(sharedDkp, true, "+ShRange", true);
 		if inRange > 0 then
 			local dkp = ceil(sharedDkp / inRange);
-			if SOTA_QueuedPlayersImpacted == 0 then
---				publicEcho(string.format("%d DKP was shared for %d players in range (%s DKP per player)", sharedDkp, inRange, dkp));
-				SOTA_EchoEvent(SOTA_MSG_OnDKPSharedRange, "", dkp, "", "", sharedDkp, inRange);
-			else
---				publicEcho(string.format("%d DKP was shared for %d players in range (%s DKP per player plus %d in queue)", sharedDkp, inRange, dkp, SOTA_QueuedPlayersImpacted));
-				SOTA_EchoEvent(SOTA_MSG_OnDKPSharedRangeQ, "", dkp, "", "", sharedDkp, inRange, SOTA_QueuedPlayersImpacted);
-			end;
+			SOTA_EchoEvent(SOTA_MSG_OnDKPSharedRange, "", dkp, "", "", sharedDkp, inRange);
 		end
 		return true;
 	end

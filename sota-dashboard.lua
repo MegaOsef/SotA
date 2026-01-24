@@ -82,20 +82,14 @@ GuildDKP            SOTA /command       SOTA !command       SOTA /w command     
 /gdminus <n> <p>    /SOTA -<n> <p>      -                   -                   Subtract <n> DKP from player <p>
 /gdminuspct <n> <p> /SOTA [-]<n>% <p>   -                   -                   Subtract <n>% DKP from player (+<n>% does not exist)
 
-/addraid <n>        /SOTA raid +<n>     -                   -                   Add <n> DKP to all players in raid (SOTA: and queue)
-/subtractraid <n>   /SOTA raid -<n>     -                   -                   Subtract <n> DKP from players in raid (SOTA: and queue)
-/addrange <n>       /SOTA range [+]<n>  -                   -                   Add <n> DKP to all players in range (SOTA: and queue)
-/shareraid <n>      /SOTA share [+]<n>  -                   -                   Share <n> DKP across all members in raid (SOTA: and queue)
-/sharerange <n>     /SOTA sharerange [+]<n>                 -                   Share <n> DKP across all members in range (SOTA: and queue)
+/addraid <n>        /SOTA raid +<n>     -                   -                   Add <n> DKP to all players in raid
+/subtractraid <n>   /SOTA raid -<n>     -                   -                   Subtract <n> DKP from players in raid 
+/addrange <n>       /SOTA range [+]<n>  -                   -                   Add <n> DKP to all players in range
+/shareraid <n>      /SOTA share [+]<n>  -                   -                   Share <n> DKP across all members in raid
+/sharerange <n>     /SOTA sharerange [+]<n>                 -                   Share <n> DKP across all members in range
 -                   /SOTA rangeshare [+]<n>                 -                   sharerange and rangeshare (and the alias SR) do the same.
 /gddecay <n>        /SOTA decay <n>[%]  -                   -                   Remove <n>% DKP from all guild members
 -                   /SOTA decaytest     -                   -                   Test if DECAY operation will work (check for odd characters)
-
--                   /SOTA listqueue     !listqueue          /w <o> listqueue    List names of people in queue (by whisper or local if user have SOTA installed)
--                   /SOTA queue         !queue              /w <o> queue        Get queue status
--                   /SOTA queue <r>     !queue <r>          /w <o> queue <r>    Queue as role <r>: <r> can be tank, melee, ranged or healer
--                   /SOTA addqueue <p>  -                   -                   Add person <p> manually to the queue. Must be promoted.
--                   /SOTA leave         !leave              /w <o> leave        Leave the raid queue (can be done by players in raid)
 
 -                   /SOTA <item>        -                   -                   Starts an auction for <item>
                     /startauction
@@ -223,45 +217,6 @@ function SOTA_HandleSOTACommand(msg)
 		return SOTA_Call_CheckClassDKP(arg);
 	end
 
-	--	Command: queue
-	--	Syntax: "queue [<role>]", "queue leave" (will fallback to "leave" below)
-	if cmd == "queue" then
-		if arg == "leave" then
-			cmd = arg;
-			arg = nil;
-		else
-			return SOTA_HandleQueueRequest(playername, msg);
-		end
-	end
-
-	-- Command: listqueue
-	--	Syntax: "listqueue"
-	if cmd == "listqueue" then
-		return SOTA_Call_ListQueue(playername);
-	end
-
-	
-	--	Command: addqueue
-	--	Syntax: "addqueue"
-	if cmd == "addqueue" then
-		if SOTA_IsPromoted() then
-			if not SOTA_Master then
-				SOTA_RequestMaster();
-			end
-			return SOTA_AddToRaidQueueByName(arg);
-		else
-			localEcho("You must be promoted for adding people to the raid queue.");
-		end
-		return;
-	end
-	
-	
-	--	Command: leave
-	--	Syntax: "leave"
-	if cmd == "leave" then
-		return SOTA_RemoveFromRaidQueue(playername);
-	end
-	
 	--	Command: bid, os, ms
 	--	Syntax: "bid <%d>", "bid min", "bid max"
 	if cmd == "bid" or cmd == "ms" or cmd == "os" then
@@ -409,16 +364,11 @@ function SOTA_DisplayHelp()
 	echo("");
 	--	Raid DKP:
 	localEcho("Raid DKP:");
-	echo("  raid +<dkp>    Add <dkp> to all players in raid and in raid queue.");
-	echo("  raid -<dkp>    Subtract <dkp> from all players in raid and in raid queue.");
+	echo("  raid +<dkp>    Add <dkp> to all players in raid.");
+	echo("  raid -<dkp>    Subtract <dkp> from all players in raid.");
 	echo("  range +<dkp>    Add <dkp> to all players in 100 yards range.");
-	echo("  share +<dkp>    Share <dkp> to all players in raid and in raid queue. Every player gets (<dkp> / <number of players in raid>) DKP.");
+	echo("  share +<dkp>    Share <dkp> to all players in raid. Every player gets (<dkp> / <number of players in raid>) DKP.");
 	echo("  decay <pct>%    Remove <pct> percent DKP from every player in the guild.");
-	echo("");
-	--	Queue options:
-	localEcho("Raid Queue:");
-	echo("  queue    Get current queue status (number of people in queue)");
-	echo("  addqueue <p> <r>    Manually add the player <p> to the raid queue with role <r>.");
 	echo("");
 	--	Misc:
 	localEcho("Miscellaneous:");
@@ -431,10 +381,6 @@ function SOTA_DisplayHelp()
 	echo("");
 	--	Chat options (Guild chat and Raid chat):
 	localEcho("Guild/Raid chat commands:");
-	echo("  !queue    Get current queue status (number of people in queue)");
-	echo("  !queue <r>    Queue as role <r>; <r> can be tank, melee, ranged or healer");
-	echo("  !leave    Leave the raid queue.");
-	echo("  !listqueue    Returns a list of people who are currently in queue.");
 	echo("  !bid <dkp>    Bid <dkp> for item currently being on auction.");
 	echo("  !bid min    Bid the minimum bid on item currently being on auction.");
 	echo("  !bid max    Bid everything (go all out) on item currently being on auction");	
@@ -489,7 +435,6 @@ function SOTA_OnTimer(elapsed)
 
 	if floor(EventTime) < floor(SOTA_TimerTick) then
 		SOTA_CheckAuctionState();
-		SOTA_CheckOfflineStatus();
 		EventTime = SOTA_TimerTick;
 	end
 	
@@ -763,23 +708,6 @@ function SOTA_HandleTXMaster(message, sender)
 	end
 end
 
-function SOTA_BroadcastJoinQueue(playername, playerrole)
-	addonEcho("TX_JOINQUEUE#".. string.format("%s/%s", playername, playerrole) .."#");
-end
-
-function SOTA_BroadcastLeaveQueue(playername)
-	addonEcho("TX_LEAVEQUEUE#".. playername .."#");
-end
-
-function SOTA_HandleTXJoinQueue(message, sender)
-	local _, _, playername, playerrole = string.find(message, "([^/]*)/([^/]*)")	
-	SOTA_AddToRaidQueue(playername, playerrole, true);
-end
-
-function SOTA_HandleTXLeaveQueue(message, sender)
-	SOTA_RemoveFromRaidQueue(message, true);	
-end
-
 --[[
 	Respond to a TX_VERSION command.
 	Input:
@@ -868,8 +796,6 @@ function SOTA_HandleTXSyncInit(message, sender)
 
 	-- Transaction Log:	
 	addonEcho("RX_SYNCINIT#"..SOTA_currentTransactionID.."#"..sender)
-	-- Raid queue: (kept in two messages for backwards compability)
-	addonEcho("RX_SYNCRQINIT#".. table.getn(SOTA_RaidQueue) .."#"..sender)
 	
 	-- If this is the MASTER, we should also tell this to the requester.
 	if SOTA_Master then
@@ -891,20 +817,6 @@ function SOTA_HandleRXSyncInit(message, sender)
 	
 	syncResults[syncIndex] = { sender, maxTid };
 end
-
---Handle RX_SYNCRQINIT responses from clients
-function SOTA_HandleRXSyncRQInit(message, sender)
-	--	Check we are still in TX_SYNCINIT state
-	if not (synchronizationState == 1) then
-		return
-	end
-
-	local qCount = tonumber(message);
-	local syncIndex = table.getn(syncRQResults) + 1;
-	
-	syncRQResults[syncIndex] = { sender, qCount };
-end
-
 
 
 --[[
@@ -936,21 +848,6 @@ function SOTA_HandleRXSyncInitDone()
 		--	Now request transaction synchronization from selected target
 		addonEcho("TX_SYNCTRAC##"..maxName);	
 	end
-
-
-	-- Raid queue:
-	local maxQueue = 0;
-	local maxSource = "";
-	for n=1, table.getn(syncRQResults), 1 do
-		if(tonumber(syncRQResults[n][2]) > maxQueue) then
-			maxQueue = syncRQResults[n][2];
-			maxSource = syncRQResults[n][1];
-		end
-	end
-
-	if maxQueue > 0 then
-		addonEcho("TX_SYNCRAIDQ##"..maxSource);
-	end	
 end
 
 
@@ -980,33 +877,6 @@ function SOTA_HandleTXSyncTransaction(message, sender)
 	
 	--	Last, send an EOF to signal all transactions were sent.
 	addonEcho("RX_SYNCTRAC#EOF#"..sender);
-end
-
---[[
---	Sync all elements in raid queue to sender.
---]]
-function SOTA_HandleTXSyncRaidQueue(message, sender)
-
-	--{ Name, QueueID, Role , Class }
-	for n=1, table.getn(SOTA_RaidQueue), 1 do
-		local name = SOTA_RaidQueue[n][1];
-		local role = SOTA_RaidQueue[n][3];
-		local clss = SOTA_RaidQueue[n][4];
-		
-		-- TODO:
-		--	OFFLINE state is not broadcasted. That is not a problem wince the
-		--	receiving client will set this.
-		--	However, the offline timer will be wrong for that client, since it
-		--	will start from 0 (seconds).
-		--	We could add the offline timer, but this will break compatibility with
-		--	older (pre 1.2) SOTA clients.
-
-		local response = name.."/"..role.."/"..clss;
-		addonEcho("RX_SYNCRAIDQ#"..response.."#"..sender);
-	end
-
-	--	Last, send an EOF to signal all records were sent.
-	addonEcho("RX_SYNCRAIDQ#EOF#"..sender);
 end
 
 
@@ -1046,20 +916,6 @@ function SOTA_HandleRXSyncTransaction(message, sender)
 	transactions[tracCount + 1] = { name, dkp };
 	transaction[6] = transactions;
 	SOTA_transactionLog[tid] = transaction;
-end
-
-
---[[
---	Received a SOTA_RaidQueue sync record - merge with existing queue.
---]]
-function SOTA_HandleRXSyncRaidQueue(message, sender)
-	if message == "EOF" then
-		synchronizationState = 0;
-		return;
-	end
-
-	local _, _, name, role, clss = string.find(message, "([^/]*)/([^/]*)/([^/]*)")
-	SOTA_AddToRaidQueue(name, role, true);
 end
 
 --[[
@@ -1138,30 +994,16 @@ function SOTA_OnChatMsgAddon(event, prefix, msg, channel, sender)
 			SOTA_HandleTXSyncInit(message, sender)
 		elseif cmd == "RX_SYNCINIT" then
 			SOTA_HandleRXSyncInit(message, sender)
-		elseif cmd == "RX_SYNCRQINIT" then
-			SOTA_HandleRXSyncRQInit(message, sender)
 		elseif cmd == "TX_SYNCTRAC" then
 			SOTA_HandleTXSyncTransaction(message, sender)
 		elseif cmd == "RX_SYNCTRAC" then
 			SOTA_HandleRXSyncTransaction(message, sender)
-		elseif cmd == "TX_SYNCRAIDQ" then
-			SOTA_HandleTXSyncRaidQueue(message, sender)		
-		elseif cmd == "RX_SYNCRAIDQ" then
-			SOTA_HandleRXSyncRaidQueue(message, sender)
-		elseif cmd == "TX_SYNCRQINIT" then
-			SOTA_HandleTXSyncRaidQueueInit(message, sender)
-		elseif cmd == "RX_SYNCRQINIT" then
-			SOTA_HandleRXSyncRaidQueueInit(message, sender)
 		elseif cmd == "TX_CFGSYNCREQ" then
 			SOTA_HandleTXConfigSyncRequest(message, sender)
 		elseif cmd == "RX_CFGSYNCREQ" then
 			SOTA_HandleRXConfigSyncRequest(message, sender)
 		elseif cmd == "TX_SETMASTER" then
 			SOTA_HandleTXMaster(message, sender)		
-		elseif cmd == "TX_JOINQUEUE" then
-			SOTA_HandleTXJoinQueue(message, sender)		
-		elseif cmd == "TX_LEAVEQUEUE" then
-			SOTA_HandleTXLeaveQueue(message, sender)		
 		else
 			--gEcho("Unknown command, raw msg="..msg)
 		end
@@ -1202,7 +1044,6 @@ end
 --]]
 function SOTA_InitializeUI()
 	SOTA_AuctionUIInit();
-	SOTA_RaidQueueUIInit()
 	SOTA_TransactionLogUIInit();
 end
 
@@ -1308,21 +1149,7 @@ function SOTA_OnChatWhisper(event, message, sender)
 
 	elseif cmd == "pass" then
 		SOTA_HandlePlayerPass(sender);
-		
-	elseif cmd == "queue" then
-		SOTA_HandleQueueRequest(sender, message);
-
-	elseif cmd == "listqueue" then
-		SOTA_Call_ListQueue(sender);
-		
-	elseif cmd == "leave" then		
-		if SOTA_RemoveFromRaidQueue(sender) then
-			local guildInfo = SOTA_GetGuildPlayerInfo(sender);
-			if (guildInfo and guildInfo[5] == 1) then
-				SOTA_whisper(sender, "You have left the Raid Queue.")
-			end
-		end
-	end
+	end	
 end	
 
 

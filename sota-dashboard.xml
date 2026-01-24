@@ -37,32 +37,6 @@
 				</Backdrop>
 				<!-- "buttons" -->
 				<Frames>
-					<!-- Button 1A: Raid Queue ("Prayer of Spirit") -->
-					<Button name="$parentShareDKPButton" inherits="ActionButtonTemplate" frameStrata="HIGH" hidden="false">
-						<Size>
-							<AbsDimension x="32" y="32" />
-						</Size>
-						<Anchors>
-							<Anchor point="TOPLEFT">
-								<Offset>
-									<AbsDimension x="4" y="-4" />
-								</Offset>
-							</Anchor>
-						</Anchors>
-						<NormalTexture file="Interface\ICONS\Spell_Holy_PrayerOfSpirit.blp" />
-						<PushedTexture file="Interface\ICONS\Spell_Holy_DivineSpirit.blp" />
-						<Scripts>
-							<OnClick>
-								SOTA_OpenRaidQueueUI();
-							</OnClick>
-							<OnEnter>
-								SOTA_ShowDashboardToolTip(this, "Open Raid Queue");
-							</OnEnter>
-							<OnLeave>
-								SOTA_HideDashboardToolTip(this);
-							</OnLeave>
-						</Scripts>
-					</Button>
 					<!-- Button 2A: Transaction Log ("Note") -->
 					<Button name="$parentTransactionLogButton" inherits="ActionButtonTemplate" frameStrata="HIGH" hidden="false">
 						<Size>
@@ -160,7 +134,7 @@
 								SOTA_ShareBossDKP();
 							</OnClick>
 							<OnEnter>
-								SOTA_ShowDashboardToolTip(this, "Share DKP across Raid and Queue");
+								SOTA_ShowDashboardToolTip(this, "Share DKP across Raid");
 							</OnEnter>
 							<OnLeave>
 								SOTA_HideDashboardToolTip(this);
