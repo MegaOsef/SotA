@@ -248,13 +248,9 @@ function SOTA_HandlePlayerBid(sender, message)
 	end	
 
 	-- Default is MS - if OS bidding is enabled, check bidtype:
-	local bidtype = nil;
-	
-	if SOTA_CONFIG_EnableOSBidding == 1 then
-		bidtype = 1;
-		if cmd == "os" then
-			bidtype = 2;
-		end
+	local bidtype = 1;
+	if cmd == "os" then
+		bidtype = 2;
 	end
 
 	local minimumBid = SOTA_GetMinimumBid(bidtype);
@@ -401,9 +397,7 @@ function SOTA_RegisterBid(playername, bid, bidtype, playerclass, rankname, ranki
 
 	-- Sort by DKP, then BidType (so MS bids are before OS bids)
 	SOTA_SortTableDescending(IncomingBidsTable, 2);
-	if SOTA_CONFIG_EnableOSBidding == 1 then
-		SOTA_SortTableAscending(IncomingBidsTable, 3);
-	end
+	SOTA_SortTableAscending(IncomingBidsTable, 3); -- TODO remove the line before?
 	
 	--Debug output:
 	--[[

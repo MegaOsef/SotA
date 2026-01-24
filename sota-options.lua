@@ -275,9 +275,6 @@ function SOTA_InitializeConfigSettings()
 	end
 
 	-- Update GUI:
-	if not SOTA_CONFIG_EnableOSBidding then
-		SOTA_CONFIG_EnableOSBidding = 1;
-	end
 	if not SOTA_CONFIG_EnableZoneCheck then
 		SOTA_CONFIG_EnableZoneCheck = 1;
 	end
@@ -295,7 +292,6 @@ function SOTA_InitializeConfigSettings()
 	end
 
 	
-	getglobal("FrameConfigBiddingMSoverOSPriority"):SetChecked(SOTA_CONFIG_EnableOSBidding);
 	getglobal("FrameConfigBiddingDisableDashboard"):SetChecked(SOTA_CONFIG_DisableDashboard);
 
 	if SOTA_CONFIG_UseGuildNotes == 1 then
@@ -382,16 +378,6 @@ end;
 
 function SOTA_HandleCheckbox(checkbox)
 	local checkboxname = checkbox:GetName();
-
-	--	Enable MS>OS priority:		
-	if checkboxname == "FrameConfigBiddingMSoverOSPriority" then
-		if checkbox:GetChecked() then
-			SOTA_CONFIG_EnableOSBidding = 1;
-		else
-			SOTA_CONFIG_EnableOSBidding = 0;
-		end
-		return;
-	end
 
 	--	Disable Dashboard:		
 	if checkboxname == "FrameConfigBiddingDisableDashboard" then
