@@ -10,7 +10,7 @@
 
 
 --	State machine:
-local STATE_NONE				= 0
+STATE_NONE				= 0
 local STATE_AUCTION_RUNNING		= 10
 local STATE_AUCTION_PAUSED		= 20
 local STATE_AUCTION_COMPLETE	= 30
@@ -43,6 +43,7 @@ function SOTA_SetAuctionState(auctionState, seconds)
 	if not seconds then
 		seconds = 0;
 	end
+	debugEcho("SOTA_SetAuctionState " .. auctionState .. " " .. seconds)
 	AuctionState = auctionState;
 	SOTA_setSecondCounter(seconds);
 end
@@ -106,7 +107,7 @@ end
 function SOTA_CheckAuctionState()
 	local state = SOTA_GetAuctionState();
 	
-	debugEcho(string.format("SOTA_CheckAuctionState called, state = %d", STATE_AUCTION_PAUSED));
+	debugEcho(string.format("SOTA_CheckAuctionState called, state = %d, secs = %d", state, SOTA_GetSecondCounter()));
 
 	if state == STATE_NONE or state == STATE_AUCTION_PAUSED then
 		return;
@@ -624,14 +625,14 @@ function SOTA_PauseAuction()
 	local secs = SOTA_GetSecondCounter();
 	
 	if state == STATE_AUCTION_RUNNING then
-		SOTA_SetAuctionState(STATE_AUCTION_PAUSED, secs);
+		SOTA_SetAuctionState(STATE_AUCTION_PAUSED, 0);
 		--publicEcho("Auction has been Paused");
 		--publicEcho(SOTA_getConfigurableMessage(SOTA_MSG_OnPause, AuctionedItemLink));
 		SOTA_EchoEvent(SOTA_MSG_OnPause, AuctionedItemLink);
 	end
 	
 	if state == STATE_AUCTION_PAUSED then
-		SOTA_SetAuctionState(STATE_AUCTION_RUNNING, secs + SOTA_CONFIG_AuctionExtension);
+		SOTA_SetAuctionState(STATE_AUCTION_RUNNING, SOTA_CONFIG_AuctionExtension);
 		--publicEcho("Auction has been Resumed");
 		--publicEcho(SOTA_getConfigurableMessage(SOTA_MSG_OnResume, AuctionedItemLink));
 		SOTA_EchoEvent(SOTA_MSG_OnResume, AuctionedItemLink);
@@ -687,7 +688,7 @@ function SOTA_CancelAuction()
 	local state = SOTA_GetAuctionState();
 	if state == STATE_AUCTION_RUNNING or state == STATE_AUCTION_PAUSED then
 		IncomingBidsTable = { }
-		SOTA_SetAuctionState(STATE_AUCTION_NONE);
+		SOTA_SetAuctionState(STATE_NONE);
 		--publicEcho("Auction was Cancelled");		
 		--publicEcho(SOTA_getConfigurableMessage(SOTA_MSG_OnCancel, AuctionedItemLink));
 		SOTA_EchoEvent(SOTA_MSG_OnCancel, AuctionedItemLink);
