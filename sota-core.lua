@@ -112,7 +112,6 @@ SOTA_MSG_OnDKPReplaced		= "OnDKPReplaced";
 SOTA_CONFIG_AuctionTime			= 8
 SOTA_CONFIG_AuctionExtension	= 8
 SOTA_CONFIG_EnableOSBidding		= 1;	-- Enable MS bidding over OS
-SOTA_CONFIG_AllowPlayerPass     = 1;	-- 0: No pass, 1: can pass latest bid
 SOTA_CONFIG_DisableDashboard	= 0;	-- Disable Dashboard in UI (hide it)
 SOTA_CONFIG_OutputChannel		= WARN_CHANNEL;
 SOTA_CONFIG_Messages			= { }	-- Contains configurable raid messages (if any)

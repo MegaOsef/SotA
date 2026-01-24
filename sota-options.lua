@@ -284,9 +284,6 @@ function SOTA_InitializeConfigSettings()
 	if not SOTA_CONFIG_EnableOnlineCheck then
 		SOTA_CONFIG_EnableOnlineCheck = 1;
 	end
-	if not SOTA_CONFIG_AllowPlayerPass then
-		SOTA_CONFIG_AllowPlayerPass = 1;
-	end;
 	if not SOTA_CONFIG_DisableDashboard then
 		SOTA_CONFIG_DisableDashboard = 1;
 	end
@@ -299,7 +296,6 @@ function SOTA_InitializeConfigSettings()
 
 	
 	getglobal("FrameConfigBiddingMSoverOSPriority"):SetChecked(SOTA_CONFIG_EnableOSBidding);
-	getglobal("FrameConfigBiddingAllowPlayerPass"):SetChecked(SOTA_CONFIG_AllowPlayerPass);
 	getglobal("FrameConfigBiddingDisableDashboard"):SetChecked(SOTA_CONFIG_DisableDashboard);
 
 	if SOTA_CONFIG_UseGuildNotes == 1 then
@@ -393,16 +389,6 @@ function SOTA_HandleCheckbox(checkbox)
 			SOTA_CONFIG_EnableOSBidding = 1;
 		else
 			SOTA_CONFIG_EnableOSBidding = 0;
-		end
-		return;
-	end
-
-	--	Allow Player Pass:
-	if checkboxname == "FrameConfigBiddingAllowPlayerPass" then
-		if checkbox:GetChecked() then
-			SOTA_CONFIG_AllowPlayerPass = 1;
-		else
-			SOTA_CONFIG_AllowPlayerPass = 0;
 		end
 		return;
 	end
