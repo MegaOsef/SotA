@@ -92,9 +92,6 @@ function SOTA_UpdateFramePos(frame)
 	if(framename ~= "FrameConfigBidding") then
 		FrameConfigBidding:SetAllPoints(frame);
 	end
-	if(framename ~= "FrameConfigBossDkp") then
-		FrameConfigBossDkp:SetAllPoints(frame);
-	end
 	if(framename ~= "FrameConfigMiscDkp") then
 		FrameConfigMiscDkp:SetAllPoints(frame);
 	end
@@ -111,7 +108,6 @@ end;
 
 function SOTA_OpenConfigurationUI()
 	ConfigurationDialogOpen = true;
-	SOTA_RefreshBossDKPValues();
 
 	SOTA_OpenBiddingConfig();
 end
@@ -124,7 +120,6 @@ end
 
 function SOTA_CloseAllConfig()
 	FrameConfigBidding:Hide();
-	FrameConfigBossDkp:Hide();
 	FrameConfigMiscDkp:Hide();
 	FrameConfigMessage:Hide();
 	FrameConfigBidRules:Hide();
@@ -146,11 +141,6 @@ end;
 function SOTA_OpenBiddingConfig()
 	SOTA_CloseAllConfig();
 	FrameConfigBidding:Show();
-end
-
-function SOTA_OpenBossDkpConfig()
-	SOTA_CloseAllConfig();
-	FrameConfigBossDkp:Show();
 end
 
 function SOTA_OpenMiscDkpConfig()
@@ -219,47 +209,6 @@ function SOTA_OnOptionMinimumDKPPenaltyChanged(object)
 	getglobal(object:GetName().."Text"):SetText(string.format("Minimum DKP penalty: %s", valueString))
 end
 
-function SOTA_RefreshBossDKPValues()
-	getglobal("FrameConfigBossDkp_20Mans"):SetValue(SOTA_GetBossDKPValue("20Mans"));
-	getglobal("FrameConfigBossDkp_MoltenCore"):SetValue(SOTA_GetBossDKPValue("MoltenCore"));
-	getglobal("FrameConfigBossDkp_Onyxia"):SetValue(SOTA_GetBossDKPValue("Onyxia"));
-	getglobal("FrameConfigBossDkp_BlackwingLair"):SetValue(SOTA_GetBossDKPValue("BlackwingLair"));
-	getglobal("FrameConfigBossDkp_AQ40"):SetValue(SOTA_GetBossDKPValue("AQ40"));
-	getglobal("FrameConfigBossDkp_Naxxramas"):SetValue(SOTA_GetBossDKPValue("Naxxramas"));
-	getglobal("FrameConfigBossDkp_WorldBosses"):SetValue(SOTA_GetBossDKPValue("WorldBosses"));
-end
-
-function SOTA_OnOptionBossDKPChanged(object)
-	local slider = object:GetName();
-	local value = tonumber( getglobal(object:GetName()):GetValue() );
-	local valueString = "";
-	
-	if slider == "FrameConfigBossDkp_20Mans" then
-		SOTA_SetBossDKPValue("20Mans", value);
-		valueString = string.format("20 mans (ZG, AQ20): %d DKP", value);
-	elseif slider == "FrameConfigBossDkp_MoltenCore" then
-		SOTA_SetBossDKPValue("Molten Core", value);
-		valueString = string.format("Molten Core: %d DKP", value);
-	elseif slider == "FrameConfigBossDkp_Onyxia" then
-		SOTA_SetBossDKPValue("Onyxia", value);
-		valueString = string.format("Onyxia: %d DKP", value);
-	elseif slider == "FrameConfigBossDkp_BlackwingLair" then
-		SOTA_SetBossDKPValue("BlackwingLair", value);
-		valueString = string.format("Blackwing Lair: %d DKP", value);
-	elseif slider == "FrameConfigBossDkp_AQ40" then
-		SOTA_SetBossDKPValue("AQ40", value);
-		valueString = string.format("Temple of Ahn'Qiraj: %d DKP", value);
-	elseif slider == "FrameConfigBossDkp_Naxxramas" then
-		SOTA_SetBossDKPValue("Naxxramas", value);
-		valueString = string.format("Naxxramas: %d DKP", value);
-	elseif slider == "FrameConfigBossDkp_WorldBosses" then
-		SOTA_SetBossDKPValue("WorldBosses", value);
-		valueString = string.format("World Bosses: %d DKP", value);
-	end
-
-	getglobal(slider.."Text"):SetText(valueString);
-end
-
 function SOTA_InitializeConfigSettings()
     if not SOTA_CONFIG_UseGuildNotes then
 		SOTA_CONFIG_UseGuildNotes = 0;
@@ -300,8 +249,6 @@ function SOTA_InitializeConfigSettings()
 	getglobal("FrameConfigBiddingAuctionTime"):SetValue(SOTA_CONFIG_AuctionTime);
 	getglobal("FrameConfigBiddingAuctionExtension"):SetValue(SOTA_CONFIG_AuctionExtension);
 	
-	SOTA_RefreshBossDKPValues();
-
 	SOTA_VerifyEventMessages();
 end
 

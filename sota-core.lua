@@ -43,6 +43,8 @@ local GuildRosterTable			= { }
 local RaidRosterTable			= { }
 local RaidRosterLazyUpdate		= false;
 
+local SOTA_MINIMUM_BID = 10
+
 SOTA_CHANNELS = {
 	{ 'Raid Warning (/rw)',			WARN_CHANNEL },
 	{ 'Raid channel (/raid)',		RAID_CHANNEL },
@@ -118,17 +120,6 @@ SOTA_CONFIG_VersionNumber		= nil;	-- Increases for every change!
 SOTA_CONFIG_VersionDate			= nil;	-- Date of last change!
 
 
--- Pane 2:
-SOTA_CONFIG_BossDKP				= { }
-local SOTA_CONFIG_DEFAULT_BossDKP = {
-	{ "20Mans",			200 },
-	{ "MoltenCore",		600 },
-	{ "Onyxia",			600 },
-	{ "BlackwingLair",	600 },
-	{ "AQ40",			800 },
-	{ "Naxxramas",		1200 },
-	{ "WorldBosses",	400 }
-}
 -- Pane 3:
 SOTA_CONFIG_Modified			= false;	-- If TRUE, then config number has been updated; FALSE: not.
 SOTA_CONFIG_UseGuildNotes		= 0;
@@ -570,36 +561,6 @@ end
 --
 --	DKP handling
 --
-
-
-function SOTA_GetBossDKPValue(instancename)
-	local bossDkpList = SOTA_GetBossDKPList();
-
-	for n=1, table.getn(bossDkpList), 1 do
-		if bossDkpList[n][1] == instancename then
-			return tonumber(bossDkpList[n][2]);
-		end
-	end
-	return 0;
-end
-
-function SOTA_SetBossDKPValue(instancename, bossDkp)
-	SOTA_GetBossDKPList();
-	
-	for n=1, table.getn(SOTA_CONFIG_BossDKP), 1 do
-		if SOTA_CONFIG_BossDKP[n][1] == instancename then
-			SOTA_CONFIG_BossDKP[n][2] = bossDkp;
-			break;
-		end
-	end
-end
-
-function SOTA_GetBossDKPList()
-	if not SOTA_CONFIG_BossDKP or table.getn(SOTA_CONFIG_BossDKP) == 0 then
-		SOTA_CONFIG_BossDKP = SOTA_CONFIG_DEFAULT_BossDKP;
-	end
-	return SOTA_CONFIG_BossDKP;
-end
 
 function SOTA_Call_CheckPlayerDKP(playername, sender)
 	if playername then
@@ -1538,38 +1499,7 @@ function SOTA_ToggleIncludePlayerInTransaction(playername)
 end
 
 function SOTA_GetStartingDKP()
-	-- TODO: Detect current instance (if any) and calculate starting DKP.
-	local startingDKP = 0;
-	local zonetext = GetRealZoneText();
-	local subzone = GetSubZoneText();
-	if not zonetext then
-		zonetext = "";
-	end
-	if not subzone then
-		subzone = ""
-	end
-	
-	if zonetext == "Zul'Gurub" or zonetext == "Ruins of Ahn'Qiraj" --[[or (zonetext == "Gates of Ahn'Qiraj" and posX >= 0.422)]] then
-		startingDKP = SOTA_GetBossDKPValue("20Mans") / 10;				-- Verified
-	elseif zonetext == "Molten Core" then
-		startingDKP = SOTA_GetBossDKPValue("MoltenCore") / 10;			-- Verified
-	elseif zonetext == "Onyxia's Lair" --[[or (zonetext == "Dustwallow Marsh" and subzone == "Wyrmbog")]] then
-		startingDKP = SOTA_GetBossDKPValue("Onyxia") / 10;				-- Verified
-	elseif zonetext == "Blackwing Lair" then
-		startingDKP = SOTA_GetBossDKPValue("BlackwingLair") / 10;
-	elseif zonetext == "Ahn'Qiraj" --[[or (zonetext == "Gates of Ahn'Qiraj" and posX < 0.422)]] then
-		startingDKP = SOTA_GetBossDKPValue("AQ40") / 10;				-- Verified
-	elseif zonetext == "Naxxramas" then
-		startingDKP = SOTA_GetBossDKPValue("Naxxramas") / 10;
-	elseif	zonetext == "Feralas" or zonetext == "Ashenvale" or zonetext == "Azshara" or 
-			zonetext == "Duskwood" or zonetext == "Blasted Lands" or zonetext == "The Hinterlands" then
-		startingDKP = SOTA_GetBossDKPValue("WorldBosses") / 10;
-	else
-		-- Debug:
-		--echo("Unknown zone: ".. zonetext)
-	end	
-
-	return startingDKP;
+	return SOTA_MINIMUM_BID;
 end
 
 

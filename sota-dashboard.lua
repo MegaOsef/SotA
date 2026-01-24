@@ -460,12 +460,6 @@ function SOTA_OnTimer(elapsed)
 end
 
 function SOTA_OnSecondTimer()
-	local zonetext = GetRealZoneText();
-	if not CurrentZoneName or not(zonetext == CurrentZoneName) then
-		CurrentZoneName = zonetext;
-		SOTA_OnZoneChanged();
-	end
-	
 	if SOTA_IsInRaid(true) then
 		if SOTA_CONFIG_DisableDashboard == 0 then
 			SOTA_OpenDashboard();
@@ -1046,41 +1040,6 @@ function SOTA_InitializeUI()
 	SOTA_AuctionUIInit();
 	SOTA_TransactionLogUIInit();
 end
-
-
-
---
---	Events
---
-function SOTA_OnZoneChanged()
-	if SOTA_IsInRaid(true) then
-		local dkp = SOTA_GetBossDKPValue("WorldBosses");
-		local min = SOTA_GetStartingDKP();
-		if dkp > 0 then
-			local zonetext = GetRealZoneText();
-			if zonetext == "Azshara" then
-				zonetext = zonetext .." (Azuregos)";
-			elseif zonetext == "Blasted Lands" then
-				zonetext = zonetext .." (Lord Kazzak)";
-			elseif zonetext == "Ashenvale" then
-				zonetext = zonetext .." (Emerald Dream: Taerar)";
-			elseif zonetext == "Duskwood" then
-				zonetext = zonetext .." (Emerald Dream: Lethon)";
-			elseif zonetext == "The Hinterlands" then
-				zonetext = zonetext .." (Emerald Dream: Emeriss)";
-			elseif zonetext == "Feralas" then
-				zonetext = zonetext .." (Emerald Dream: Ysondre)";
-			else
-				return;
-			end
-			
-			localEcho(string.format("Instance: "..SOTA_COLOUR_INTRO.."%s"..SOTA_COLOUR_CHAT, zonetext));
-			localEcho(string.format("Boss value: "..SOTA_COLOUR_INTRO.."%s"..SOTA_COLOUR_CHAT.." DKP", dkp*10));
-			localEcho(string.format("Minimum bid: "..SOTA_COLOUR_INTRO.."%s"..SOTA_COLOUR_CHAT.." DKP", min));
-		end
-	end
-end
-
 
 --[[
 --	There's a message in the Guild channel - investigate that!
