@@ -295,30 +295,6 @@ function SOTA_HandlePlayerBid(sender, message)
 	local bidderRank  = playerInfo[4];		-- This rank is by NAME
 	local bidderRIdx  = playerInfo[7];		-- This rank is by NUMBER!
 
-	-- Check bidding using Custom Bidding Strategy.
-	-- This does currently NOT check the min. bid, but it handles player ranks.
-	--[[
-	if SOTA_CONFIG_MinimumBidStrategy == 5 then
-		local variables = { }
-		variables['bid'] = dkp;
-		variables['min'] = hiBid;
-		variables['bidrank'] = hiRankIndex;		--Rank for the current highest bid (idx)
-		variables['currank'] = bidderRIdx;		--Rank for the player bidding (idx); Lower = better.
-
-		local ruleInfo = SOTA_ParseRules(variables);
-
-		if(ruleInfo['VALID']) and (ruleInfo['RESULT']) then
-			if(ruleInfo['RULETYPE'] == SOTA_RULETYPE_SUCCESS) then
-				-- A valid rule was found; continue with the bidding!
-			else
-				SOTA_whisper(sender, ruleInfo['MESSAGE']);
-				return;
-			end;
-		end;
-	end;
-	--]]
-
-
 	-- Check user at least did bid more than last bidder:
 	if not(dkp > hiBid) then
 		SOTA_whisper(sender, string.format("Current highest bid is %s DKP - your bid of %s DKP was ignored.", hiBid, dkp));

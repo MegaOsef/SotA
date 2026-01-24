@@ -111,7 +111,6 @@ SOTA_MSG_OnDKPReplaced		= "OnDKPReplaced";
 -- Pane 1:
 SOTA_CONFIG_AuctionTime			= 8
 SOTA_CONFIG_AuctionExtension	= 8
-SOTA_CONFIG_EnableOSBidding		= 1;	-- Enable MS bidding over OS
 SOTA_CONFIG_DisableDashboard	= 0;	-- Disable Dashboard in UI (hide it)
 SOTA_CONFIG_OutputChannel		= WARN_CHANNEL;
 SOTA_CONFIG_Messages			= { }	-- Contains configurable raid messages (if any)
@@ -133,7 +132,6 @@ local SOTA_CONFIG_DEFAULT_BossDKP = {
 -- Pane 3:
 SOTA_CONFIG_Modified			= false;	-- If TRUE, then config number has been updated; FALSE: not.
 SOTA_CONFIG_UseGuildNotes		= 0;
-SOTA_CONFIG_MinimumBidStrategy	= 1;	-- 0: No strategy, 1: +10 DKP, 2: +10 %, 3: GGC rules, 4: DejaVu rules, 5: Custom rules
 SOTA_CONFIG_DKPStringLength		= 5;
 SOTA_CONFIG_MinimumDKPPenalty	= 50;	-- Minimum DKP withdrawn when doing percent DKP
 -- History: (basically a copy of the transaction log, but not shared with others)
@@ -1539,59 +1537,7 @@ function SOTA_ToggleIncludePlayerInTransaction(playername)
 	end	
 end
 
-
-
---
---	MinBidStrategy
---
-local function strategy10DKP(dkp)
-	return 10 + dkp;
-end
-
-local function strategy10Percent(dkp)
-	return 1.10 * dkp;
-end
-
---	Goldshire Golfclub rules:
---	0-200: +10 DKP
---	200-1K: +50 DKP
---	1K+: 100 DKP
-local function strategyGGCRules(dkp)
-	if dkp < 200 then
-		dkp = dkp + 10;
-	elseif dkp < 1000 then
-		dkp = dkp + 50;
-	else
-		dkp = dkp + 100;
-	end
-	
-	return dkp;
-end
-
--- Deja Vu rules:
--- Minimum bid: 100 DKP
---	100-4999: +100 DKP
--- 5000+: 1000 DKP
---
-local function strategyDejaVuRules(dkp)
-	if dkp < 100 then
-		dkp = 100;
-	elseif dkp < 5000 then
-		dkp = dkp + 100;
-	else 
-		dkp = dkp + 1000;
-	end;
-	return dkp;
-end;
-
-
 function SOTA_GetStartingDKP()
-	-- Deja Vu rules: starting bid is always 100 DKP
-	if SOTA_CONFIG_MinimumBidStrategy == 4 then
-		return 100;
-	end;
-
-
 	-- TODO: Detect current instance (if any) and calculate starting DKP.
 	local startingDKP = 0;
 	local zonetext = GetRealZoneText();
@@ -1685,23 +1631,7 @@ function SOTA_GetMinimumBid(bidtype)
 	
 	minimumBid = 1 * (highestBid[2]);
 
-	--echo("BidType="..bidtype ..", MinBid=".. minimumBid ..", strategy=".. SOTA_CONFIG_MinimumBidStrategy);
-
-	if SOTA_CONFIG_MinimumBidStrategy == 1 then
-		minimumBid = strategy10DKP(minimumBid);
-	elseif SOTA_CONFIG_MinimumBidStrategy == 2 then
-		minimumBid = strategy10Percent(minimumBid);
-	elseif SOTA_CONFIG_MinimumBidStrategy == 3 then
-		minimumBid = strategyGGCRules(minimumBid);
-	elseif SOTA_CONFIG_MinimumBidStrategy == 4 then
-		minimumBid = strategyDejaVuRules(minimumBid);
-	elseif SOTA_CONFIG_MinimumBidStrategy == 5 then
-		-- TODO: Custom bidding currently does not define any custom min.bid strategy
-		minimumBid = strategyDejaVuRules(minimumBid);
-	else
-		-- Fallback strategy (no strategy)
-		minimumBid = minimumBid + 1;
-	end
+	minimumBid = minimumBid + 10; -- People have to bid 10 dkp more.
 
 	return floor(minimumBid);
 end;

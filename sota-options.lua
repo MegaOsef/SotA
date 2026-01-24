@@ -264,9 +264,6 @@ function SOTA_InitializeConfigSettings()
     if not SOTA_CONFIG_UseGuildNotes then
 		SOTA_CONFIG_UseGuildNotes = 0;
     end
-    if not SOTA_CONFIG_MinimumBidStrategy then
-		SOTA_CONFIG_MinimumBidStrategy = 0;
-    end
 	if not SOTA_CONFIG_DKPStringLength then
 		SOTA_CONFIG_DKPStringLength = 5;
 	end
@@ -298,7 +295,6 @@ function SOTA_InitializeConfigSettings()
 		getglobal("FrameConfigMiscDkpPublicNotes"):SetChecked(1)
 	end
 
-	getglobal("FrameConfigMiscDkpMinBidStrategy".. SOTA_CONFIG_MinimumBidStrategy):SetChecked(1)
 	getglobal("FrameConfigMiscDkpDKPStringLength"):SetValue(SOTA_CONFIG_DKPStringLength);
 	getglobal("FrameConfigMiscDkpMinimumDKPPenalty"):SetValue(SOTA_CONFIG_MinimumDKPPenalty);
 	getglobal("FrameConfigBiddingAuctionTime"):SetValue(SOTA_CONFIG_AuctionTime);
@@ -399,54 +395,6 @@ function SOTA_HandleCheckbox(checkbox)
 			SOTA_CONFIG_UseGuildNotes = 0;
 		end
 		return;
-	end
-	
-	if checkbox:GetChecked() then		
-		--	Bid type:
-		--	If checked, then we need to uncheck others in same group:
-		if checkboxname == "FrameConfigMiscDkpMinBidStrategy0" then
-			getglobal("FrameConfigMiscDkpMinBidStrategy1"):SetChecked(0);
-			getglobal("FrameConfigMiscDkpMinBidStrategy2"):SetChecked(0);
-			getglobal("FrameConfigMiscDkpMinBidStrategy3"):SetChecked(0);
-			getglobal("FrameConfigMiscDkpMinBidStrategy4"):SetChecked(0);
-			getglobal("FrameConfigMiscDkpMinBidStrategy5"):SetChecked(0);
-			SOTA_CONFIG_MinimumBidStrategy = 0;
-		elseif checkboxname == "FrameConfigBossDkpMinBidStrategy1" then
-			getglobal("FrameConfigMiscDkpMinBidStrategy0"):SetChecked(0);
-			getglobal("FrameConfigMiscDkpMinBidStrategy2"):SetChecked(0);
-			getglobal("FrameConfigMiscDkpMinBidStrategy3"):SetChecked(0);
-			getglobal("FrameConfigMiscDkpMinBidStrategy4"):SetChecked(0);
-			getglobal("FrameConfigMiscDkpMinBidStrategy5"):SetChecked(0);
-			SOTA_CONFIG_MinimumBidStrategy = 1;
-		elseif checkboxname == "FrameConfigMiscDkpMinBidStrategy2" then
-			getglobal("FrameConfigMiscDkpMinBidStrategy0"):SetChecked(0);
-			getglobal("FrameConfigMiscDkpMinBidStrategy1"):SetChecked(0);
-			getglobal("FrameConfigMiscDkpMinBidStrategy3"):SetChecked(0);
-			getglobal("FrameConfigMiscDkpMinBidStrategy4"):SetChecked(0);
-			getglobal("FrameConfigMiscDkpMinBidStrategy5"):SetChecked(0);
-			SOTA_CONFIG_MinimumBidStrategy = 2;
-		elseif checkboxname == "FrameConfigMiscDkpMinBidStrategy3" then
-			getglobal("FrameConfigMiscDkpMinBidStrategy0"):SetChecked(0);
-			getglobal("FrameConfigMiscDkpMinBidStrategy1"):SetChecked(0);
-			getglobal("FrameConfigMiscDkpMinBidStrategy2"):SetChecked(0);
-			getglobal("FrameConfigMiscDkpMinBidStrategy4"):SetChecked(0);
-			getglobal("FrameConfigMiscDkpMinBidStrategy5"):SetChecked(0);
-			SOTA_CONFIG_MinimumBidStrategy = 3;			
-		elseif checkboxname == "FrameConfigMiscDkpMinBidStrategy4" then
-			getglobal("FrameConfigMiscDkpMinBidStrategy0"):SetChecked(0);
-			getglobal("FrameConfigMiscDkpMinBidStrategy1"):SetChecked(0);
-			getglobal("FrameConfigMiscDkpMinBidStrategy2"):SetChecked(0);
-			getglobal("FrameConfigMiscDkpMinBidStrategy3"):SetChecked(0);
-			getglobal("FrameConfigMiscDkpMinBidStrategy5"):SetChecked(0);
-			SOTA_CONFIG_MinimumBidStrategy = 4;
-		elseif checkboxname == "FrameConfigMiscDkpMinBidStrategy5" then
-			getglobal("FrameConfigMiscDkpMinBidStrategy0"):SetChecked(0);
-			getglobal("FrameConfigMiscDkpMinBidStrategy1"):SetChecked(0);
-			getglobal("FrameConfigMiscDkpMinBidStrategy2"):SetChecked(0);
-			getglobal("FrameConfigMiscDkpMinBidStrategy3"):SetChecked(0);
-			getglobal("FrameConfigMiscDkpMinBidStrategy4"):SetChecked(0);
-			SOTA_CONFIG_MinimumBidStrategy = 5;
-		end
 	end
 end
 
