@@ -116,7 +116,7 @@ function SOTA_PurgeDKPHistory()
 end;
 
 function SOTA_PurgeDKPHistoryNow()
-	SOTA_HISTORY_DKP = {};
+	SOTA.db.realm.HistoryDkp = {};
 
 	SOTA_RefreshLogElements();
 end;
@@ -238,9 +238,9 @@ function SOTA_GetIndividuelDKPHistory()
 
 	-- Generate array with all entries:
 	local index = 1;
-	for n=1, table.getn(SOTA_HISTORY_DKP), 1 do
+	for n=1, table.getn(SOTA.db.realm.HistoryDkp), 1 do
 		-- DKP is stored as { timestamp, tid, author, description, state, { names, dkp }, zone }
-		local entry = SOTA_HISTORY_DKP[n];		
+		local entry = SOTA.db.realm.HistoryDkp[n];		
 		for f=1, table.getn(entry[6]), 1 do
 			local info = entry[6][f];
 			-- Remap into { timestamp, tid, description, name, dkp, zone }
@@ -610,19 +610,19 @@ function SOTA_CopyTransactionToHistory(transaction)
 	local timestamp = tr[1];
 	local tid = tr[2];
 
-	for n=1, table.getn(SOTA_HISTORY_DKP), 1 do
-		local entry = SOTA_HISTORY_DKP[n];
+	for n=1, table.getn(SOTA.db.realm.HistoryDkp), 1 do
+		local entry = SOTA.db.realm.HistoryDkp[n];
 		-- Same transaction found; replace player data with the current one:
 		if (entry[1] == timestamp) and (entry[2] == tid) then
 			-- However, verify the new array is larger than the old one (it should be!)
-			if(table.getn(tr[6]) > table.getn(SOTA_HISTORY_DKP[n][6])) then
-				SOTA_HISTORY_DKP[n][6] = tr[6];
+			if(table.getn(tr[6]) > table.getn(SOTA.db.realm.HistoryDkp[n][6])) then
+				SOTA.db.realm.HistoryDkp[n][6] = tr[6];
 			end;
 			return;
 		end;
 	end;
 
-	table.insert(SOTA_HISTORY_DKP, tr);
+	table.insert(SOTA.db.realm.HistoryDkp, tr);
 end;
 
 
@@ -631,7 +631,7 @@ end;
 --	Added in 1.1.0
 --]]
 function SOTA_ClearLocalHistory()
-	SOTA_HISTORY_DKP = { };
+	SOTA.db.realm.HistoryDkp = { };
 	localEcho("Local history was cleared.");
 end;
 
@@ -788,8 +788,8 @@ function SOTA_DisplayDKPDetails(object,showInRaidChat)
 	local name = getglobal(object:GetName().."Name"):GetText();
 
 	local entry, info, dkp;
-	for n=1, table.getn(SOTA_HISTORY_DKP), 1 do
-		entry = SOTA_HISTORY_DKP[n];
+	for n=1, table.getn(SOTA.db.realm.HistoryDkp), 1 do
+		entry = SOTA.db.realm.HistoryDkp[n];
 		if (entry[1] == timestamp) then
 			for f=1, table.getn(entry[6]), 1 do
 				info = entry[6][f];

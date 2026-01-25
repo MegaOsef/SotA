@@ -1,3 +1,10 @@
+SOTA = AceLibrary("AceAddon-2.0"):new(
+	"AceEvent-2.0",
+	"AceConsole-2.0",
+	"AceDB-2.0",
+	"AceModuleCore-2.0"
+)
+
 --[[
 --	SotA - State of the Art DKP Addon
 --	By Mimma <VanillaGaming.org>
@@ -13,7 +20,7 @@ SOTA_ID							= "SOTA"
 SOTA_TITLE						= "SotA"
 SOTA_TITAN_TITLE				= "SotA - DKP Distribution"
 
-local SOTA_DEBUG_ENABLED		= false;
+local SOTA_DEBUG_ENABLED		= true;
 
 SOTA_CHAT_END					= "|r"
 SOTA_COLOUR_INTRO				= "|c80F0F0F0"
@@ -111,26 +118,16 @@ SOTA_MSG_OnDKPReplaced		= "OnDKPReplaced";
 
 --	Settings (persisted)
 -- Pane 1:
-SOTA_CONFIG_AuctionTime			= 8
-SOTA_CONFIG_AuctionExtension	= 8
-SOTA_CONFIG_DisableDashboard	= 0;	-- Disable Dashboard in UI (hide it)
-SOTA_CONFIG_OutputChannel		= WARN_CHANNEL;
 SOTA_CONFIG_Messages			= { }	-- Contains configurable raid messages (if any)
 SOTA_CONFIG_VersionNumber		= nil;	-- Increases for every change!
 SOTA_CONFIG_VersionDate			= nil;	-- Date of last change!
 
 
--- Pane 3:
-SOTA_CONFIG_Modified			= false;	-- If TRUE, then config number has been updated; FALSE: not.
-SOTA_CONFIG_UseGuildNotes		= 0;
-SOTA_CONFIG_DKPStringLength		= 5;
-SOTA_CONFIG_MinimumDKPPenalty	= 50;	-- Minimum DKP withdrawn when doing percent DKP
--- History: (basically a copy of the transaction log, but not shared with others)
-SOTA_HISTORY_DKP				= { }	-- { timestamp, tid, author, description, state, { names, dkp } }
-
--- Pane 4: (Messages)
--- Pane 5: (Bid rules)
-
+SOTA_GUILDNOTE               = {
+	USEOFFICER = 0,
+	USEPUBLIC = 1,
+}
+SOTA_CONFIG_DKPSTRING_LENGTH  = 5;
 
 
 --[[
@@ -260,7 +257,7 @@ end
 --	1: If player is assistant
 --	2: If player is leader
 --]]
-function SOTA_GetRaidRank(playername)	
+function SOTA:GetRaidRank(playername)	
 	if(SOTA_IsInRaid(true)) then	
 		for n=1, GetNumRaidMembers(), 1 do
 			local name, rank = GetRaidRosterInfo(n);
@@ -281,7 +278,8 @@ function SOTA_IsInRaid(silentMode)
 end
 
 function SOTA_CanReadNotes()
-	if SOTA_CONFIG_UseGuildNotes == 1 then
+	local result = true
+	if SOTA.db.realm.UseGuildNotes == SOTA_GUILDNOTE.USEPUBLIC then
 		-- Guild notes can always be read; there is no WOW setting for that.
 		result = true;
 	else
@@ -291,7 +289,8 @@ function SOTA_CanReadNotes()
 end
 
 function SOTA_CanWriteNotes()
-	if SOTA_CONFIG_UseGuildNotes == 1 then
+	local result = false
+	if SOTA.db.realm.UseGuildNotes == SOTA_GUILDNOTE.USEPUBLIC then
 		result = CanEditPublicNote();
 	else
 		result = CanViewOfficerNote() and CanEditOfficerNote();
@@ -383,11 +382,11 @@ end
 --
 --	Guild Roster Functions
 --
-function SOTA_RequestUpdateGuildRoster()
+function SOTA:RequestUpdateGuildRoster()
 	GuildRoster();
 end
 
-function SOTA_OnGuildRosterUpdate()
+function SOTA:GUILD_ROSTER_UPDATE()
 	SOTA_RefreshGuildRoster();
 
 	if SOTA_CanReadNotes() then
@@ -434,7 +433,7 @@ function SOTA_RefreshGuildRoster()
 			zone = "";
 		end
 
-		if SOTA_CONFIG_UseGuildNotes == 1 then		
+		if SOTA.db.realm.UseGuildNotes == SOTA_GUILDNOTE.USEPUBLIC then
 			note = publicnote
 		else
 			note = officernote
@@ -483,7 +482,7 @@ function SOTA_GetGuildPlayerInfo(player)
 end
 
 
-function SOTA_OnRaidRosterUpdate(event, arg1, arg2, arg3, arg4, arg5)
+function SOTA:RAID_ROSTER_UPDATE()
 	RaidRosterLazyUpdate = true;
 
 	SOTA_RefreshLogElements();
@@ -722,40 +721,6 @@ function SOTA_SubtractPlayerDKP(playername, dkpValue, silentmode)
 	end
 end
 
-function SOTA_Call_SubtractPlayerDKPPercent(playername, percent)
-	if SOTA_IsInRaid(true) then
-		RaidState = RAID_STATE_ENABLED;
-		SOTA_RequestMaster();
-		SOTA_AddJob( function(job) SOTA_SubtractPlayerDKPPercent(job[2], job[3]) end, playername, percent )
-		SOTA_RequestUpdateGuildRoster();
-	end
-end
-function SOTA_SubtractPlayerDKPPercent(playername, percent, silentmode)
-	playername = SOTA_UCFirst(playername);
-	local playerInfo = SOTA_GetGuildPlayerInfo(playername);
-	if playerInfo then
-		percent = 1 * percent;
-		local dkp = 1 * (playerInfo[2]);
-		local minus = floor(dkp * percent / 100);
-		if minus < SOTA_CONFIG_MinimumDKPPenalty then
-			minus = SOTA_CONFIG_MinimumDKPPenalty;
-		end
-		
-		SOTA_ApplyPlayerDKP(playername, -1 * minus, true);
-		
-		if not silentmode then
---			publicEcho(string.format("%d %% (%d DKP) was subtracted from %s", percent, minus, playername));
-			SOTA_EchoEvent(SOTA_MSG_OnDKPPercent, "", minus, playername, "", percent);
-		end
-
-		SOTA_LogSingleTransaction("%Player", playername, -1 * abs(minus));
-	else
-		if not silentmode then
-			localEcho(string.format("Player %s was not found", playername));
-		end
-	end
-end
-
 --[[
 --	Add <n> DKP to all players in raid
 --]]
@@ -784,16 +749,6 @@ function SOTA_AddRaidDKP(dkp, silentmode, callMethod)
 			
 			tidChanges[tidIndex] = { raidRoster[n][1], dkp };
 			tidIndex = tidIndex + 1;
-		end
-		
-		local instance, zonename;
-		local zonecheck = SOTA_CONFIG_EnableZoneCheck;
-		local onlinecheck = SOTA_CONFIG_EnableOnlineCheck;
-		if zonecheck == 1 then
-			instance, zonename = SOTA_GetValidDKPZones();
-			if not instance then
-				zonecheck = 0;
-			end
 		end
 		
 		if not silentmode then
@@ -1052,7 +1007,7 @@ function SOTA_Decaytest(percent, silentmode)
 	for n=1,memberCount,1 do
 		name, _, _, _, _, _, publicNote, officerNote = GetGuildRosterInfo(n);
 		local note = officerNote;
-		if SOTA_CONFIG_UseGuildNotes == 1 then
+		if SOTA.db.realm.UseGuildNotes == SOTA_GUILDNOTE.USEPUBLIC then
 			note = publicNote;
 		end
 
@@ -1126,7 +1081,7 @@ function SOTA_DecayDKP(percent, silentmode)
 	for n=1,memberCount,1 do
 		name, _, _, _, _, _, publicNote, officerNote = GetGuildRosterInfo(n);
 		local note = officerNote;
-		if SOTA_CONFIG_UseGuildNotes == 1 then
+		if SOTA.db.realm.UseGuildNotes == SOTA_GUILDNOTE.USEPUBLIC then
 			note = publicNote;
 		end
 
@@ -1145,7 +1100,7 @@ function SOTA_DecayDKP(percent, silentmode)
 			note = note..SOTA_CreateDkpString(dkp);
 		end
 		
-		if SOTA_CONFIG_UseGuildNotes == 1 then
+		if SOTA.db.realm.UseGuildNotes == SOTA_GUILDNOTE.USEPUBLIC then
 			GuildRosterSetPublicNote(n, note);
 		else
 			GuildRosterSetOfficerNote(n, note);
@@ -1310,7 +1265,7 @@ function SOTA_ApplyPlayerDKP(playername, dkpValue, silentmode)
 		name, _, _, _, _, _, publicNote, officerNote = GetGuildRosterInfo(n);
 		if name == playername then
 			local note = officerNote;
-			if SOTA_CONFIG_UseGuildNotes == 1 then
+			if SOTA.db.realm.UseGuildNotes == SOTA_GUILDNOTE.USEPUBLIC then
 				note = publicNote;
 			end
 		
@@ -1324,7 +1279,7 @@ function SOTA_ApplyPlayerDKP(playername, dkpValue, silentmode)
 				note = note..SOTA_CreateDkpString(dkp);
 			end
 			
-			if SOTA_CONFIG_UseGuildNotes == 1 then
+			if SOTA.db.realm.UseGuildNotes == SOTA_GUILDNOTE.USEPUBLIC then
 				GuildRosterSetPublicNote(n, note);
 			else
 				GuildRosterSetOfficerNote(n, note);
@@ -1378,7 +1333,7 @@ function SOTA_CreateDkpString(dkp)
 	end
 	dkp = tonumber(dkp);
 	
-	local dkpLen = tonumber(SOTA_CONFIG_DKPStringLength);
+	local dkpLen = tonumber(SOTA_CONFIG_DKPSTRING_LENGTH);
 	if dkpLen > 0 then
 		local dkpStr = "".. abs(dkp)
 		while string.len(dkpStr) < dkpLen do
@@ -1504,39 +1459,6 @@ end
 
 
 --[[
---	Return Instance and Outsize zone for which shared DKP will be given.
---	If NIL values, then no zone was found.
---]]
-function SOTA_GetValidDKPZones()
-	local validZones = { nil, nil };
-
-	local zonetext = GetRealZoneText();
-	if not zonetext then
-		zonetext = "";
-	elseif zonetext == "Zul'Gurub" then
-		validZones = { zonetext, "Stranglethorn Vale" };
-	elseif zonetext == "Ruins of Ahn'Qiraj" then 
-		validZones = { zonetext, "Gates of Ahn'Qiraj" };
-	elseif zonetext == "Molten Core" then 
-		validZones = { zonetext, "Blackrock Mountain" };
-	elseif zonetext == "Onyxia's Lair" then 
-		validZones = { zonetext, "Dustwallow Marsh" };
-	elseif zonetext == "Blackwing Lair" then 
-		validZones = { zonetext, "Blackrock Mountain" };
-	elseif zonetext == "Ahn'Qiraj" then 
-		validZones = { zonetext, "Gates of Ahn'Qiraj" };
-	elseif zonetext == "Naxxramas" then 
-		validZones = { zonetext, "Eastern Plaguelands" };
-	elseif zonetext == "Feralas" or zonetext == "Ashenvale" or zonetext == "Azshara" or 
-		zonetext == "Duskwood" or zonetext == "Blasted Lands" or zonetext == "The Hinterlands" then
-		validZones = { zonetext, zonetext };
-	end
-	
-	return validZones[1], validZones[2];
-end
-
-
---[[
 --	Get current minimum bid.
 --	Bidtype is set if specific bid type is wanted. If nil (default), then all bid types are accepted.
 --	bidtype 1 = MS
@@ -1574,3 +1496,276 @@ end;
 function SOTA_SetConfigurableTextMessages(messages)
 	SOTA_CONFIG_Messages = messages;
 end;
+
+function SOTA:OnInitialize()
+end
+
+
+function SOTA:OnEnable()
+	localEcho(string.format("Loot Distribution Addon version %s by %s", GetAddOnMetadata("SOTA", "Version"), GetAddOnMetadata("SOTA", "Author")));
+
+	SOTA:RegisterDB("SOTADB")
+	SOTA:RegisterDefaults("realm",
+		{
+			DisableDashboard = 0,
+			UseGuildNotes = SOTA_GUILDNOTE.USEOFFICER,
+			HistoryDkp = {},
+		}
+	)
+
+	self:RegisterChatCommand({ "/SOTA" }, function(input) self:HandleSOTACommand(input) end)
+    
+	self:RegisterEvent("ENTERING_WORLD");
+	self:RegisterEvent("GUILD_ROSTER_UPDATE");
+	self:RegisterEvent("RAID_ROSTER_UPDATE");
+	--self:RegisterEvent("CHAT_MSG_ADDON");
+
+    
+	SOTA_RefreshRaidRoster();
+	
+	self:RequestUpdateGuildRoster()
+	
+	SOTA_SetMasterState(SOTA_Master, CLIENT_STATE);
+	
+	if SOTA_IsInRaid(true) then	
+		SOTA_Synchronize();
+	end
+	
+	if not SOTA_CONFIG_VersionNumber then
+		SOTA_CONFIG_VersionNumber = 1;
+	end;
+	if not SOTA_CONFIG_VersionDate then
+		SOTA_CONFIG_VersionDate = SOTA_GetDateTimestamp();
+	end;
+
+	SOTA_InitializeTextElements();
+
+	self:ScheduleRepeatingEvent("SOTA_RequestUpdateGuildRoster", self.RequestUpdateGuildRoster, 5, self)
+	self:ScheduleRepeatingEvent("SOTA_OnSecondTimer", self.OnSecondTimer, 1, self)
+end
+
+--[[
+--	/SOTA - main command entry handler
+--]]
+function SOTA:HandleSOTACommand(msg)
+	local playername = UnitName("player");
+	local sign;
+
+	--	Command: <item>
+	--	Syntax: "<itemlink>"
+	local _, _, itemId = string.find(msg, "item:(%d+):")
+	if itemId then
+		return self:TriggerEvent("SOTA_STARTAUCTION", msg);
+	end
+
+		
+	-- Split command into cmd (mandatory) and arg (optional)
+	msg = string.lower(msg);
+	local cmd, arg;
+	local playerclass, playerrole;
+	
+	local spacepos = string.find(msg, "%s");
+	if spacepos then
+		_, _, cmd, arg = string.find(msg, "(%S+)%s+(.+)");
+	else
+		cmd = msg;
+	end
+	
+
+	--	Command: rule
+	--	Syntax: "rule"
+	--	Added for rule engine testing.
+	if cmd == "rule" then
+		return SOTA_PerformSampleRuleTest();
+	end;
+
+
+	--	Command: help
+	--	Syntax: "config"	
+	if cmd == "help" or cmd == "?" or cmd == "" then
+		SOTA_DisplayHelp();
+		return;	
+	end
+
+
+	--	Command: config
+	--	Syntax: "config"	
+	if cmd == "cfg" or cmd == "config" then
+		SOTA_OpenConfigurationUI();
+		return;	
+	end
+
+
+	--	Command: master
+	--	Syntax: "master"	
+	if cmd == "master" then
+		SOTA_RequestMaster(false);
+		return;	
+	end
+
+
+	--	Command: version
+	--	Syntax: "version"
+	if cmd == "version" then
+		if SOTA_IsInRaid(true) then
+			addonEcho("TX_VERSION##");
+		else
+			localEcho(string.format("%s is using SOTA version %s", UnitName("player"), GetAddOnMetadata("SOTA", "Version")));
+		end
+		return;
+	end
+	
+	
+	--	Command: log
+	--	Syntax: "log"
+	if cmd == "log" then
+		if arg and tonumber(arg) then
+			SOTA_selectedTransactionID = arg;
+			SOTA_RefreshTransactionDetails();
+			SOTA_OpenTransactionDetails();
+		else	
+			SOTA_OpenTransauctionUI();
+		end
+		return;
+	end
+
+	--	Command: clearhistory
+	--	Syntax: "clear", "clearhistory"
+	if (cmd == "clear") or (cmd == "clearhistory") then
+		return SOTA_ClearLocalHistory(arg);
+	end
+
+	--	Command: dkp
+	--	Syntax: "dkp [<playername>]"
+	if cmd == "dkp" then
+		return SOTA_Call_CheckPlayerDKP(arg);
+	end
+
+	--	Command: class
+	--	Syntax: "class [<classname>]"
+	if cmd == "class" then
+		return SOTA_Call_CheckClassDKP(arg);
+	end
+
+	--	Command: bid, os, ms
+	--	Syntax: "bid <%d>", "bid min", "bid max"
+	if cmd == "bid" or cmd == "ms" or cmd == "os" then
+		return SOTA_HandlePlayerBid(playername, msg);
+	end
+
+	--	Command: pass
+	--	Syntax: "pass"
+	if cmd == "pass" then
+		return SOTA_HandlePlayerPass(playername);
+	end
+
+	
+	
+	if cmd == "raid" then
+		sign = string.sub(arg, 1, 1);
+		--	Command: raid
+		--	Syntax: "raid -<%d>"
+		if sign == "-" then
+			arg = string.sub(arg, 2);
+			return SOTA_Call_SubtractRaidDKP(arg);
+		--	Command: raid
+		--	Syntax: "raid +<%d>"
+		elseif sign == "+" then
+			arg = string.sub(arg, 2);
+			return SOTA_Call_AddRaidDKP(arg);
+		else
+			localEcho("DKP must be written as +999 or -999");
+			return;
+		end
+	end
+
+	if cmd == "range" then
+		sign = string.sub(arg, 1, 1);
+		--	Command: range
+		--	Syntax: "range [+]<%d>"
+		--	Plus is optional (default)
+		if sign == "+" then
+			arg = string.sub(arg, 2);
+		end
+		return SOTA_Call_AddRangedDKP(arg);
+	end
+
+	if cmd == "share" then
+		--	Command: share
+		--	Syntax: "share [[+]<%d>]"
+		--	Parameter is optional; if omitted, current Boss DKP will be shared.
+		--	Plus is optional (default, undocumented)
+		if not arg or arg == "" then
+			arg = SOTA_GetMinimumBid() * 10;
+			if arg == 0 then
+				localEcho("Boss DKP value could not be calculated - DKP was not shared.");
+				return;
+			end
+		else
+			sign = string.sub(arg, 1, 1);
+			if sign == "+" then
+				arg = string.sub(arg, 2);
+			end
+		end
+		return SOTA_Call_ShareDKP(arg);
+	end	
+
+	if cmd == "sharerange" or
+	   cmd == "rangeshare" or
+	   cmd == "sr" then
+		--	Command: sharerange / rangeshare / sr
+		--	Syntax: "sharerange [[+]<%d>]"
+		--	Parameter is optional; if omitted, current Boss DKP will be shared.
+		--	Plus is optional (default, undocumented)
+		if not arg or arg == "" then
+			arg = SOTA_GetMinimumBid() * 10;
+			if arg == 0 then
+				localEcho("Boss DKP value could not be calculated - DKP was not shared.");
+				return;
+			end
+		else
+			sign = string.sub(arg, 1, 1);
+			if sign == "+" then
+				arg = string.sub(arg, 2);
+			end
+		end
+		return SOTA_Call_ShareRangedDKP(arg);
+	end	
+
+	--	Command: decay
+	--	Syntax: "decay <%d>[%]"
+	if cmd == "decay" then
+		return SOTA_Call_DecayDKP(arg);		
+	end
+
+
+	--	Command: decaytest
+	--	Syntax: "decaytest <%d>[%]"
+	if cmd == "decaytest" then
+		return SOTA_Call_Decaytest(arg);		
+	end
+
+
+	--	Ok, the <cmd> is not a known command; we assume it is a "/SOTA [+-]<dkp>" command.
+	-- TODO: Add some regex check: something like "[+-]%d+[%]"
+	sign = string.sub(cmd, 1, 1);
+
+
+	--	Command: +
+	--	Syntax: "+<%d> <playername>"
+	if sign == "+" then
+		local cmd = string.sub(cmd, 2);
+		return SOTA_Call_AddPlayerDKP(arg, cmd);
+	end
+	
+
+	if sign == "-" then
+		cmd = string.sub(cmd, 2);		
+		--	Command: -
+		--	Syntax: "-<%d> <playername>"
+		return SOTA_Call_SubtractPlayerDKP(arg, cmd);
+	end
+	
+	localEcho("Unknown command: ".. msg);
+end
+

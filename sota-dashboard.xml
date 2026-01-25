@@ -182,25 +182,4 @@
 			</OnDragStop>
 		</Scripts>
 	</Frame>
-
-	<!-- Dummy event frame -->
-	<Frame name="SOTAEventFrame">
-		<Scripts>
-			<OnLoad>
-				if (SOTA_OnLoad) then
-				SOTA_OnLoad();
-				end
-			</OnLoad>
-			<OnEvent>
-				if (SOTA_OnEvent) then
-				SOTA_OnEvent(event, arg1, arg2, arg3, arg4, arg5);
-				end
-			</OnEvent>
-			<OnUpdate>
-				if (SOTA_OnTimer) then
-				SOTA_OnTimer(arg1);
-				end
-			</OnUpdate>
-		</Scripts>
-	</Frame>
 </Ui>

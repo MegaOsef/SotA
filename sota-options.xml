@@ -320,45 +320,6 @@
 	<!-- Auction Timer, nominal time -->
 	<Frame name="FrameConfigBidding" parent="UIParent" toplevel="true" hidden="true" inherits="SOTA_ConfigurationFrameTemplate">
 		<Frames>
-			<Slider name="$parentAuctionTime" minValue="0" maxValue="60" defaultValue="10" valueStep="1" inherits="OptionsSliderTemplate">
-				<Anchors>
-					<Anchor point="TOPLEFT">
-						<Offset x="64" y="-124"/>
-					</Anchor>
-				</Anchors>
-				<Size>
-					<AbsDimension x="250" y="14" />
-				</Size>
-				<Scripts>
-					<OnLoad>
-						getglobal(this:GetName().."Low"):SetText("0")
-						getglobal(this:GetName().."High"):SetText("60")
-					</OnLoad>
-					<OnValueChanged>
-						SOTA_OnOptionAuctionTimeChanged(this);
-					</OnValueChanged>
-				</Scripts>
-			</Slider>
-			<!-- Auction Extension time -->
-			<Slider name="$parentAuctionExtension" minValue="0" maxValue="20" defaultValue="8" valueStep="1" inherits="OptionsSliderTemplate">
-				<Anchors>
-					<Anchor point="TOPLEFT">
-						<Offset x="64" y="-156"/>
-					</Anchor>
-				</Anchors>
-				<Size>
-					<AbsDimension x="250" y="14" />
-				</Size>
-				<Scripts>
-					<OnLoad>
-						getglobal(this:GetName().."Low"):SetText("0")
-						getglobal(this:GetName().."High"):SetText("60")
-					</OnLoad>
-					<OnValueChanged>
-						SOTA_OnOptionAuctionExtensionChanged(this);
-					</OnValueChanged>
-				</Scripts>
-			</Slider>
 			<!-- Disable Dashboard ? -->
 			<CheckButton name="$parentDisableDashboard" inherits="OptionsCheckButtonTemplate">
 				<Anchors>
@@ -397,46 +358,6 @@
 					</OnClick>
 				</Scripts>
 			</CheckButton>
-			<!-- DKP String Length, options: 0-8 -->
-			<Slider name="$parentDKPStringLength" minValue="0" maxValue="8" defaultValue="5" valueStep="1" inherits="OptionsSliderTemplate">
-				<Anchors>
-					<Anchor point="TOPLEFT">
-						<Offset x="64" y="-312"/>
-					</Anchor>
-				</Anchors>
-				<Size>
-					<AbsDimension x="250" y="14" />
-				</Size>
-				<Scripts>
-					<OnLoad>
-						getglobal(this:GetName().."Low"):SetText("0")
-						getglobal(this:GetName().."High"):SetText("8")
-					</OnLoad>
-					<OnValueChanged>
-						SOTA_OnOptionDKPStringLengthChanged(this);
-					</OnValueChanged>
-				</Scripts>
-			</Slider>
-			<!-- Minimum DKP Penalty, options: 0 - 500, step 10 -->
-			<Slider name="$parentMinimumDKPPenalty" minValue="0" maxValue="500" defaultValue="50" valueStep="10" inherits="OptionsSliderTemplate">
-				<Anchors>
-					<Anchor point="TOPLEFT">
-						<Offset x="64" y="-356"/>
-					</Anchor>
-				</Anchors>
-				<Size>
-					<AbsDimension x="250" y="14" />
-				</Size>
-				<Scripts>
-					<OnLoad>
-						getglobal(this:GetName().."Low"):SetText("0")
-						getglobal(this:GetName().."High"):SetText("500")
-					</OnLoad>
-					<OnValueChanged>
-						SOTA_OnOptionMinimumDKPPenaltyChanged(this);
-					</OnValueChanged>
-				</Scripts>
-			</Slider>
 		</Frames>
 	</Frame>
 

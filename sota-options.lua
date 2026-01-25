@@ -11,7 +11,6 @@ local SOTA_MAX_MESSAGES			= 15
 local ConfigurationDialogOpen	= false;
 
 
-
 function SOTA_EchoEvent(msgKey, item, dkp, bidder, rank, param1, param2, param3)
 	local msgInfo = SOTA_getConfigurableMessage(msgKey, item, dkp, bidder, rank, param1, param2, param3);
 	publicEcho(msgInfo);
@@ -165,17 +164,6 @@ function SOTA_OpenSyncCfgConfig()
 	FrameConfigSyncCfg:Show();
 end;
 
-function SOTA_OnOptionAuctionTimeChanged(object)
-	SOTA_CONFIG_AuctionTime = tonumber( getglobal(object:GetName()):GetValue() );
-	
-	local valueString = "".. SOTA_CONFIG_AuctionTime;
-	if SOTA_CONFIG_AuctionTime == 0 then
-		valueString = "(No timer)";
-	end
-		
-	getglobal(object:GetName().."Text"):SetText(string.format("Auction Time: %s seconds", valueString))
-end
-
 function SOTA_OnOptionAuctionExtensionChanged(object)
 	SOTA_CONFIG_AuctionExtension = tonumber( getglobal(object:GetName()):GetValue() );
 	
@@ -187,65 +175,13 @@ function SOTA_OnOptionAuctionExtensionChanged(object)
 	getglobal(object:GetName().."Text"):SetText(string.format("Auction Extension: %s seconds", valueString))
 end
 
-function SOTA_OnOptionDKPStringLengthChanged(object)
-	SOTA_CONFIG_DKPStringLength = tonumber( getglobal(object:GetName()):GetValue() );
-	
-	local valueString = "".. SOTA_CONFIG_DKPStringLength;
-	if SOTA_CONFIG_DKPStringLength == 0 then
-		valueString = "(No limit)";
-	end
-		
-	getglobal(object:GetName().."Text"):SetText(string.format("DKP String Length: %s", valueString))
-end
+function SOTA:ENTERING_WORLD()
+	getglobal("FrameConfigBiddingDisableDashboard"):SetChecked(SOTA.db.realm.DisableDashboard);
 
-function SOTA_OnOptionMinimumDKPPenaltyChanged(object)
-	SOTA_CONFIG_MinimumDKPPenalty = tonumber( getglobal(object:GetName()):GetValue() );
-	
-	local valueString = "".. SOTA_CONFIG_MinimumDKPPenalty;
-	if SOTA_CONFIG_MinimumDKPPenalty == 0 then
-		valueString = "(None)";
-	end
-	
-	getglobal(object:GetName().."Text"):SetText(string.format("Minimum DKP penalty: %s", valueString))
-end
-
-function SOTA_InitializeConfigSettings()
-    if not SOTA_CONFIG_UseGuildNotes then
-		SOTA_CONFIG_UseGuildNotes = 0;
-    end
-	if not SOTA_CONFIG_DKPStringLength then
-		SOTA_CONFIG_DKPStringLength = 5;
-	end
-	if not SOTA_CONFIG_MinimumDKPPenalty then
-		SOTA_CONFIG_MinimumDKPPenalty = 50;
-	end
-
-	-- Update GUI:
-	if not SOTA_CONFIG_EnableZoneCheck then
-		SOTA_CONFIG_EnableZoneCheck = 1;
-	end
-	if not SOTA_CONFIG_EnableOnlineCheck then
-		SOTA_CONFIG_EnableOnlineCheck = 1;
-	end
-	if not SOTA_CONFIG_DisableDashboard then
-		SOTA_CONFIG_DisableDashboard = 1;
-	end
-	if not SOTA_CONFIG_OutputChannel then
-		SOTA_CONFIG_OutputChannel = WARN_CHANNEL;
-	end
-	if not SOTA_HISTORY_DKP then
-		SOTA_HISTORY_DKP = { };
-	end
-
-	
-	getglobal("FrameConfigBiddingDisableDashboard"):SetChecked(SOTA_CONFIG_DisableDashboard);
-
-	if SOTA_CONFIG_UseGuildNotes == 1 then
+	if SOTA.db.realm.UseGuildNotes == SOTA_GUILDNOTE.USEPUBLIC then
 		getglobal("FrameConfigMiscDkpPublicNotes"):SetChecked(1)
 	end
 
-	getglobal("FrameConfigMiscDkpDKPStringLength"):SetValue(SOTA_CONFIG_DKPStringLength);
-	getglobal("FrameConfigMiscDkpMinimumDKPPenalty"):SetValue(SOTA_CONFIG_MinimumDKPPenalty);
 	getglobal("FrameConfigBiddingAuctionTime"):SetValue(SOTA_CONFIG_AuctionTime);
 	getglobal("FrameConfigBiddingAuctionExtension"):SetValue(SOTA_CONFIG_AuctionExtension);
 	
@@ -325,10 +261,10 @@ function SOTA_HandleCheckbox(checkbox)
 	--	Disable Dashboard:		
 	if checkboxname == "FrameConfigBiddingDisableDashboard" then
 		if checkbox:GetChecked() then
-			SOTA_CONFIG_DisableDashboard = 1;
+			SOTA.db.realm.DisableDashboard = 1;
 			SOTA_CloseDashboard();
 		else
-			SOTA_CONFIG_DisableDashboard = 0;
+			SOTA.db.realm.DisableDashboard = 0;
 		end
 		return;
 	end
@@ -337,9 +273,9 @@ function SOTA_HandleCheckbox(checkbox)
 	--	Store DKP in Public Notes:		
 	if checkboxname == "FrameConfigMiscDkpPublicNotes" then
 		if checkbox:GetChecked() then
-			SOTA_CONFIG_UseGuildNotes = 1;
+			SOTA.db.realm.UseGuildNotes = SOTA_GUILDNOTE.USEPUBLIC;
 		else
-			SOTA_CONFIG_UseGuildNotes = 0;
+			SOTA.db.realm.UseGuildNotes = SOTA_GUILDNOTE.USEOFFICER;
 		end
 		return;
 	end

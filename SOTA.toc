@@ -2,7 +2,7 @@
 ## Version: 2.0.0
 ## Author: Raven
 ## Interface: 11200
-## SavedVariables: SOTA_CONFIG_UseGuildNotes, SOTA_CONFIG_DKPStringLength, SOTA_CONFIG_MinimumDKPPenalty, SOTA_CONFIG_AuctionTime, SOTA_CONFIG_AuctionExtension, SOTA_CONFIG_EnableZoneCheck, SOTA_CONFIG_EnableOnlineCheck, SOTA_CONFIG_DisableDashboard, SOTA_HISTORY_DKP, SOTA_CONFIG_Messages, SOTA_CONFIG_VersionNumber, SOTA_CONFIG_VersionDate
+## SavedVariables: SOTA_CONFIG_Messages, SOTA_CONFIG_VersionNumber, SOTA_CONFIG_VersionDate
 
 Libs\AceLibrary\AceLibrary.lua
 
@@ -14,7 +14,8 @@ Libs\AceEvent-2.0\AceEvent-2.0.lua
 Libs\AceModuleCore-2.0\AceModuleCore-2.0.lua
 Libs\AceDB-2.0\AceDB-2.0.lua
 
-sota-core.xml
+sota-core.lua
+sota-dashboard.lua
 sota-options.xml
 sota-transactionlog.xml
 sota-auction.xml

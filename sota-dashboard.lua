@@ -1,3 +1,4 @@
+
 --[[
 --	SotA - State of the Art DKP Addon
 --	By Mimma <VanillaGaming.org>
@@ -108,244 +109,6 @@ GuildDKP            SOTA /command       SOTA !command       SOTA /w command     
 ]]
 
 
---[[
---	/SOTA - main command entry handler
---]]
-SLASH_SOTA_DEFAULT_COMMAND1 = "/SOTA"
-SlashCmdList["SOTA_DEFAULT_COMMAND"] = function(msg)
-	SOTA_HandleSOTACommand(msg);
-end
-
-
-function SOTA_HandleSOTACommand(msg)
-	local playername = UnitName("player");
-	local sign;
-
-	--	Command: <item>
-	--	Syntax: "<itemlink>"
-	local _, _, itemId = string.find(msg, "item:(%d+):")
-	if itemId then
-		return SOTA_StartAuction(msg);
-	end
-
-		
-	-- Split command into cmd (mandatory) and arg (optional)
-	msg = string.lower(msg);
-	local cmd, arg;
-	local playerclass, playerrole;
-	
-	local spacepos = string.find(msg, "%s");
-	if spacepos then
-		_, _, cmd, arg = string.find(msg, "(%S+)%s+(.+)");
-	else
-		cmd = msg;
-	end
-	
-
-	--	Command: rule
-	--	Syntax: "rule"
-	--	Added for rule engine testing.
-	if cmd == "rule" then
-		return SOTA_PerformSampleRuleTest();
-	end;
-
-
-	--	Command: help
-	--	Syntax: "config"	
-	if cmd == "help" or cmd == "?" or cmd == "" then
-		SOTA_DisplayHelp();
-		return;	
-	end
-
-
-	--	Command: config
-	--	Syntax: "config"	
-	if cmd == "cfg" or cmd == "config" then
-		SOTA_OpenConfigurationUI();
-		return;	
-	end
-
-
-	--	Command: master
-	--	Syntax: "master"	
-	if cmd == "master" then
-		SOTA_RequestMaster(false);
-		return;	
-	end
-
-
-	--	Command: version
-	--	Syntax: "version"
-	if cmd == "version" then
-		if SOTA_IsInRaid(true) then
-			addonEcho("TX_VERSION##");
-		else
-			localEcho(string.format("%s is using SOTA version %s", UnitName("player"), GetAddOnMetadata("SOTA", "Version")));
-		end
-		return;
-	end
-	
-	
-	--	Command: log
-	--	Syntax: "log"
-	if cmd == "log" then
-		if arg and tonumber(arg) then
-			SOTA_selectedTransactionID = arg;
-			SOTA_RefreshTransactionDetails();
-			SOTA_OpenTransactionDetails();
-		else	
-			SOTA_OpenTransauctionUI();
-		end
-		return;
-	end
-
-	--	Command: clearhistory
-	--	Syntax: "clear", "clearhistory"
-	if (cmd == "clear") or (cmd == "clearhistory") then
-		return SOTA_ClearLocalHistory(arg);
-	end
-
-	--	Command: dkp
-	--	Syntax: "dkp [<playername>]"
-	if cmd == "dkp" then
-		return SOTA_Call_CheckPlayerDKP(arg);
-	end
-
-	--	Command: class
-	--	Syntax: "class [<classname>]"
-	if cmd == "class" then
-		return SOTA_Call_CheckClassDKP(arg);
-	end
-
-	--	Command: bid, os, ms
-	--	Syntax: "bid <%d>", "bid min", "bid max"
-	if cmd == "bid" or cmd == "ms" or cmd == "os" then
-		return SOTA_HandlePlayerBid(playername, msg);
-	end
-
-	--	Command: pass
-	--	Syntax: "pass"
-	if cmd == "pass" then
-		return SOTA_HandlePlayerPass(playername);
-	end
-
-	
-	
-	if cmd == "raid" then
-		sign = string.sub(arg, 1, 1);
-		--	Command: raid
-		--	Syntax: "raid -<%d>"
-		if sign == "-" then
-			arg = string.sub(arg, 2);
-			return SOTA_Call_SubtractRaidDKP(arg);
-		--	Command: raid
-		--	Syntax: "raid +<%d>"
-		elseif sign == "+" then
-			arg = string.sub(arg, 2);
-			return SOTA_Call_AddRaidDKP(arg);
-		else
-			localEcho("DKP must be written as +999 or -999");
-			return;
-		end
-	end
-
-	if cmd == "range" then
-		sign = string.sub(arg, 1, 1);
-		--	Command: range
-		--	Syntax: "range [+]<%d>"
-		--	Plus is optional (default)
-		if sign == "+" then
-			arg = string.sub(arg, 2);
-		end
-		return SOTA_Call_AddRangedDKP(arg);
-	end
-
-	if cmd == "share" then
-		--	Command: share
-		--	Syntax: "share [[+]<%d>]"
-		--	Parameter is optional; if omitted, current Boss DKP will be shared.
-		--	Plus is optional (default, undocumented)
-		if not arg or arg == "" then
-			arg = SOTA_GetMinimumBid() * 10;
-			if arg == 0 then
-				localEcho("Boss DKP value could not be calculated - DKP was not shared.");
-				return;
-			end
-		else
-			sign = string.sub(arg, 1, 1);
-			if sign == "+" then
-				arg = string.sub(arg, 2);
-			end
-		end
-		return SOTA_Call_ShareDKP(arg);
-	end	
-
-	if cmd == "sharerange" or
-	   cmd == "rangeshare" or
-	   cmd == "sr" then
-		--	Command: sharerange / rangeshare / sr
-		--	Syntax: "sharerange [[+]<%d>]"
-		--	Parameter is optional; if omitted, current Boss DKP will be shared.
-		--	Plus is optional (default, undocumented)
-		if not arg or arg == "" then
-			arg = SOTA_GetMinimumBid() * 10;
-			if arg == 0 then
-				localEcho("Boss DKP value could not be calculated - DKP was not shared.");
-				return;
-			end
-		else
-			sign = string.sub(arg, 1, 1);
-			if sign == "+" then
-				arg = string.sub(arg, 2);
-			end
-		end
-		return SOTA_Call_ShareRangedDKP(arg);
-	end	
-
-	--	Command: decay
-	--	Syntax: "decay <%d>[%]"
-	if cmd == "decay" then
-		return SOTA_Call_DecayDKP(arg);		
-	end
-
-
-	--	Command: decaytest
-	--	Syntax: "decaytest <%d>[%]"
-	if cmd == "decaytest" then
-		return SOTA_Call_Decaytest(arg);		
-	end
-
-
-	--	Ok, the <cmd> is not a known command; we assume it is a "/SOTA [+-]<dkp>" command.
-	-- TODO: Add some regex check: something like "[+-]%d+[%]"
-	sign = string.sub(cmd, 1, 1);
-
-
-	--	Command: +
-	--	Syntax: "+<%d> <playername>"
-	if sign == "+" then
-		local cmd = string.sub(cmd, 2);
-		return SOTA_Call_AddPlayerDKP(arg, cmd);
-	end
-	
-
-	if sign == "-" then
-		cmd = string.sub(cmd, 2);		
-		local percent = string.sub(cmd, string.len(cmd), string.len(cmd));
-		if percent == "%" then
-			--	Command: -
-			--	Syntax: "-<%d>% <playername>" (note the percent in the end of the numeric value!)
-			cmd = string.sub(cmd, 1, string.len(cmd) - 1)
-			return SOTA_Call_SubtractPlayerDKPPercent(arg, cmd);
-		else
-			--	Command: -
-			--	Syntax: "-<%d> <playername>"
-			return SOTA_Call_SubtractPlayerDKP(arg, cmd);
-		end
-	end
-	
-	localEcho("Unknown command: ".. msg);
-end
 
 
 function SOTA_DisplayHelp()
@@ -417,57 +180,24 @@ end
 local GuildRefreshTimer = 0;
 local EventTime = 0;
 local SecondTimer = 0;
-local Secounds = 0;
 
 --	Timer job: { method, duration }
 local SOTA_GeneralTimers = { }
 
-function SOTA_setSecondCounter(seconds)
-	Seconds = seconds;
-end;
 
 function SOTA_AddTimer( method, duration )
 	SOTA_GeneralTimers[table.getn(SOTA_GeneralTimers) + 1] = { method, SOTA_TimerTick + duration }
 end
 
-function SOTA_OnTimer(elapsed)
-	SOTA_TimerTick = SOTA_TimerTick + elapsed
-
-	if floor(EventTime) < floor(SOTA_TimerTick) then
-		SOTA_CheckAuctionState();
-		EventTime = SOTA_TimerTick;
-	end
-	
-	if floor(GuildRefreshTimer) < floor(SOTA_TimerTick) then
-		GuildRefreshTimer = SOTA_TimerTick + GUILD_REFRESH_TIMER;
-		SOTA_RequestUpdateGuildRoster();
-	end
-	
-	if floor(SecondTimer) < floor(SOTA_TimerTick) then
-		SOTA_OnSecondTimer();
-		SecondTimer = SOTA_TimerTick;
-	end
-	
-	local timer;
-	for n=1, table.getn(SOTA_GeneralTimers), 1 do
-		timer = SOTA_GeneralTimers[n];
-		if (SOTA_TimerTick > timer[2]) then
-			SOTA_GeneralTimers[n] = nil;
-			timer[1]();
-		end
-	end
-	
-end
-
-function SOTA_OnSecondTimer()
+function SOTA:OnSecondTimer()
 	if SOTA_IsInRaid(true) then
-		if SOTA_CONFIG_DisableDashboard == 0 then
+		if SOTA.db.realm.DisableDashboard == 0 then
 			SOTA_OpenDashboard();
 		end
 		
 		SOTA_ValidateMaster();		
 	else
-		if SOTA_CONFIG_DisableDashboard == 0 then
+		if SOTA.db.realm.DisableDashboard == 0 then
 			SOTA_CloseDashboard();
 		end
 	end
@@ -522,7 +252,7 @@ end
 
 function SOTA_RequestMaster(silentmode)
 	local playername = UnitName("player")
-	local rank = SOTA_GetRaidRank(playername);
+	local rank = SOTA:GetRaidRank(playername);
 	--	Requires at least Assistant!
 	if rank < 1 then
 		if silentmode then
@@ -948,7 +678,7 @@ end;
 
 
 
-function SOTA_OnChatMsgAddon(event, prefix, msg, channel, sender)
+function SOTA:CHAT_MSG_ADDON(prefix, msg, channel, sender)
 	--echo(string.format("Prefix=%s, MSG=%s", prefix, msg));
 
 	if (prefix == SOTA_MESSAGE_PREFIX) or (prefix == "GuildDKPv1") then	
@@ -1030,142 +760,10 @@ function SOTA_BroadcastTransaction(transaction)
 end
 
 
-
-
 --[[
 --	Initialize all UI table elements.
 --	This is a general handler for all UI frames.
 --]]
 function SOTA_InitializeUI()
-	SOTA_AuctionUIInit();
 	SOTA_TransactionLogUIInit();
 end
-
---[[
---	There's a message in the Guild channel - investigate that!
---]]
-function SOTA_HandleGuildChatMessage(event, message, sender)
-	if not message or message == "" or not string.sub(message, 1, 1) == "!" then
-		return;
-	end
-
-	-- Only respond if you are master, or no master has yet been assigned:
-	if SOTA_IsMaster() or (not(SOTA_Master) and SOTA_IsPromoted()) then
-		local command = string.sub(message, 2)
-		debugEcho("Master: Processing GChat command: ".. command);
-		SOTA_OnChatWhisper(event, command, sender);
-	end
-end
-
---[[
---	There's a message in the Raid channel - investigate that!
---]]
-function SOTA_HandleRaidChatMessage(event, message, sender)
-	if (not message) or (message == "") then
-		return;
-	end
-	
-	-- Parse RavenDKP bid messages: [RavenDKP] |c<color>spec dkp|r
-	local a,_,spec,dkp = string.find(message, "%[RavenDKP%] |c%x%x%x%x%x%x%x%x(%a+) (%d+)|r")
-	if spec and dkp and SOTA_IsMaster() then
-		local bidMessage = string.lower(spec) .. " " .. dkp;
-		debugEcho("Master: Processing RavenDKP bid from ".. sender ..": ".. bidMessage);
-		SOTA_HandlePlayerBid(sender, bidMessage);
-		return;
-	end
-	
-	-- Handle ! commands
-	if (string.sub(message, 1, 1) ~= "!") then
-		return;
-	end
-	
-	if SOTA_IsMaster() then
-		local command = string.sub(message, 2)
-		debugEcho("Master: Processing RChat command: ".. command);
-		SOTA_OnChatWhisper(event, command, sender);
-	end
-end
-
-
---[[
---	Handle incoming chat whisper.
---	Guild and Raid "!" commands are redirected here too with the "raw" command line.
---	Since 0.1.0
---]]
-function SOTA_OnChatWhisper(event, message, sender)	
-	if not message then
-		return
-	end
-	
-	local _, _, cmd = string.find(message, "(%a+)");	
-	if not cmd then
-		return
-	end
-	cmd = string.lower(cmd);
-	
-	if cmd == "bid" or cmd == "os" or cmd == "ms" then
-		SOTA_HandlePlayerBid(sender, message);
-
-	elseif cmd == "pass" then
-		SOTA_HandlePlayerPass(sender);
-	end	
-end	
-
-
-function SOTA_OnEvent(event, arg1, arg2, arg3, arg4, arg5)
-	if (event == "ADDON_LOADED") then
-		if arg1 == SOTA_TITLE then
-		    SOTA_InitializeConfigSettings();
-		end
-	elseif (event == "CHAT_MSG_GUILD") then
-		SOTA_HandleGuildChatMessage(event, arg1, arg2, arg3, arg4, arg5);
-	elseif (event == "CHAT_MSG_RAID" or event == "CHAT_MSG_RAID_LEADER") then
-		SOTA_HandleRaidChatMessage(event, arg1, arg2, arg3, arg4, arg5);
-	elseif (event == "CHAT_MSG_WHISPER") then
-		SOTA_OnChatWhisper(event, arg1, arg2, arg3, arg4, arg5);
-	elseif (event == "CHAT_MSG_ADDON") then
-		SOTA_OnChatMsgAddon(event, arg1, arg2, arg3, arg4, arg5)
-	elseif (event == "GUILD_ROSTER_UPDATE") then
-		SOTA_OnGuildRosterUpdate(event, arg1, arg2, arg3, arg4, arg5)
-	elseif (event == "RAID_ROSTER_UPDATE") then
-		SOTA_OnRaidRosterUpdate(event, arg1, arg2, arg3, arg4, arg5)
-	end
-end
-
-function SOTA_OnLoad()
-	localEcho(string.format("Loot Distribution Addon version %s by %s", GetAddOnMetadata("SOTA", "Version"), GetAddOnMetadata("SOTA", "Author")));
-    
-	this:RegisterEvent("ADDON_LOADED");
-	this:RegisterEvent("GUILD_ROSTER_UPDATE");
-	this:RegisterEvent("RAID_ROSTER_UPDATE");
-	this:RegisterEvent("CHAT_MSG_GUILD");
-	this:RegisterEvent("CHAT_MSG_RAID");
-	this:RegisterEvent("CHAT_MSG_RAID_LEADER");
-	this:RegisterEvent("CHAT_MSG_WHISPER");
-	this:RegisterEvent("CHAT_MSG_ADDON");
-
-    
-	SOTA_SetAuctionState(STATE_NONE);
-	SOTA_RefreshRaidRoster();
-	SOTA_InitializeUI(); 
-	
-	SOTA_RequestUpdateGuildRoster()
-	
-	SOTA_SetMasterState(SOTA_Master, CLIENT_STATE);
-	
-	if SOTA_IsInRaid(true) then	
-		SOTA_Synchronize();
-	end
-	
-	if not SOTA_CONFIG_VersionNumber then
-		SOTA_CONFIG_VersionNumber = 1;
-	end;
-	if not SOTA_CONFIG_VersionDate then
-		SOTA_CONFIG_VersionDate = SOTA_GetDateTimestamp();
-	end;
-	SOTA_CONFIG_Modified = false;
-
-	SOTA_InitializeTextElements();
-end
-
-
