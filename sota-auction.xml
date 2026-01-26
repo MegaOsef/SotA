@@ -22,19 +22,28 @@
 					</Anchors>
 					<Color r="1" g="1" b="1" />
 				</FontString>
-				<!-- Player bid -->
-				<FontString name="$parentBid" justifyH="LEFT" inherits="GameFontNormal">
+				<!-- Player bidtype -->
+				<FontString name="$parentBidtype" justifyH="LEFT" inherits="GameFontNormal">
 					<Size>
-						<AbsDimension x="80" y="16" />
+						<AbsDimension x="25" y="16" />
 					</Size>
 					<Anchors>
 						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentBidder" />
 					</Anchors>
 				</FontString>
-				<!-- Guild rank -->
-				<FontString name="$parentRank" justifyH="LEFT" inherits="GameFontNormal">
+				<!-- Player bid -->
+				<FontString name="$parentBid" justifyH="RIGHT" inherits="GameFontNormal">
 					<Size>
-						<AbsDimension x="220" y="16" />
+						<AbsDimension x="45" y="16" />
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentBidtype" />
+					</Anchors>
+				</FontString>
+				<!-- Player infos -->
+				<FontString name="$parentInfos" justifyH="CENTER" inherits="GameFontNormal">
+					<Size>
+						<AbsDimension x="195" y="16" />
 					</Size>
 					<Anchors>
 						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentBid" />
@@ -198,19 +207,28 @@
 							</Anchors>
 							<Color r="1" g="1" b="1" />
 						</FontString>
-						<!-- Selected bid -->
-						<FontString name="$parentBid" justifyH="LEFT" inherits="GameFontNormal" text="">
+						<!-- Selected bidtype -->
+						<FontString name="$parentBidtype" justifyH="LEFT" inherits="GameFontNormal" text="">
 							<Size>
-								<AbsDimension x="80" y="16" />
+								<AbsDimension x="25" y="16" />
 							</Size>
 							<Anchors>
 								<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentBidder" />
 							</Anchors>
 						</FontString>
-						<!-- Selected Rank -->
-						<FontString name="$parentRank" justifyH="LEFT" inherits="GameFontNormal" text="">
+						<!-- Selected bid -->
+						<FontString name="$parentBid" justifyH="RIGHT" inherits="GameFontNormal" text="">
 							<Size>
-								<AbsDimension x="220" y="16" />
+								<AbsDimension x="45" y="16" />
+							</Size>
+							<Anchors>
+								<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentBidtype" />
+							</Anchors>
+						</FontString>
+						<!-- Selected infos -->
+						<FontString name="$parentInfos" justifyH="CENTER" inherits="GameFontNormal" text="">
+							<Size>
+								<AbsDimension x="195" y="16" />
 							</Size>
 							<Anchors>
 								<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentBid" />
