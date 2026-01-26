@@ -16,9 +16,9 @@ Libs\AceDB-2.0\AceDB-2.0.lua
 
 sota-core.lua
 sota-dashboard.lua
+sota-auction.xml
 sota-options.xml
 sota-transactionlog.xml
-sota-auction.xml
 sota-titanpanel.xml
 sota-dashboard.xml
 

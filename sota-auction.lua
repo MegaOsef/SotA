@@ -25,10 +25,11 @@ local AUCTION_EXTENSION_TIME = 8
 local RAID_STATE_DISABLED		= 0
 local RAID_STATE_ENABLED		= 1
 
+local MINIMUM_BID = 10
+
 -- Max # of bids shown in the AuctionUI
 local MAX_BIDS					= 10
 -- List of valid bids: { Name, DKP, BidType(MS=1,OS=2), Class, RankName, RankIndex }
-local IncomingBidsTable			= { };
 
 -- Working variables:
 
@@ -37,14 +38,15 @@ function AuctionsModule:OnEnable()
 	self.auctionState = AUCTION_STATE.NONE
 	self.secondsCounter = 0
 	self.auctionedItemLink = ""
+	self.incomingBidsTable = {};
 
 	self:SetAuctionState(AUCTION_STATE.NONE, 0);
 
-	self:ScheduleRepeatingEvent("SOTA_CheckAuctionState", self.CheckAuctionState, 0.3, self)
+	self:ScheduleRepeatingEvent("SOTA_CheckAuctionState", self.CheckAuctionState, 1, self) -- TODO Put it back to 1sec ? 0.9 is for the lag.
 
 	self:RegisterEvent("CHAT_MSG_RAID")
 	self:RegisterEvent("CHAT_MSG_RAID_LEADER", "CHAT_MSG_RAID")
-	self:RegisterEvent("SOTA_STARTAUCTION", "StartAuction")
+	self:RegisterEvent("SOTA_STARTAUCTION")
 
 	self:AuctionUIInit()
 end
@@ -78,7 +80,7 @@ end
 --	itemLink: a Blizzard itemlink to auction.
 --	Since 0.0.1
 --]]
-function AuctionsModule:StartAuction(itemLink)
+function AuctionsModule:SOTA_STARTAUCTION(itemLink)
 	SOTA:Print("AuctionsModule:SOTA_STARTAUCTION")
 	local rank = SOTA:GetRaidRank(UnitName("player"));
 	if rank < 1 then
@@ -113,13 +115,30 @@ function AuctionsModule:StartAuction(itemLink)
 		end
 	end
 	
-	IncomingBidsTable = { };
+	self.incomingBidsTable = { };
 	self:UpdateBidElements();
 	self:OpenAuctionUI();
 	
 	self:SetAuctionState(AUCTION_STATE.STARTING, AUCTION_TIME);
 end
 
+
+--[[
+--	There's a message in the Raid channel - investigate that!
+--]]
+function AuctionsModule:CHAT_MSG_RAID(message, sender)
+	if (not message) or (message == "") then
+		return;
+	end
+	
+	-- Parse RavenDKP bid messages: [RavenDKP] |c<color>spec dkp|r
+	local a,_,bidtype,dkp = string.find(message, "%[RavenDKP%] |c%x%x%x%x%x%x%x%x(%a+) (%d+)|r")
+	if bidtype and dkp and SOTA_IsMaster() then
+		local bidMessage = string.lower(bidtype) .. " " .. dkp;
+		debugEcho("Master: Processing RavenDKP bid from ".. sender ..": ".. bidMessage);
+		self:HandlePlayerBid(sender, bidMessage);
+	end
+end
 
 
 --[[
@@ -138,9 +157,9 @@ function AuctionsModule:CheckAuctionState()
 	local secs = self:GetSecondsCounter()
 	if state == AUCTION_STATE.STARTING then
 		-- Broadcast auction starting messages.
-			SOTA_EchoEvent(SOTA_MSG_OnOpen, self.auctionedItemLink, SOTA_GetMinimumBid());
-			SOTA_EchoEvent(SOTA_MSG_OnAnnounceBid, self.auctionedItemLink, SOTA_GetMinimumBid());
-			SOTA_EchoEvent(SOTA_MSG_OnAnnounceMinBid, self.auctionedItemLink, SOTA_GetMinimumBid());
+			SOTA_EchoEvent(SOTA_MSG_OnOpen, self.auctionedItemLink, MINIMUM_BID);
+			SOTA_EchoEvent(SOTA_MSG_OnAnnounceBid, self.auctionedItemLink, MINIMUM_BID);
+			SOTA_EchoEvent(SOTA_MSG_OnAnnounceMinBid, self.auctionedItemLink, MINIMUM_BID);
 			self:SetAuctionState(AUCTION_STATE.RUNNING, secs)
 	end
 		
@@ -185,8 +204,7 @@ function AuctionsModule:CheckAuctionState()
 	
 	if state == AUCTION_STATE.COMPLETE then
 		--	 We're idle
-		state = AUCTION_STATE.NONE;
-		self:SetSecondsCounter(0)
+		self:SetAuctionState(AUCTION_STATE.NONE)
 	end
 
 	self:RefreshButtonStates();
@@ -198,14 +216,14 @@ end
 --	Syntax: /sota bid|ms|os <dkp>|min|max
 --	Since 0.0.1
 --]]
-function SOTA_HandlePlayerBid(sender, message)
+function AuctionsModule:HandlePlayerBid(sender, message)
 	local playerInfo = SOTA_GetGuildPlayerInfo(sender);
 	if not playerInfo then
 		SOTA_whisper(sender, "You need to be in the guild to do bidding!");
 		return;
 	end
 
-	local unitId = SOTA_GetUnitIDFromGroup(sender);
+	local unitId = SOTA:GetUnitIDFromGroup(sender);
 	if not unitId then
 		-- The sender of the message was not in the raid; must be a normal whisper.
 		return;
@@ -227,7 +245,7 @@ function SOTA_HandlePlayerBid(sender, message)
 		bidtype = 2;
 	end
 
-	local minimumBid = SOTA_GetMinimumBid(bidtype);
+	local minimumBid = self:GetMinimumBid(bidtype);
 	if not minimumBid then
 		SOTA_whisper(sender, "You cannot OS bid if an MS bid is already made.");
 		return;
@@ -247,7 +265,7 @@ function SOTA_HandlePlayerBid(sender, message)
 		end
 	end	
 
-	if not (AuctionState == AUCTION_STATE.RUNNING) then
+	if not (self:GetAuctionState() == AUCTION_STATE.RUNNING) then
 		SOTA_whisper(sender, "There is currently no auction running - bid was ignored.");
 		return;
 	end	
@@ -255,10 +273,10 @@ function SOTA_HandlePlayerBid(sender, message)
 	dkp = 1 * dkp
 
 	local userWentAllIn = false;
-	local highestBid = SOTA_GetHighestBid(bidtype);
+	local highestBid = self:GetHighestBid(bidtype);
 
 	local hiRankIndex = 0;
-	local hiBid = SOTA_GetStartingDKP(bidtype);
+	local hiBid = self:GetStartingDKP();
 	if highestBid then
 		hiBid = highestBid[2];
 		hiRankIndex = highestBid[6];
@@ -295,9 +313,8 @@ function SOTA_HandlePlayerBid(sender, message)
 	end
 
 
-	if Seconds < AUCTION_EXTENSION_TIME then
-		Seconds = AUCTION_EXTENSION_TIME;
-	end
+	-- Restarts auction timer.
+	self:SetSecondsCounter(AUCTION_EXTENSION_TIME)
 	
 	if userWentAllIn then
 		if bidtype == 2 then
@@ -318,7 +335,7 @@ function SOTA_HandlePlayerBid(sender, message)
 	end;
 	
 
-	SOTA_RegisterBid(sender, dkp, bidtype, bidderClass, bidderRank, bidderRIdx);
+	self:RegisterBid(sender, dkp, bidtype, bidderClass, bidderRank, bidderRIdx);
 	
 		
 	-- Checks to perform now:
@@ -339,20 +356,20 @@ end
 
 
 
-function SOTA_RegisterBid(playername, bid, bidtype, playerclass, rankname, rankindex)
+function AuctionsModule:RegisterBid(playername, bid, bidtype, playerclass, rankname, rankindex)
 
-	IncomingBidsTable = SOTA_RenumberTable(IncomingBidsTable);
+	self.incomingBidsTable = SOTA_RenumberTable(self.incomingBidsTable);
 	
-	IncomingBidsTable[table.getn(IncomingBidsTable) + 1] = { playername, bid, bidtype, playerclass, rankname, rankindex };
+	self.incomingBidsTable[table.getn(self.incomingBidsTable) + 1] = { playername, bid, bidtype, playerclass, rankname, rankindex };
 
 	-- Sort by DKP, then BidType (so MS bids are before OS bids)
-	SOTA_SortTableDescending(IncomingBidsTable, 2);
-	SOTA_SortTableAscending(IncomingBidsTable, 3); -- TODO remove the line before?
+	SOTA_SortTableDescending(self.incomingBidsTable, 2);
+	SOTA_SortTableAscending(self.incomingBidsTable, 3); -- TODO remove the line before?
 	
 	--Debug output:
 	--[[
-	for n=1, table.getn(IncomingBidsTable), 1 do
-		local cbid = IncomingBidsTable[n];
+	for n=1, table.getn(self.incomingBidsTable), 1 do
+		local cbid = self.incomingBidsTable[n];
 		local name = cbid[1];
 		local dkp  = cbid[2];
 		local type = cbid[3];
@@ -370,32 +387,32 @@ function SOTA_RegisterBid(playername, bid, bidtype, playerclass, rankname, ranki
 end
 
 
-function SOTA_UnregisterBid(playername, bid)
+function AuctionsModule:UnregisterBid(playername, bid)
 	playername = SOTA_UCFirst(playername);
 	bid = 1 * bid;
 
 	local bidInfo;
-	for n=1,table.getn(IncomingBidsTable), 1 do
-		bidInfo = IncomingBidsTable[n];
+	for n=1,table.getn(self.incomingBidsTable), 1 do
+		bidInfo = self.incomingBidsTable[n];
 		if bidInfo[1] == playername and 1*(bidInfo[2]) == bid then
-			table.remove(IncomingBidsTable, n);
+			table.remove(self.incomingBidsTable, n);
 
-			IncomingBidsTable = SOTA_RenumberTable(IncomingBidsTable);
+			self.incomingBidsTable = SOTA_RenumberTable(self.incomingBidsTable);
 			
 			self:UpdateBidElements();
-			SOTA_ShowSelectedPlayer();
+			self:ShowSelectedPlayer();
 			return;
 		end
 	end
 end
 
-function SOTA_GetBidInfo(playername, bid)
+function AuctionsModule:GetBidInfo(playername, bid)
 	playername = SOTA_UCFirst(playername);
 	bid = 1 * bid;
 
 	local bidInfo;
-	for n=1,table.getn(IncomingBidsTable), 1 do
-		bidInfo = IncomingBidsTable[n];
+	for n=1,table.getn(self.incomingBidsTable), 1 do
+		bidInfo = self.incomingBidsTable[n];
 		if bidInfo[1] == playername and 1*(bidInfo[2]) == bid then
 			return bidInfo;
 		end
@@ -405,7 +422,7 @@ function SOTA_GetBidInfo(playername, bid)
 end
 
 
-function SOTA_AcceptBid(playername, bid)
+function AuctionsModule:AcceptBid(playername, bid)
 	if playername and bid then
 		playername = SOTA_UCFirst(playername);
 		bid = 1 * bid;
@@ -450,14 +467,14 @@ end;
 function AuctionsModule:UpdateBidElements()
 	local bidder, bid, playerclass, rank;
 	for n=1, MAX_BIDS, 1 do
-		if table.getn(IncomingBidsTable) < n then
+		if table.getn(self.incomingBidsTable) < n then
 			bidder = "";
 			bid = "";
 			bidcolor = { 64, 255, 64 };
 			playerclass = "";
 			rank = "";
 		else
-			local cbid = IncomingBidsTable[n];
+			local cbid = self.incomingBidsTable[n];
 			bidder = cbid[1];
 			bidcolor = { 64, 255, 64 };
 			if cbid[3] == 2 then
@@ -548,13 +565,13 @@ end
 --	Accept a player bid
 --	Since 0.0.3
 --]]
-function SOTA_AcceptSelectedPlayerBid()
+function AuctionsModule:AcceptSelectedPlayerBid()
 	local selectedBid = self:GetSelectedBid();
 	if not selectedBid then
 		return;
 	end
 
-	SOTA_AcceptBid(selectedBid[1], selectedBid[2]);
+	self:AcceptBid(selectedBid[1], selectedBid[2]);
 end
 
 
@@ -568,11 +585,11 @@ function AuctionsModule:CancelSelectedPlayerBid()
 		return;
 	end
 	
-	local previousBid = SOTA_GetHighestBid();
+	local previousBid = self:GetHighestBid();
 	
 	SOTA_UnregisterBid(selectedBid[1], selectedBid[2]);
 	
-	local highestBid = SOTA_GetHighestBid();
+	local highestBid = self:GetHighestBid();
 	local bid = 0;
 	if highestBid[2] then
 		bid = highestBid[2]
@@ -580,7 +597,7 @@ function AuctionsModule:CancelSelectedPlayerBid()
 	
 	if not (previousBid[2] == bid) then
 		if bid == 0 then
-			bid = SOTA_GetMinimumBid();
+			bid = self:GetMinimumBid();
 		end
 		--publicEcho(string.format("Minimum bid: %d DKP", bid));
 		--publicEcho(SOTA_getConfigurableMessage(SOTA_MSG_OnAnnounceMinBid, self.auctionedItemLink));
@@ -627,14 +644,14 @@ function AuctionsModule:FinishAuction()
 		self:SetAuctionState(AUCTION_STATE.COMPLETE);
 		
 		-- Check if a player was selected; if not, select highest bid:
-		if table.getn(IncomingBidsTable) > 0 then
+		if table.getn(self.incomingBidsTable) > 0 then
 			local selectedBid = self:GetSelectedBid();
 			if not selectedBid then
-				SOTA_ShowSelectedPlayer(IncomingBidsTable[1][1], IncomingBidsTable[1][2]);
+				self:ShowSelectedPlayer(self.incomingBidsTable[1][1], self.incomingBidsTable[1][2]);
 			end
 			
 			-- Auto-accept highest bid and announce winner
-			local highestBid = IncomingBidsTable[1];
+			local highestBid = self.incomingBidsTable[1];
 			local winner = highestBid[1];
 			local bidAmount = highestBid[2];
 			local bidType = highestBid[3];
@@ -660,7 +677,7 @@ end
 function AuctionsModule:CancelAuction()
 	local state = self:GetAuctionState();
 	if state == AUCTION_STATE.RUNNING or state == AUCTION_STATE.PAUSED then
-		IncomingBidsTable = { }
+		self.incomingBidsTable = { }
 		self:SetAuctionState(AUCTION_STATE.NONE);
 		--publicEcho("Auction was Cancelled");		
 		--publicEcho(SOTA_getConfigurableMessage(SOTA_MSG_OnCancel, self.auctionedItemLink));
@@ -677,19 +694,18 @@ end
 --]]
 function AuctionsModule:RestartAuction()
 	self:SetAuctionState(AUCTION_STATE.NONE)
-	self:StartAuction(self.auctionedItemLink);
+	self:TriggerEvent("SOTA_STARTAUCTION", self.auctionedItemLink);
 end
-
 
 
 --[[
 --	Show the selected (clicked) bidder information in AuctionUI.
 --	Since 0.0.2
 --]]
-function SOTA_ShowSelectedPlayer(playername, bid)
+function AuctionsModule:ShowSelectedPlayer(playername, bid)
 	local bidInfo = nil
 	if playername and bid then
-		bidInfo = SOTA_GetBidInfo(playername, bid);	
+		bidInfo = self:GetBidInfo(playername, bid);	
 	end
 	
 	local bidder, bid, playerclass, rank;
@@ -724,20 +740,20 @@ function AuctionsModule:ClearSelectedPlayer()
 end
 
 
-function SOTA_GetHighestBid(bidtype)
+function AuctionsModule:GetHighestBid(bidtype)
 	if bidtype and bidtype == 1 then
 		-- Find highest MS bid:
-		for n=1, table.getn(IncomingBidsTable), 1 do
-			if IncomingBidsTable[n][3] == 1 then
-				return IncomingBidsTable[n];
+		for n=1, table.getn(self.incomingBidsTable), 1 do
+			if self.incomingBidsTable[n][3] == 1 then
+				return self.incomingBidsTable[n];
 			end
 		end
 		return nil
 	else
 		--	Find highest bid regardless of type.
 		--	Note: This might be an MS bid - OS bidders will have to ignore this!
-		if table.getn(IncomingBidsTable) > 0 then
-			return IncomingBidsTable[1];
+		if table.getn(self.incomingBidsTable) > 0 then
+			return self.incomingBidsTable[1];
 		end
 	end
 
@@ -745,28 +761,66 @@ function SOTA_GetHighestBid(bidtype)
 end
 
 
+function AuctionsModule:GetStartingDKP()
+	return 0;
+end
+
+
+--[[
+--	Get current minimum bid.
+--	Bidtype is set if specific bid type is wanted. If nil (default), then all bid types are accepted.
+--	bidtype 1 = MS
+--	bidtype 2 = OS
+--]]
+function AuctionsModule:GetMinimumBid(bidtype)
+	local minimumBid = MINIMUM_BID
+	local highestBid = self:GetHighestBid(bidtype);
+
+	if not highestBid then
+		-- This is first bid = the minimum
+		return minimumBid;
+	end
+	
+	--	OS bidders cannot bid if a MS bid is already placed!
+	if bidtype == 2 and highestBid[3] == 1 then
+		return nil
+	end
+	
+	minimumBid = 1 * (highestBid[2]);
+
+	minimumBid = minimumBid + 10; -- People have to bid 10 dkp more.
+
+	return floor(minimumBid);
+end;
+
+function SOTA_GetMinimumBid(bidtype) -- Exposes globally
+	return AuctionsModule:GetMinimumBid(bidtype)
+end
+
+
+-- UI Events
 function SOTA_OnCancelBidClick(object)
-	SOTA_CancelSelectedPlayerBid();
+	AuctionsModule:CancelSelectedPlayerBid();
 end
 
 function SOTA_OnPauseAuctionClick(object)
-	SOTA_PauseAuction();
+	AuctionsModule:PauseAuction();
 end
 
 function SOTA_OnFinishAuctionClick(object)
-	SOTA_FinishAuction();
+	AuctionsModule:FinishAuction();
 end
 
 function SOTA_OnRestartAuctionClick(object)
-	SOTA_RestartAuction();
+	AuctionsModule:RestartAuction();
 end
 
 function SOTA_OnAcceptBidClick(object)
-	SOTA_AcceptSelectedPlayerBid();
+	AuctionsModule:AcceptSelectedPlayerBid();
 end
 
 function SOTA_OnCancelAuctionClick(object)
-	SOTA_CancelAuction();
+	AuctionsModule:CancelAuction();
 end
 
 function SOTA_OnBidClick(object)
@@ -779,22 +833,4 @@ function SOTA_OnBidClick(object)
 	local bid = 1 * (getglobal(object:GetName().."Bid"):GetText());
 
 	AuctionsModule:ShowSelectedPlayer(bidder, bid);
-end
-
-
---[[
---	There's a message in the Raid channel - investigate that!
---]]
-function AuctionsModule:CHAT_MSG_RAID(message, sender)
-	if (not message) or (message == "") then
-		return;
-	end
-	
-	-- Parse RavenDKP bid messages: [RavenDKP] |c<color>spec dkp|r
-	local a,_,bidtype,dkp = string.find(message, "%[RavenDKP%] |c%x%x%x%x%x%x%x%x(%a+) (%d+)|r")
-	if bidtype and dkp and SOTA_IsMaster() then
-		local bidMessage = string.lower(bidtype) .. " " .. dkp;
-		debugEcho("Master: Processing RavenDKP bid from ".. sender ..": ".. bidMessage);
-		SOTA_HandlePlayerBid(sender, bidMessage);
-	end
 end

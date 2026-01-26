@@ -20,7 +20,7 @@ SOTA_ID							= "SOTA"
 SOTA_TITLE						= "SotA"
 SOTA_TITAN_TITLE				= "SotA - DKP Distribution"
 
-local SOTA_DEBUG_ENABLED		= true;
+local SOTA_DEBUG_ENABLED		= false;
 
 SOTA_CHAT_END					= "|r"
 SOTA_COLOUR_INTRO				= "|c80F0F0F0"
@@ -50,7 +50,6 @@ local GuildRosterTable			= { }
 local RaidRosterTable			= { }
 local RaidRosterLazyUpdate		= false;
 
-local SOTA_MINIMUM_BID = 10
 
 SOTA_CHANNELS = {
 	{ 'Raid Warning (/rw)',			WARN_CHANNEL },
@@ -299,7 +298,7 @@ function SOTA_CanWriteNotes()
 end
 
 
-function SOTA_GetUnitIDFromGroup(playerName)
+function SOTA:GetUnitIDFromGroup(playerName)
 	playerName = SOTA_UCFirst(playerName);
 
 	if SOTA_IsInRaid(false) then
@@ -316,7 +315,7 @@ function SOTA_GetUnitIDFromGroup(playerName)
 		end				
 	end
 	
-	return nil;	
+	return nil;
 end
 
 
@@ -1452,41 +1451,6 @@ function SOTA_ToggleIncludePlayerInTransaction(playername)
 		end	
 	end	
 end
-
-function SOTA_GetStartingDKP()
-	return SOTA_MINIMUM_BID;
-end
-
-
---[[
---	Get current minimum bid.
---	Bidtype is set if specific bid type is wanted. If nil (default), then all bid types are accepted.
---	bidtype 1 = MS
---	bidtype 2 = OS
---]]
-function SOTA_GetMinimumBid(bidtype)
-	local minimumBid = SOTA_GetStartingDKP();
-	if minimumBid == 0 then
-		minimumBid = 10;
-	end
-
-	local highestBid = SOTA_GetHighestBid(bidtype);
-	if not highestBid then
-		-- This is first bid = the minimum
-		return minimumBid;
-	end
-	
-	--	OS bidders cannot bid if a MS bid is already placed!
-	if bidtype == 2 and highestBid[3] == 1 then
-		return nil
-	end
-	
-	minimumBid = 1 * (highestBid[2]);
-
-	minimumBid = minimumBid + 10; -- People have to bid 10 dkp more.
-
-	return floor(minimumBid);
-end;
 
 
 function SOTA_GetConfigurableTextMessages()
