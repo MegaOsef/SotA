@@ -747,7 +747,9 @@ end
 --]]
 function AuctionsModule:CancelAuction()
 	local state = self:GetAuctionState();
-	if state == AUCTION_STATE.RUNNING or state == AUCTION_STATE.PAUSED then
+	if state == AUCTION_STATE.RUNNING
+	or state == AUCTION_STATE.PAUSED
+	or state == AUCTION_STATE.COMPLETE then
 		self.incomingBidsTable = { }
 		self:SetAuctionState(AUCTION_STATE.NONE);
 		--publicEcho("Auction was Cancelled");		
