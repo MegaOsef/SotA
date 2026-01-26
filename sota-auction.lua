@@ -27,6 +27,33 @@ local RAID_STATE_ENABLED		= 1
 
 local MINIMUM_BID = 10
 
+local BIDSTABLE_COLS         = {
+	-- UNIQUE KEY
+	PNAME = 1, -- Player's name
+	BID_AMNT = 2, -- Bid Amount
+	BID_TP = 3, -- Bid Type (BIDTYPE value)
+
+	-- INFORMATIONS
+	CLASS = 4,
+	GRANK = 5,
+	GRANK_IDX = 6,
+}
+local BIDTYPE                = {
+	MS = 1,
+	OS = 2,
+}
+
+local function BidTypeToText(bidtype)
+	if bidtype == BIDTYPE.MS then
+		return "MS"
+	elseif bidtype == BIDTYPE.OS then
+		return "OS"
+	else
+		bidtype = bidtype or "nil"
+		SOTA:Print("Error: BidTypeToText(" .. bidtype .. "), unknown bidtype")
+	end
+end
+
 -- Max # of bids shown in the AuctionUI
 local MAX_BIDS					= 10
 -- List of valid bids: { Name, DKP, BidType(MS=1,OS=2), Class, RankName, RankIndex }
@@ -216,8 +243,8 @@ end
 --	Since 0.0.1
 --]]
 function AuctionsModule:HandlePlayerBid(sender, message)
-	local playerInfo = SOTA_GetGuildPlayerInfo(sender);
-	if not playerInfo then
+	local playerGuildInfos = SOTA_GetGuildPlayerInfo(sender);
+	if not playerGuildInfos then
 		SOTA_whisper(sender, "You need to be in the guild to do bidding!");
 		return;
 	end
@@ -228,7 +255,7 @@ function AuctionsModule:HandlePlayerBid(sender, message)
 		return;
 	end
 
-	local availableDkp = 1 * (playerInfo[2]);
+	local availableDkp = 1 * (playerGuildInfos[2]);
 	
 	local cmd, arg
 	local spacepos = string.find(message, "%s");
@@ -239,9 +266,9 @@ function AuctionsModule:HandlePlayerBid(sender, message)
 	end	
 
 	-- Default is MS - if OS bidding is enabled, check bidtype:
-	local bidtype = 1;
+	local bidtype = BIDTYPE.MS;
 	if cmd == "os" then
-		bidtype = 2;
+		bidtype = BIDTYPE.OS;
 	end
 
 	local minimumBid = self:GetMinimumBid(bidtype);
@@ -277,14 +304,14 @@ function AuctionsModule:HandlePlayerBid(sender, message)
 	local hiRankIndex = 0;
 	local hiBid = self:GetStartingDKP();
 	if highestBid then
-		hiBid = highestBid[2];
-		hiRankIndex = highestBid[6];
+		hiBid = highestBid[BIDSTABLE_COLS.BID_AMNT];
+		hiRankIndex = highestBid[BIDSTABLE_COLS.GRANK_IDX];
 	end;
 
 
-	local bidderClass = playerInfo[3];		-- Info for the player placing the bid.
-	local bidderRank  = playerInfo[4];		-- This rank is by NAME
-	local bidderRIdx  = playerInfo[7];		-- This rank is by NUMBER!
+	local bidderClass = playerGuildInfos[3];		-- Info for the player placing the bid.
+	local bidderRank  = playerGuildInfos[4];		-- This rank is by NAME
+	local bidderRIdx  = playerGuildInfos[7];		-- This rank is by NUMBER!
 
 	-- Check user at least did bid more than last bidder:
 	if not(dkp > hiBid) then
@@ -354,6 +381,22 @@ function AuctionsModule:HandlePlayerBid(sender, message)
 end
 
 
+function AuctionsModule:PrintIncomingBidsTable()
+	--Debug output:
+	for n=1, table.getn(self.incomingBidsTable), 1 do
+		local cbid = self.incomingBidsTable[n];
+		local name = cbid[BIDSTABLE_COLS.PNAME];
+		local dkp  = cbid[BIDSTABLE_COLS.BID_AMNT];
+		local type = BidTypeToText(cbid[BIDSTABLE_COLS.BID_TP])
+		local clss = cbid[BIDSTABLE_COLS.CLASS];
+		local rank = cbid[BIDSTABLE_COLS.GRANK];
+		local indx = cbid[BIDSTABLE_COLS.GRANK_IDX];
+		if(indx == nil) then
+			indx = -1;
+		end;
+		echo(string.format("#%d %s: bid=%d DKP, type=%s, class=%s, rank=%s(%d)", n, name, dkp, type, clss, rank, indx));
+	end
+end
 
 function AuctionsModule:RegisterBid(playername, bid, bidtype, playerclass, rankname, rankindex)
 
@@ -362,25 +405,10 @@ function AuctionsModule:RegisterBid(playername, bid, bidtype, playerclass, rankn
 	self.incomingBidsTable[table.getn(self.incomingBidsTable) + 1] = { playername, bid, bidtype, playerclass, rankname, rankindex };
 
 	-- Sort by DKP, then BidType (so MS bids are before OS bids)
-	SOTA_SortTableDescending(self.incomingBidsTable, 2);
-	SOTA_SortTableAscending(self.incomingBidsTable, 3); -- TODO remove the line before?
-	
-	--Debug output:
-	--[[
-	for n=1, table.getn(self.incomingBidsTable), 1 do
-		local cbid = self.incomingBidsTable[n];
-		local name = cbid[1];
-		local dkp  = cbid[2];
-		local type = cbid[3];
-		local clss = cbid[4];
-		local rank = cbid[5];
-		local indx = cbid[6];
-		if(indx == nil) then
-			indx = -1;
-		end;
-		echo(string.format("%d - %s bid %d DKP, Type=%d, class=%s, rank=%s, index=%d", n, name, dkp, type, clss, rank, indx));
-	end
-	--]]
+	SOTA_SortTableDescending(self.incomingBidsTable, BIDSTABLE_COLS.BID_AMNT);
+	SOTA_SortTableAscending(self.incomingBidsTable, BIDSTABLE_COLS.BID_TP);
+
+	self:PrintIncomingBidsTable()
  
 	self:UpdateBidElements();
 end
@@ -393,10 +421,11 @@ function AuctionsModule:UnregisterBid(playername, bid)
 	local bidInfo;
 	for n=1,table.getn(self.incomingBidsTable), 1 do
 		bidInfo = self.incomingBidsTable[n];
-		if bidInfo[1] == playername and 1*(bidInfo[2]) == bid then
+		if bidInfo[BIDSTABLE_COLS.PNAME] == playername and 1*(bidInfo[BIDSTABLE_COLS.BID_AMNT]) == bid then
 			table.remove(self.incomingBidsTable, n);
 
 			self.incomingBidsTable = SOTA_RenumberTable(self.incomingBidsTable);
+			self:PrintIncomingBidsTable()
 			
 			self:UpdateBidElements();
 			self:ShowSelectedPlayer();
@@ -412,7 +441,7 @@ function AuctionsModule:GetBidInfo(playername, bid)
 	local bidInfo;
 	for n=1,table.getn(self.incomingBidsTable), 1 do
 		bidInfo = self.incomingBidsTable[n];
-		if bidInfo[1] == playername and 1*(bidInfo[2]) == bid then
+		if bidInfo[BIDSTABLE_COLS.PNAME] == playername and 1 * (bidInfo[BIDSTABLE_COLS.BID_AMNT]) == bid then
 			return bidInfo;
 		end
 	end
@@ -474,14 +503,14 @@ function AuctionsModule:UpdateBidElements()
 			rank = "";
 		else
 			local cbid = self.incomingBidsTable[n];
-			bidder = cbid[1];
+			bidder = cbid[BIDSTABLE_COLS.PNAME];
 			bidcolor = { 64, 255, 64 };
-			if cbid[3] == 2 then
+			if cbid[BIDSTABLE_COLS.BID_TP] == BIDTYPE.OS then
 				bidcolor = { 255, 255, 96 };
 			end
-			bid = string.format("%d", cbid[2]);
-			playerclass = cbid[4];
-			rank = cbid[5];
+			bid = string.format("%d", cbid[BIDSTABLE_COLS.BID_AMNT]);
+			playerclass = cbid[BIDSTABLE_COLS.CLASS];
+			rank = cbid[BIDSTABLE_COLS.GRANK];
 		end
 
 		local color = SOTA_GetClassColorCodes(playerclass);
@@ -586,7 +615,7 @@ function AuctionsModule:CancelSelectedPlayerBid()
 	
 	local previousBid = self:GetHighestBid();
 	
-	SOTA_UnregisterBid(selectedBid[1], selectedBid[2]);
+	self:UnregisterBid(selectedBid[1], selectedBid[2]);
 	
 	local highestBid = self:GetHighestBid();
 	local bid = 0;
@@ -646,18 +675,15 @@ function AuctionsModule:FinishAuction()
 		if table.getn(self.incomingBidsTable) > 0 then
 			local selectedBid = self:GetSelectedBid();
 			if not selectedBid then
-				self:ShowSelectedPlayer(self.incomingBidsTable[1][1], self.incomingBidsTable[1][2]);
+				self:ShowSelectedPlayer(self.incomingBidsTable[1][BIDSTABLE_COLS.PNAME], self.incomingBidsTable[1][BIDSTABLE_COLS.BID_AMNT]);
 			end
 			
 			-- Auto-accept highest bid and announce winner
 			local highestBid = self.incomingBidsTable[1];
-			local winner = highestBid[1];
-			local bidAmount = highestBid[2];
-			local bidType = highestBid[3];
-			local bidTypeText = "MS";
-			if bidType == 2 then
-				bidTypeText = "OS";
-			end
+			local winner = highestBid[BIDSTABLE_COLS.PNAME];
+			local bidAmount = highestBid[BIDSTABLE_COLS.BID_AMNT];
+			local bidType = highestBid[BIDSTABLE_COLS.BID_TP];
+			local bidTypeText = BidTypeToText(bidType)
 			
 			raidEcho(string.format("%s won %s for %d DKP (%s)", winner, self.auctionedItemLink, bidAmount, bidTypeText));
 		else
@@ -740,10 +766,10 @@ end
 
 
 function AuctionsModule:GetHighestBid(bidtype)
-	if bidtype and bidtype == 1 then
+	if bidtype and bidtype == BIDTYPE.MS then
 		-- Find highest MS bid:
 		for n=1, table.getn(self.incomingBidsTable), 1 do
-			if self.incomingBidsTable[n][3] == 1 then
+			if self.incomingBidsTable[n][BIDSTABLE_COLS.BID_TP] == BIDTYPE.MS then
 				return self.incomingBidsTable[n];
 			end
 		end
@@ -781,7 +807,8 @@ function AuctionsModule:GetMinimumBid(bidtype)
 	end
 	
 	--	OS bidders cannot bid if a MS bid is already placed!
-	if bidtype == 2 and highestBid[3] == 1 then
+	if bidtype == BIDTYPE.OS
+		and highestBid[BIDSTABLE_COLS.BID_TP] == BIDTYPE.MS then
 		return nil
 	end
 	
