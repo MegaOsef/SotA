@@ -19,6 +19,5 @@ sota-dashboard.lua
 sota-auction.xml
 sota-options.xml
 sota-transactionlog.xml
-sota-titanpanel.xml
 sota-dashboard.xml
 
