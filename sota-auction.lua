@@ -81,7 +81,6 @@ end
 --	Since 0.0.1
 --]]
 function AuctionsModule:SOTA_STARTAUCTION(itemLink)
-	SOTA:Print("AuctionsModule:SOTA_STARTAUCTION")
 	local rank = SOTA:GetRaidRank(UnitName("player"));
 	if rank < 1 then
 		localEcho("You need to be Raid Assistant or Raid Leader to start auctions.");

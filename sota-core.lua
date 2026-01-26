@@ -1519,7 +1519,8 @@ function SOTA:HandleSOTACommand(msg)
 	--	Syntax: "<itemlink>"
 	local _, _, itemId = string.find(msg, "item:(%d+):")
 	if itemId then
-		return self:TriggerEvent("SOTA_STARTAUCTION", msg);
+		self:TriggerEvent("SOTA_STARTAUCTION", msg);
+		return
 	end
 
 		
