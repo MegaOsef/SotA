@@ -747,9 +747,12 @@ end
 --]]
 function AuctionsModule:CancelAuction()
 	local state = self:GetAuctionState();
+
+	local highestBid = self:GetHighestBid()
+	local hasBid = (highestBid ~= nil)
 	if state == AUCTION_STATE.RUNNING
-	or state == AUCTION_STATE.PAUSED
-	or state == AUCTION_STATE.COMPLETE then
+		or state == AUCTION_STATE.PAUSED
+		or (state == AUCTION_STATE.COMPLETE and hasBid) then
 		self.incomingBidsTable = { }
 		self:SetAuctionState(AUCTION_STATE.NONE);
 		--publicEcho("Auction was Cancelled");		
