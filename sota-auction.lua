@@ -251,7 +251,7 @@ function module:HandlePlayerBid(sender, message)
 		return;
 	end
 
-	local availableDkp = 1 * (playerGuildInfos[2]);
+	local availableDkp = 1 * (playerGuildInfos[RT_COL.DKP_AMNT]);
 	
 	local cmd, arg
 	local spacepos = string.find(message, "%s");
@@ -304,9 +304,9 @@ function module:HandlePlayerBid(sender, message)
 	end;
 
 
-	local bidderClass = playerGuildInfos[3];		-- Info for the player placing the bid.
-	local bidderRank  = playerGuildInfos[4];		-- This rank is by NAME
-	local bidderRIdx  = playerGuildInfos[7];		-- This rank is by NUMBER!
+	local bidderClass = playerGuildInfos[RT_COL.CLASS];		-- Info for the player placing the bid.
+	local bidderRank  = playerGuildInfos[RT_COL.GRANK];		-- This rank is by NAME
+	local bidderRIdx  = playerGuildInfos[RT_COL.GRANK_IDX];	-- This rank is by NUMBER!
 
 	-- Check user at least did bid more than last bidder:
 	if not(dkp > hiBid) then

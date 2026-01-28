@@ -228,7 +228,7 @@ function module:RefreshTransactionElements()
 			if state == 1 then
 				local guildInfo = SOTA:GetGuildPlayerInfo(name);
 				if guildInfo then
-					color = SOTA:GetClassColorCodes(guildInfo[3]);
+					color = SOTA:GetClassColorCodes(guildInfo[RT_COL.CLASS]);
 				end
 			end
 			getglobal(frame:GetName().."Name"):SetTextColor((color[1]/255), (color[2]/255), (color[3]/255), 255);
@@ -346,7 +346,7 @@ function module:RefreshHistoryElements()
 			local color = { 128, 128, 128 };
 			local guildInfo = SOTA:GetGuildPlayerInfo(name);
 			if guildInfo then
-				color = SOTA:GetClassColorCodes(guildInfo[3]);
+				color = SOTA:GetClassColorCodes(guildInfo[RT_COL.CLASS]);
 			end
 			getglobal(frame:GetName().."Name"):SetTextColor((color[1]/255), (color[2]/255), (color[3]/255), 255);
 
@@ -471,7 +471,7 @@ function module:RefreshTransactionDetails()
 	local raidRoster = SOTA:GetRaidRoster();
 	for n=1, table.getn(raidRoster), 1 do
 		totalCount = totalCount + 1
-		totalPlayers[totalCount] = { raidRoster[n][1], raidRoster[n][3] };
+		totalPlayers[totalCount] = { raidRoster[n][RT_COL.PNAME], raidRoster[n][RT_COL.CLASS] };
 	end	
 
 	totalPlayers = SOTA:SortTableAscending(totalPlayers, 1);

@@ -50,6 +50,16 @@ SOTA_GUILDNOTE               = {
 }
 local DKPSTRING_LENGTH  = 5;
 
+RT_COL                 = {
+	PNAME = 1,
+	DKP_AMNT = 2,
+	CLASS = 3,
+	GRANK = 4,
+	ONLINE = 5,
+	ZONE = 6,
+	GRANK_IDX = 7
+}
+
 function SOTA:Broadcast(channel, msg)
 	if msg and channel and msg ~= "" then
 		SendChatMessage(string.format("[%s] %s", SOTA_TITLE, msg), channel);
@@ -232,7 +242,7 @@ function SOTA:GetGuildPlayerInfo(player)
 	player = self:UCFirst(player);
 
 	for n=1, table.getn(self.guildRosterTable), 1 do
-		if self.guildRosterTable[n][1] == player then
+		if self.guildRosterTable[n][RT_COL.PNAME] == player then
 			return self.guildRosterTable[n];
 		end
 	end
@@ -259,23 +269,23 @@ function SOTA:GetRaidRoster()
 end
 
 
---[[
---	Return raid info for specific player.
---	{ Name, DKP, Class, Rank, Online }
---]]
-function SOTA:GetRaidInfoForPlayer(playername)
-	if self:IsInRaid(true) and playername then
-		playername = self:UCFirst(playername);
-		
-		local raid = self:GetRaidRoster();
-		for n=1, table.getn(raid), 1 do
-			if raid[n][1] == playername then
-				return raid[n];
-			end			
-		end	
-	end
-	return nil;
-end
+----[[
+----	Return raid info for specific player.
+----	{ Name, DKP, Class, Rank, Online }
+----]]
+--function SOTA:GetRaidInfoForPlayer(playername)
+--	if self:IsInRaid(true) and playername then
+--		playername = self:UCFirst(playername);
+--		
+--		local raid = self:GetRaidRoster();
+--		for n=1, table.getn(raid), 1 do
+--			if raid[n][RT_COL.PNAME] == playername then
+--				return raid[n];
+--			end			
+--		end	
+--	end
+--	return nil;
+--end
 
 
 --[[
@@ -294,7 +304,7 @@ function SOTA:RefreshRaidRoster()
 
 			for m=1,memberCount,1 do
 				local info = self.guildRosterTable[m]
-				if name == info[1] then
+				if name == info[RT_COL.PNAME] then
 					self.raidRosterTable[index] = info;
 					index = index + 1
 				end
@@ -304,11 +314,11 @@ function SOTA:RefreshRaidRoster()
 	
 	RaidRosterLazyUpdate = false;
 	
-	for n=1,table.getn(self.raidRosterTable), 1 do
-		local rr = self.raidRosterTable[n];
+--	for n=1,table.getn(self.raidRosterTable), 1 do
+--		local rr = self.raidRosterTable[n];
 --		echo("RaidRosterUpdate:");
 --		echo(string.format("Name=%s, DKP=%d, Class=%s, Rank=%s", rr[1], rr[2], rr[3], rr[4]));
-	end
+--	end
 end
 
 
@@ -350,25 +360,25 @@ function SOTA:Call_CheckClassDKP(playerclass, sender)
 
 	local classtable = { }
 	for n=1, table.getn(self.guildRosterTable), 1 do
-		if self.guildRosterTable[n][3] == playerclass then
+		if self.guildRosterTable[n][RT_COL.CLASS] == playerclass then
 			classtable[ table.getn(classtable) + 1] = self.guildRosterTable[n];
 		end
 	end
 
-	self:SortTableDescending(classtable, 2);
+	self:SortTableDescending(classtable, RT_COL.DKP_AMNT);
 	
 	if sender then
 		self:Whisper(sender, string.format("Top %d DKP for %ss:", MAX_CLASS_DKP_WHISPERED, playerclass));
 		for n=1, table.getn(classtable), 1 do
 			if n <= MAX_CLASS_DKP_WHISPERED then
-				self:Whisper(sender, string.format("%d - %s: %d DKP", n, classtable[n][1], 1*(classtable[n][2])));
+				self:Whisper(sender, string.format("%d - %s: %d DKP", n, classtable[n][RT_COL.PNAME], 1*(classtable[n][RT_COL.DKP_AMNT])));
 			end
 		end
 	else
 		self:Print(string.format("Top %d DKP for %ss:", MAX_CLASS_DKP_DISPLAYED, playerclass));
 		for n=1, table.getn(classtable), 1 do
 			if n <= MAX_CLASS_DKP_DISPLAYED then
-				self:Print(string.format("%d - %s: %d DKP", n, classtable[n][1], 1*(classtable[n][2])));
+				self:Print(string.format("%d - %s: %d DKP", n, classtable[n][RT_COL.PNAME], 1*(classtable[n][RT_COL.DKP_AMNT])));
 			end
 		end
 	end
@@ -383,7 +393,7 @@ function SOTA:GetDKP(playername)
 	local dkp = nil;
 	local playerInfo = self:GetGuildPlayerInfo(playername);
 	if playerInfo then
-		dkp = 1 * (playerInfo[2]);
+		dkp = 1 * (playerInfo[RT_COL.DKP_AMNT]);
 	end
 	
 	return dkp;
@@ -515,9 +525,9 @@ function SOTA:AddRaidDKP(dkp, silentmode, callMethod)
 
 		local raidRoster = self:GetRaidRoster();
 		for n=1, table.getn(raidRoster), 1 do
-			self:ApplyPlayerDKP(raidRoster[n][1], dkp);
+			self:ApplyPlayerDKP(raidRoster[n][RT_COL.PNAME], dkp);
 			
-			tidChanges[tidIndex] = { raidRoster[n][1], dkp };
+			tidChanges[tidIndex] = { raidRoster[n][RT_COL.PNAME], dkp };
 			tidIndex = tidIndex + 1;
 		end
 		
@@ -566,9 +576,9 @@ function SOTA:SubtractRaidDKP(dkp, silentmode, callMethod)
 		--	)
 		--end
 		for n=1, table.getn(raidRoster), 1 do
-			self:ApplyPlayerDKP(raidRoster[n][1], dkp);
+			self:ApplyPlayerDKP(raidRoster[n][RT_COL.PNAME], dkp);
 			
-			tidChanges[tidIndex] = { raidRoster[n][1], dkp };
+			tidChanges[tidIndex] = { raidRoster[n][RT_COL.PNAME], dkp };
 			tidIndex = tidIndex + 1;
 		end
 
@@ -1089,12 +1099,8 @@ function SOTA:UpdateLocalDKP(receiver, dkpAdded)
 	local raidRoster = self:GetRaidRoster();	--{ Name, DKP, Class, Rank, Online }
 	for n=1, table.getn(raidRoster),1 do
 		local player = raidRoster[n];
-		local name = player[1];
-		local dkp = player[2];
-		local class = player[3];
-		local rank = player[4];
-		local online = player[5];
-
+		local name = player[RT_COL.PNAME]
+		local dkp = player[RT_COL.DKP_AMNT]
 		if receiver == name then
 			if dkp then
 				dkp = dkp + dkpAdded;
@@ -1102,7 +1108,7 @@ function SOTA:UpdateLocalDKP(receiver, dkpAdded)
 				dkp = dkpAdded;
 			end
 			
-			raidRoster[n] = {name, dkp, class, rank, online};
+			raidRoster[n][RT_COL.DKP_AMNT] = dkp
 			return;
 		end
 	end
@@ -1250,9 +1256,11 @@ function SOTA:OnInitialize()
 	self.jobQueue          = {}
 
 	-- Guild Roster: table of guild players:	{ Name, DKP, Class, Rank(text), Online, Zone, Rank(value) }
+	-- Use RT_COL for cols id.
 	self.guildRosterTable = {}
 
-	-- Raid Roster: table of raid players:		{ Name, DKP, Class, Rank, Online }
+	-- Raid Roster: table of raid players:		Same as GuildRosterTable.
+	-- Use RT_COL for cols id.
 	self.raidRosterTable   = {}
 
 	self.CHANNEL           = {
