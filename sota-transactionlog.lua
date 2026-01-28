@@ -7,57 +7,68 @@
 --	in the UI is also possible, like swapping DKP for two people.
 --]]
 
+local SOTA = SOTAG
 
+local module = SOTA:NewModule("LogsUI", "AceEvent-2.0")
 
---  Transaction log: Contains a list of { timestamp, tid, author, description, state, { names, dkp } }
---	Transaction state: 0=Rolled back, 1=Active (default), 
-SOTA_transactionLog				= { }
 
 ---- Max # of transaction logs shown in UI (excluding Header)
-SOTA_MAX_TRANSACTIONS_DISPLAYED	= 18;
+local MAX_TRANSACTIONS_DISPLAYED	= 18;
 
---	Current transactionID, starts out as 0 (=none).
-SOTA_currentTransactionID		= 0;
-SOTA_selectedTransactionID		= nil;
 
-TRANSACTION_STATE_ROLLEDBACK	= 0;
-TRANSACTION_STATE_ACTIVE		= 1;
+local TRANSACTION_STATE            = {
+	ROLLEDBACK = 0,
+	ACTIVE = 1,
+}
 
---	# of transactions displayed in /gdlog
-local TRANSACTION_LIST_SIZE		= 5;
---	# of player names displayed per line when posting transaction log into guild chat
-local TRANSACTION_PLAYERS_PER_LINE	= 8;
 --	Setting for transaction details screen:
-local TRANSACTION_DETAILS_ROWS		= 18;
-local TRANSACTION_DETAILS_COLUMNS	= 4;
+local TRANSACTION_DETAILS = {
+	ROWS    = 18,
+	COLUMNS = 4,
+}
 
 
-local currentTransactionPage	= 1;	-- Current page shown (1=first page)
-local TransactionUIOpen			= false;
-local TransactionDetailsOpen	= false;
-local DKPHistoryPageOpen		= false;
 
 -- Used for alternating "colours" in DKP History view.
 local ALPHA_1 = 1.0;
 local ALPHA_2 = 0.7;
 
+function module:OnEnable()
+	--  Transaction log: Contains a list of { timestamp, tid, author, description, state, { names, dkp } }
+	--	Transaction state: 0=Rolled back, 1=Active (default),
+	self.transactionLog           = {}
 
+	self.currentTransactionID     = 0;
 
-function SOTA_RefreshLogElements()
-	if TransactionUIOpen then
-		SOTA_RefreshTransactionElements();		
-	elseif TransactionDetailsOpen then
-		SOTA_RefreshTransactionDetails();	
-	elseif DKPHistoryPageOpen then
-		SOTA_RefreshHistoryElements();
-	end
+	--	Current transactionID, starts out as 0 (=none).
+	self.selectedTransactionID    = nil;
+
+	self.currentTransactionPage   = 1; -- Current page shown (1=first page)
+	self.isTransactionUIOpen      = false;
+	self.isTransactionDetailsOpen = false;
+	self.isDKPHistoryPageOpen     = false;
+
+	self:TransactionLogUIInit()
+
+	self:RegisterEvent("SOTA_LOGSUI_REFRESHLOGELEMENTS", "RefreshLogElements")
+	self:RegisterEvent("SOTA_LOG_SINGLE_TRANSACTION")
 end
 
 
-function SOTA_OpenTransauctionUI()
-	TransactionUIOpen = true;
-	TransactionDetailsOpen = false;
-	DKPHistoryPageOpen = false;
+function module:RefreshLogElements()
+	if self.isTransactionUIOpen then
+		self:RefreshTransactionElements();
+	elseif self.isTransactionDetailsOpen then
+		self:RefreshTransactionDetails();
+	elseif self.isDKPHistoryPageOpen then
+		self:RefreshHistoryElements();
+	end
+end
+
+function module:OpenTransauctionUI()
+	self.isTransactionUIOpen = true;
+	self.isTransactionDetailsOpen = false;
+	self.isDKPHistoryPageOpen = false;
 	PurgeDKPHistoryButton:Hide();
 
 	getglobal("TransactionUIFrameTableList"):Show();
@@ -67,45 +78,46 @@ function SOTA_OpenTransauctionUI()
 	getglobal("BackToTransactionLogButton"):Hide();
 	getglobal("UndoTransactionButton"):Hide();
 	
-	SOTA_RefreshLogElements();
+	self:RefreshLogElements();
 
 	TransactionUIFrame:Show();	
 end
 
-function SOTA_CloseTransactionUI()
-	TransactionUIOpen = false;
-	TransactionDetailsOpen = false;
-	DKPHistoryPageOpen = false;
+
+function module:CloseTransactionUI()
+	self.isTransactionUIOpen = false;
+	self.isTransactionDetailsOpen = false;
+	self.isDKPHistoryPageOpen = false;
 	TransactionUIFrame:Hide();
 end
 
-function SOTA_ViewTransactionLog()
-	currentTransactionPage = 1;
-	TransactionUIOpen = true;
-	TransactionDetailsOpen = false;
-	DKPHistoryPageOpen = false;
+function module:ViewTransactionLog()
+	self.currentTransactionPage = 1;
+	self.isTransactionUIOpen = true;
+	self.isTransactionDetailsOpen = false;
+	self.isDKPHistoryPageOpen = false;
 	PurgeDKPHistoryButton:Hide();
-	SOTA_RefreshLogElements();
-	SOTA_UpdatePageControls();
+	self:RefreshLogElements();
+	self:UpdatePageControls();
 end;
 
-function SOTA_ViewDKPHistory()
-	currentTransactionPage = 1;
-	TransactionUIOpen = false;
-	TransactionDetailsOpen = false;
-	DKPHistoryPageOpen = true;
+function module:ViewDKPHistory()
+	self.currentTransactionPage = 1;
+	self.isTransactionUIOpen = false;
+	self.isTransactionDetailsOpen = false;
+	self.isDKPHistoryPageOpen = true;
 	PurgeDKPHistoryButton:Show();
-	SOTA_RefreshLogElements();
-	SOTA_UpdatePageControls();
+	self:RefreshLogElements();
+	self:UpdatePageControls();
 end;
 
-function SOTA_PurgeDKPHistory()
+function module:PurgeDKPHistory()
 
 	StaticPopupDialogs["SOTA_POPUP_PURGE_DKPHISTORY"] = {
 		text = "Are you sure you want to reset the DKP History?",
 		button1 = "Yes",
 		button2 = "No",
-		OnAccept = function() SOTA_PurgeDKPHistoryNow(playername) end,
+		OnAccept = function() self:PurgeDKPHistoryNow(playername) end,
 		timeout = 0,
 		whileDead = true,
 		hideOnEscape = true,
@@ -115,42 +127,42 @@ function SOTA_PurgeDKPHistory()
 	StaticPopup_Show("SOTA_POPUP_PURGE_DKPHISTORY");
 end;
 
-function SOTA_PurgeDKPHistoryNow()
+function module:PurgeDKPHistoryNow()
 	SOTA.db.realm.HistoryDkp = {};
 
-	SOTA_RefreshLogElements();
+	self:RefreshLogElements();
 end;
 
-function SOTA_OpenTransactionDetails()
-	TransactionUIOpen = false;
-	TransactionDetailsOpen = true;
-	DKPHistoryPageOpen = false;
+function module:OpenTransactionDetails()
+	self.isTransactionUIOpen = false;
+	self.isTransactionDetailsOpen = true;
+	self.isDKPHistoryPageOpen = false;
 	--TransactionUIFrameTableList:Hide();
 	--PrevTransactionPageButton:Hide();
 	--NextTransactionPageButton:Hide();
 	--TransactionUIFramePlayerList:Show();
 	--BackToTransactionLogButton:Show();
 	--UndoTransactionButton:Show();
-	SOTA_UpdatePageControls();
+	self:UpdatePageControls();
 end
 
-function SOTA_CloseTransactionDetails()
-	SOTA_OpenTransauctionUI();
+function module:CloseTransactionDetails()
+	self:OpenTransauctionUI();
 end
 
-function SOTA_RefreshTransactionElements()
-	if not TransactionUIOpen then
+function module:RefreshTransactionElements()
+	if not self.isTransactionUIOpen then
 		return;
 	end
 
 	local timestamp, tid, description, state, trInfo;
 	local name, dkp, playerCount;
 	
-	local trLog = SOTA_CloneTable(SOTA_transactionLog);
-	SOTA_SortTableDescending(trLog, 2);
+	local trLog = SOTA:CloneTable(self.transactionLog);
+	SOTA:SortTableDescending(trLog, 2);
 	
 	local numTransactions = table.getn(trLog);
-	for n=0, SOTA_MAX_TRANSACTIONS_DISPLAYED, 1 do
+	for n=0, MAX_TRANSACTIONS_DISPLAYED, 1 do
 		if n == 0 then
 			timestamp = "Time";
 			tid = "ID";
@@ -159,7 +171,7 @@ function SOTA_RefreshTransactionElements()
 			name = "Player(s)";
 			dkp = "DKP";
 		else
-			local index = n + ((currentTransactionPage - 1) * SOTA_MAX_TRANSACTIONS_DISPLAYED);
+			local index = n + ((self.currentTransactionPage - 1) * MAX_TRANSACTIONS_DISPLAYED);
 			if numTransactions < index then
 				timestamp = "";
 				tid = "";
@@ -207,13 +219,13 @@ function SOTA_RefreshTransactionElements()
 		getglobal(frame:GetName().."Command"):SetText(description);
 		getglobal(frame:GetName().."DKP"):SetText(dkp);
 
-		if (n > 0) and SOTA_CanReadNotes() then		
+		if (n > 0) and SOTA:CanReadNotes() then
 			local color = { 128, 128, 128 };
 			-- state=1: only for active transactions
 			if state == 1 then
-				local guildInfo = SOTA_GetGuildPlayerInfo(name);
+				local guildInfo = SOTA:GetGuildPlayerInfo(name);
 				if guildInfo then
-					color = SOTA_GetClassColorCodes(guildInfo[3]);
+					color = SOTA:GetClassColorCodes(guildInfo[3]);
 				end
 			end
 			getglobal(frame:GetName().."Name"):SetTextColor((color[1]/255), (color[2]/255), (color[3]/255), 255);
@@ -225,7 +237,7 @@ function SOTA_RefreshTransactionElements()
 		frame:Show();
 	end
 
-	SOTA_UpdatePageControls();
+	self:UpdatePageControls();
 end
 
 
@@ -233,7 +245,7 @@ end
 --	Get transactions splitted up, so each line contains one player+dkp
 --	Added in 1.1.0
 --]]
-function SOTA_GetIndividuelDKPHistory()
+function module:GetIndividuelDKPHistory()
 	local hrLog = { };
 
 	-- Generate array with all entries:
@@ -257,22 +269,22 @@ end;
 --	Show last <n> History entries:
 --	Added in: 1.1.0
 --]]
-function SOTA_RefreshHistoryElements()
-	if not DKPHistoryPageOpen then
+function module:RefreshHistoryElements()
+	if not self.isDKPHistoryPageOpen then
 		return;
 	end
 
 	local timestamp, tid, description, name, dkp, zone;
 
-	local hrLog = SOTA_GetIndividuelDKPHistory();
-	SOTA_SortTableDescending(hrLog, 1);
+	local hrLog = self:GetIndividuelDKPHistory();
+	SOTA:SortTableDescending(hrLog, 1);
 
 
 	local lastTimestamp = "";
 	local lastTID = 0;
 	local currentAlpha = ALPHA_1;
 	local numTransactions = table.getn(hrLog);
-	for n=0, SOTA_MAX_TRANSACTIONS_DISPLAYED, 1 do
+	for n=0, MAX_TRANSACTIONS_DISPLAYED, 1 do
 		if n == 0 then
 			timestamp = "Time";
 			tid = "ID";
@@ -281,7 +293,7 @@ function SOTA_RefreshHistoryElements()
 			dkp = "DKP";
 			zone = "";
 		else
-			local index = n + ((currentTransactionPage - 1) * SOTA_MAX_TRANSACTIONS_DISPLAYED);
+			local index = n + ((self.currentTransactionPage - 1) * MAX_TRANSACTIONS_DISPLAYED);
 			if numTransactions < index then
 				timestamp = "";
 				tid = "";
@@ -329,9 +341,9 @@ function SOTA_RefreshHistoryElements()
 
 		if (n > 0) then
 			local color = { 128, 128, 128 };
-			local guildInfo = SOTA_GetGuildPlayerInfo(name);
+			local guildInfo = SOTA:GetGuildPlayerInfo(name);
 			if guildInfo then
-				color = SOTA_GetClassColorCodes(guildInfo[3]);
+				color = SOTA:GetClassColorCodes(guildInfo[3]);
 			end
 			getglobal(frame:GetName().."Name"):SetTextColor((color[1]/255), (color[2]/255), (color[3]/255), 255);
 
@@ -345,11 +357,11 @@ function SOTA_RefreshHistoryElements()
 		frame:Show();
 	end
 
-	SOTA_UpdatePageControls();
+	self:UpdatePageControls();
 end
 
 
-function SOTA_UpdatePageControls()
+function module:UpdatePageControls()
 	PrevTransactionPageButton:Disable();
 	NextTransactionPageButton:Disable();
 	TransactionUIFramePlayerList:Hide();
@@ -357,21 +369,21 @@ function SOTA_UpdatePageControls()
 	UndoTransactionButton:Hide();
 	TransactionUIFrameTableList:Hide();
 
-	if DKPHistoryPageOpen then
+	if self.isDKPHistoryPageOpen then
 		-- DKP History log page:
 		DKPHistoryButton:Hide();
 		TransactionLogButton:Show();
 
 		-- Refresh navigation Buttons
-		local hrLog = SOTA_GetIndividuelDKPHistory();
+		local hrLog = self:GetIndividuelDKPHistory();
 		local numTransactions = table.getn(hrLog);
-		local numPages = ceil(numTransactions / SOTA_MAX_TRANSACTIONS_DISPLAYED);
+		local numPages = ceil(numTransactions / MAX_TRANSACTIONS_DISPLAYED);
 
-		if currentTransactionPage > 1 then
+		if self.currentTransactionPage > 1 then
 			PrevTransactionPageButton:Enable();
 		end
 	
-		if numPages > currentTransactionPage then
+		if numPages > self.currentTransactionPage then
 			NextTransactionPageButton:Enable();
 		end
 
@@ -380,14 +392,14 @@ function SOTA_UpdatePageControls()
 	else
 		-- Transaction log/details page:
 		-- Refresh navigation Buttons
-		local numTransactions = table.getn(SOTA_transactionLog);
-		local numPages = ceil(numTransactions / SOTA_MAX_TRANSACTIONS_DISPLAYED);
+		local numTransactions = table.getn(self.transactionLog);
+		local numPages = ceil(numTransactions / MAX_TRANSACTIONS_DISPLAYED);
 
-		if currentTransactionPage > 1 then
+		if self.currentTransactionPage > 1 then
 			PrevTransactionPageButton:Enable();
 		end
 	
-		if numPages > currentTransactionPage then
+		if numPages > self.currentTransactionPage then
 			NextTransactionPageButton:Enable();
 		end
 
@@ -397,7 +409,7 @@ function SOTA_UpdatePageControls()
 		TransactionLogButton:Hide();
 		TransactionUIFrameDKPHistory:Hide();
 
-		if TransactionDetailsOpen then
+		if self.isTransactionDetailsOpen then
 			PrevTransactionPageButton:Hide();
 			NextTransactionPageButton:Hide();
 			TransactionUIFramePlayerList:Show();
@@ -410,39 +422,39 @@ function SOTA_UpdatePageControls()
 	end
 end;
 
-function SOTA_PreviousTransactionUIPage()
-	if currentTransactionPage > 1 then
-		currentTransactionPage = currentTransactionPage - 1;
+function module:PreviousTransactionUIPage()
+	if self.currentTransactionPage > 1 then
+		self.currentTransactionPage = self.currentTransactionPage - 1;
 	end
-	SOTA_RefreshLogElements();
+	self:RefreshLogElements();
 end
 
-function SOTA_NextTransactionUIPage()
+function module:NextTransactionUIPage()
 	local numTransactions;
-	if DKPHistoryPageOpen then
-		local hrLog = SOTA_GetIndividuelDKPHistory();
+	if self.isDKPHistoryPageOpen then
+		local hrLog = self:GetIndividuelDKPHistory();
 		numTransactions = table.getn(hrLog);
 	else
-		numTransactions = table.getn(SOTA_transactionLog);
+		numTransactions = table.getn(self.transactionLog);
 	end;
 
-	local numPages = ceil(numTransactions / SOTA_MAX_TRANSACTIONS_DISPLAYED);
+	local numPages = ceil(numTransactions / MAX_TRANSACTIONS_DISPLAYED);
 	
-	if numPages > currentTransactionPage then
-		currentTransactionPage = currentTransactionPage + 1;
+	if numPages > self.currentTransactionPage then
+		self.currentTransactionPage = self.currentTransactionPage + 1;
 	end
-	SOTA_RefreshLogElements();
+	self:RefreshLogElements();
 end
 
-function SOTA_GetNextTransactionID()
-	SOTA_currentTransactionID = SOTA_currentTransactionID + 1;
-	return SOTA_currentTransactionID;
+function module:GetNextTransactionID()
+	self.currentTransactionID = self.currentTransactionID + 1;
+	return self.currentTransactionID;
 end
 
-function SOTA_RefreshTransactionDetails()
-	SOTA_selectedTransactionID = 1 * SOTA_selectedTransactionID;
+function module:RefreshTransactionDetails()
+	self.selectedTransactionID = 1 * self.selectedTransactionID;
 
-	local tInfo = SOTA_transactionLog[SOTA_selectedTransactionID];
+	local tInfo = self.transactionLog[self.selectedTransactionID];
 	if not tInfo then
 		return;
 	end
@@ -453,20 +465,20 @@ function SOTA_RefreshTransactionDetails()
 	local totalPlayers = { };
 	local found;
 
-	local raidRoster = SOTA_GetRaidRoster();
+	local raidRoster = SOTA:GetRaidRoster();
 	for n=1, table.getn(raidRoster), 1 do
 		totalCount = totalCount + 1
 		totalPlayers[totalCount] = { raidRoster[n][1], raidRoster[n][3] };
 	end	
 
-	totalPlayers = SOTA_SortTableAscending(totalPlayers, 1);
+	totalPlayers = SOTA:SortTableAscending(totalPlayers, 1);
 
 
 
 	local name, class, enabled;
 	local row = 1;
 	local col = 1;
-	for n=1, TRANSACTION_DETAILS_COLUMNS * TRANSACTION_DETAILS_ROWS, 1 do
+	for n=1, TRANSACTION_DETAILS.COLUMNS * TRANSACTION_DETAILS.ROWS, 1 do
 		if n > totalCount then
 			name = "";
 			class = "";
@@ -489,7 +501,7 @@ function SOTA_RefreshTransactionDetails()
 
 		local color = { 128, 128, 128 };
 		if enabled then
-			color = SOTA_GetClassColorCodes(class);			
+			color = SOTA:GetClassColorCodes(class);			
 		end
 
 
@@ -500,10 +512,10 @@ function SOTA_RefreshTransactionDetails()
 		frame:Show();
 
 		row = row + 1;
-		if row > TRANSACTION_DETAILS_ROWS then
+		if row > TRANSACTION_DETAILS.ROWS then
 			row = 1;
 			col = col + 1;
-			if col > TRANSACTION_DETAILS_COLUMNS then
+			if col > TRANSACTION_DETAILS.COLUMNS then
 				break;
 			end;
 		end
@@ -514,8 +526,8 @@ end
 --[[
 --	Initalize Transaction Log UI elements
 --]]
-function SOTA_TransactionLogUIInit()
-	for n=0,SOTA_MAX_TRANSACTIONS_DISPLAYED, 1 do
+function module:TransactionLogUIInit()
+	for n=0,MAX_TRANSACTIONS_DISPLAYED, 1 do
 		local lgEntry = CreateFrame("Button", "$parentEntry"..n, TransactionUIFrameTableList, "SOTA_LogTemplate");
 		local dhEntry = CreateFrame("Button", "$parentEntry"..n, TransactionUIFrameDKPHistory, "SOTA_DKPTemplate");
 		lgEntry:SetID(n);
@@ -531,8 +543,8 @@ function SOTA_TransactionLogUIInit()
 	
 	--	Initialize Player buttons in TransactionDetails
 	local id = 1;
-	for row=1, TRANSACTION_DETAILS_ROWS, 1 do
-		for col=1, TRANSACTION_DETAILS_COLUMNS, 1 do
+	for row=1, TRANSACTION_DETAILS.ROWS, 1 do
+		for col=1, TRANSACTION_DETAILS.COLUMNS, 1 do
 			local entry = CreateFrame("Button", "$parentEntry_"..col.."_"..row, TransactionUIFramePlayerList, "SOTA_PlayerLogTemplate");			
 			entry:SetID(id);
 			
@@ -558,41 +570,37 @@ end;
 --
 --	Transaction Log handling
 --
-function SOTA_LogIncludeExcludeTransaction(transactioncmd, name, tid, dkp)
+function module:LogIncludeExcludeTransaction(transactioncmd, name, tid, dkp)
 	local author = UnitName("Player");
 	local transactions = { };
 	transactions[1] = { name, dkp };
 	
-	local tidData = { SOTA_GetTimestamp(), tid, author, transactioncmd, TRANSACTION_STATE_ACTIVE, transactions };
+	local tidData = { SOTA:GetTimestamp(), tid, author, transactioncmd, TRANSACTION_STATE.ACTIVE, transactions };
 	
-	SOTA_RefreshLogElements();
-
-	SOTA_BroadcastTransaction(tidData);
+	self:RefreshLogElements();
 end
 
 
 
-function SOTA_LogSingleTransaction(transactioncmd, name, dkp)
+function module:SOTA_LOG_SINGLE_TRANSACTION(transactioncmd, name, dkp)
 	local transactions = { };
 	transactions[1] = { name, dkp };
 	
-	SOTA_LogMultipleTransactions(transactioncmd, transactions);
+	self:LogMultipleTransactions(transactioncmd, transactions);
 end
 
 
 --[[
 --	Add transaction and broadcast to other clients.
 --]]
-function SOTA_LogMultipleTransactions(transactioncmd, transactions)
+function module:LogMultipleTransactions(transactioncmd, transactions)
 	local author = UnitName("Player");
-	local tid = SOTA_GetNextTransactionID();
+	local tid = self:GetNextTransactionID();
 
-	SOTA_transactionLog[tid] = { SOTA_GetTimestamp(), tid, author, transactioncmd, TRANSACTION_STATE_ACTIVE, transactions };
-	SOTA_RefreshLogElements();
+	self.transactionLog[tid] = { SOTA:GetTimestamp(), tid, author, transactioncmd, TRANSACTION_STATE.ACTIVE, transactions };
+	self:RefreshLogElements();
 
-	SOTA_BroadcastTransaction(SOTA_transactionLog[tid]);
-
-	SOTA_CopyTransactionToHistory(SOTA_transactionLog[tid]);
+	self:CopyTransactionToHistory(self.transactionLog[tid]);
 end
 
 
@@ -601,10 +609,10 @@ end
 --	Will merge with existing transaction (timestamp + TID) if found
 --	Added in 1.1.0
 --]]
-function SOTA_CopyTransactionToHistory(transaction)
-	local tr = SOTA_CloneTable(transaction);
+function module:CopyTransactionToHistory(transaction)
+	local tr = SOTA:CloneTable(transaction);
 
-	tr[1] = SOTA_GetDateTimestamp();
+	tr[1] = SOTA:GetDateTimestamp();
 	tr[7] = GetRealZoneText();
 
 	local timestamp = tr[1];
@@ -630,28 +638,28 @@ end;
 --	Clear the local DKP history.
 --	Added in 1.1.0
 --]]
-function SOTA_ClearLocalHistory()
+function module:ClearLocalHistory()
 	SOTA.db.realm.HistoryDkp = { };
-	localEcho("Local history was cleared.");
+	SOTA:Print("Local history was cleared.");
 end;
 
 
-function SOTA_RequestUndoTransaction(transactionID)
-	if not SOTA_CanWriteNotes() then
-		localEcho("Sorry, you do not have access to the DKP notes.");
+function module:RequestUndoTransaction(transactionID)
+	if not SOTA:CanWriteNotes() then
+		SOTA:Print("Sorry, you do not have access to the DKP notes.");
 		return;
 	end;
 	
 
 	if not transactionID then
-		transactionID = SOTA_selectedTransactionID
+		transactionID = self.selectedTransactionID
 	end
 
 	StaticPopupDialogs["SOTA_POPUP_TRANSACTION_PLAYER"] = {
 		text = "Do you want to undo this transaction?",
 		button1 = "Yes",
 		button2 = "No",
-		OnAccept = function() SOTA_UndoTransaction(SOTA_RequestUndoTransaction)  end,
+		OnAccept = function() self:UndoTransaction(self.RequestUndoTransaction)  end,
 		timeout = 0,
 		whileDead = true,
 		hideOnEscape = true,
@@ -660,12 +668,12 @@ function SOTA_RequestUndoTransaction(transactionID)
 	StaticPopup_Show("SOTA_POPUP_TRANSACTION_PLAYER");	
 end
 
-function SOTA_UndoTransaction(transactionID)
+function module:UndoTransaction(transactionID)
 	if not transactionID then
 		return;
 	end
 
-	local tInfo = SOTA_transactionLog[SOTA_selectedTransactionID];
+	local tInfo = self.transactionLog[self.selectedTransactionID];
 	if not tInfo then
 		return;
 	end
@@ -678,88 +686,88 @@ function SOTA_UndoTransaction(transactionID)
 			playername = playerinfo[n][1]
 			dkp = playerinfo[n][2]
 			
-			SOTA_ApplyPlayerDKP(playername, -1 * dkp)
+			SOTA:ApplyPlayerDKP(playername, -1 * dkp)
 		end
 		
 		-- Roll back
 		tInfo[5] = 0;
-		SOTA_transactionLog[SOTA_selectedTransactionID] = tInfo;
+		self.transactionLog[self.selectedTransactionID] = tInfo;
 		
 		-- Refresh UI
-		SOTA_RefreshTransactionDetails();
+		self:RefreshTransactionDetails();
 	end
 	
 --  Transaction log: Contains a list of { timestamp, tid, author, description, state, { names, dkp } }
 --	Transaction state: 0=Rolled back, 1=Active (default), 	
 end
 
-function SOTA_ReplacePlayerInTransaction(transactionID, currentPlayer, newPlayer)
+function module:ReplacePlayerInTransaction(transactionID, currentPlayer, newPlayer)
 	if not currentPlayer or not newPlayer or not transactionID then
 		return;
 	end
 
-	local transaction = SOTA_GetTransaction(transactionID);
+	local transaction = self:GetTransaction(transactionID);
 	if not transaction then
 		return;
 	end
 		
-	SOTA_Call_SwapPlayersInTransaction(transactionID, newPlayer);
-	SOTA_OpenTransauctionUI();
+	self:Call_SwapPlayersInTransaction(transactionID, newPlayer);
+	self:OpenTransauctionUI();
 end
 
-function SOTA_IncludePlayerInTransaction(transactionID, playername)
+function module:IncludePlayerInTransaction(transactionID, playername)
 	if not playername or not transactionID then
 		return;
 	end
-	SOTA_Call_IncludePlayer(transactionID, playername);
+	self:Call_IncludePlayer(transactionID, playername);
 end
 
-function SOTA_ExcludePlayerFromTransaction(transactionID, playername)
+function module:ExcludePlayerFromTransaction(transactionID, playername)
 	if not playername or not transactionID then
 		return;
 	end
-	SOTA_Call_ExcludePlayer(transactionID, playername);
+	self:Call_ExcludePlayer(transactionID, playername);
 end
 
 
 --[[
 --	Get transaction with id=<tid>
 --]]
-function SOTA_GetTransaction(transactionID)
+function module:GetTransaction(transactionID)
 	transactionID = 1 * transactionID;
 
-	for n=1, table.getn(SOTA_transactionLog), 1 do
-		if (1 * SOTA_transactionLog[n][2]) == transactionID then
-			return SOTA_transactionLog[n];
+	for n=1, table.getn(self.transactionLog), 1 do
+		if (1 * self.transactionLog[n][2]) == transactionID then
+			return self.transactionLog[n];
 		end
 	end
 	return nil;
 end
 
 
-function SOTA_OnTransactionLogClick(object)
+function module:OnTransactionLogClick(object)
 	local msgID = object:GetID();
-	SOTA_selectedTransactionID = getglobal(object:GetName().."TID"):GetText();
-	if not SOTA_selectedTransactionID then
+	self.selectedTransactionID = getglobal(object:GetName().."TID"):GetText();
+	if not self.selectedTransactionID then
 		return;
 	end
 
-	if SOTA_CanWriteNotes() then
+	if SOTA:CanWriteNotes() then
 		UndoTransactionButton:Enable();
 	else
 		UndoTransactionButton:Disable();
 	end;
 	
-	SOTA_RefreshTransactionDetails();
-	SOTA_OpenTransactionDetails();
+	self:RefreshTransactionDetails();
+	self:OpenTransactionDetails();
 end
 
-function SOTA_OnTransactionLogDetailPlayer(object)
-	if SOTA_CanWriteNotes() then
+function module:OnTransactionLogDetailPlayer(object)
+	if SOTA:CanWriteNotes() then
 		local msgID = object:GetID();
 		local playername = getglobal(object:GetName().."PlayerButton"):GetText();
 	
-		SOTA_ToggleIncludePlayerInTransaction(playername);
+		self:ToggleIncludePlayerInTransaction(playername);
 	end;
 end
 
@@ -767,13 +775,13 @@ end
 --	Output DKP details from DKP History.
 --	Added in 1.1.0
 --]]
-function SOTA_OnDKPHistoryClick(object)
+function module:OnDKPHistoryClick(object)
 	StaticPopupDialogs["SOTA_POPUP_TRANSACTION_DETAILS"] = {
 		text = "Display information for transaction in:",
 		button1 = "Raid chat",
 		button2 = "Local",
-		OnAccept = function() SOTA_DisplayDKPDetails(object,true)  end,
-		OnCancel = function() SOTA_DisplayDKPDetails(object,false)  end,
+		OnAccept = function() self:DisplayDKPDetails(object,true)  end,
+		OnCancel = function() self:DisplayDKPDetails(object,false)  end,
 		timeout = 0,
 		whileDead = true,
 		hideOnEscape = true,
@@ -782,7 +790,7 @@ function SOTA_OnDKPHistoryClick(object)
 	StaticPopup_Show("SOTA_POPUP_TRANSACTION_DETAILS");	
 end;
 
-function SOTA_DisplayDKPDetails(object,showInRaidChat)
+function module:DisplayDKPDetails(object,showInRaidChat)
 	local msgID = object:GetID();
 	local timestamp = getglobal(object:GetName().."Time"):GetText();
 	local name = getglobal(object:GetName().."Name"):GetText();
@@ -797,26 +805,26 @@ function SOTA_DisplayDKPDetails(object,showInRaidChat)
 					dkp = 1*info[2];
 					if showInRaidChat then
 						-- Show details in Raid chat:
-						raidEcho("----- DKP details -----");
-						raidEcho(string.format(" - Player: %s, Zone: %s", info[1], entry[7]));
-						raidEcho(string.format(" - Date/time: %s, TransactionID: %d", entry[1], 1*entry[2]));
+						SOTA:Broadcast(SOTA.CHANNEL.RAID, "----- DKP details -----");
+						SOTA:Broadcast(SOTA.CHANNEL.RAID, string.format(" - Player: %s, Zone: %s", info[1], entry[7]));
+						SOTA:Broadcast(SOTA.CHANNEL.RAID, string.format(" - Date/time: %s, TransactionID: %d", entry[1], 1*entry[2]));
 						if dkp < 0 then
-							raidEcho(string.format(" - DKP subtracted: %d, Total players involved: %d", math.abs(dkp), table.getn(entry[6])));
+							SOTA:Broadcast(SOTA.CHANNEL.RAID, string.format(" - DKP subtracted: %d, Total players involved: %d", math.abs(dkp), table.getn(entry[6])));
 						else
-							raidEcho(string.format(" - DKP added: %d, Total players involved: %d", math.abs(dkp), table.getn(entry[6])));
+							SOTA:Broadcast(SOTA.CHANNEL.RAID, string.format(" - DKP added: %d, Total players involved: %d", math.abs(dkp), table.getn(entry[6])));
 						end;
-						raidEcho(string.format(' - Command: "%s", DKP Officer: %s', string.lower(entry[4]), entry[3]));
+						SOTA:Broadcast(SOTA.CHANNEL.RAID, string.format(' - Command: "%s", DKP Officer: %s', string.lower(entry[4]), entry[3]));
 					else
 						--- Show details in Local chat:
-						localEcho("----- DKP details -----");
-						localEcho(string.format(" - Player: "..SOTA_COLOUR_INTRO.."%s"..SOTA_COLOUR_CHAT..", Zone: "..SOTA_COLOUR_INTRO.."%s"..SOTA_COLOUR_CHAT.."", info[1], entry[7]));
-						localEcho(string.format(" - Date/time: "..SOTA_COLOUR_INTRO.."%s"..SOTA_COLOUR_CHAT..", TransactionID: "..SOTA_COLOUR_INTRO.."%d"..SOTA_COLOUR_CHAT.."", entry[1], 1*entry[2]));
+						SOTA:Print("----- DKP details -----");
+						SOTA:Print(string.format(" - Player: "..SOTA_COLOUR_INTRO.."%s"..SOTA_COLOUR_CHAT..", Zone: "..SOTA_COLOUR_INTRO.."%s"..SOTA_COLOUR_CHAT.."", info[1], entry[7]));
+						SOTA:Print(string.format(" - Date/time: "..SOTA_COLOUR_INTRO.."%s"..SOTA_COLOUR_CHAT..", TransactionID: "..SOTA_COLOUR_INTRO.."%d"..SOTA_COLOUR_CHAT.."", entry[1], 1*entry[2]));
 						if dkp < 0 then
-							localEcho(string.format(" - DKP subtracted: "..SOTA_COLOUR_INTRO.."%d"..SOTA_COLOUR_CHAT..", Total players involved: "..SOTA_COLOUR_INTRO.."%d"..SOTA_COLOUR_CHAT.."", math.abs(dkp), table.getn(entry[6])));
+							SOTA:Print(string.format(" - DKP subtracted: "..SOTA_COLOUR_INTRO.."%d"..SOTA_COLOUR_CHAT..", Total players involved: "..SOTA_COLOUR_INTRO.."%d"..SOTA_COLOUR_CHAT.."", math.abs(dkp), table.getn(entry[6])));
 						else
-							localEcho(string.format(" - DKP added: "..SOTA_COLOUR_INTRO.."%d"..SOTA_COLOUR_CHAT..", Total players involved: "..SOTA_COLOUR_INTRO.."%d"..SOTA_COLOUR_CHAT.."", math.abs(dkp), table.getn(entry[6])));
+							SOTA:Print(string.format(" - DKP added: "..SOTA_COLOUR_INTRO.."%d"..SOTA_COLOUR_CHAT..", Total players involved: "..SOTA_COLOUR_INTRO.."%d"..SOTA_COLOUR_CHAT.."", math.abs(dkp), table.getn(entry[6])));
 						end;
-						localEcho(string.format(" - Command: "..SOTA_COLOUR_INTRO.."%s"..SOTA_COLOUR_CHAT..", DKP Officer: "..SOTA_COLOUR_INTRO.."%s"..SOTA_COLOUR_CHAT.."", entry[4], entry[3]));
+						SOTA:Print(string.format(" - Command: "..SOTA_COLOUR_INTRO.."%s"..SOTA_COLOUR_CHAT..", DKP Officer: "..SOTA_COLOUR_INTRO.."%s"..SOTA_COLOUR_CHAT.."", entry[4], entry[3]));
 					end
 
 					return;
@@ -826,3 +834,54 @@ function SOTA_DisplayDKPDetails(object,showInRaidChat)
 	end;
 end;
 
+function SOTA_OpenTransauctionUI()
+	module:OpenTransauctionUI()
+end
+
+function SOTA_CloseTransactionUI()
+	module:CloseTransactionUI()
+end
+
+function SOTA_PurgeDKPHistory()
+	module:PurgeDKPHistory()
+end
+
+function SOTA_ViewTransactionLog()
+	module:ViewTransactionLog()
+end
+
+function SOTA_ViewDKPHistory()
+	module:ViewDKPHistory()
+end
+
+function SOTA_PreviousTransactionUIPage()
+	module:PreviousTransactionUIPage()
+end
+
+function SOTA_NextTransactionUIPage()
+	module:NextTransactionUIPage()
+end
+
+function SOTA_CloseTransactionDetails()
+	module:CloseTransactionDetails()
+end
+
+function SOTA_RequestUndoTransaction()
+	module:RequestUndoTransaction()
+end
+
+function SOTA_OnTransactionLogClick(obj)
+	module:OnTransactionLogClick(obj)
+end
+
+function SOTA_OnDKPHistoryClick(obj)
+	module:OnDKPHistoryClick(obj)
+end
+
+function SOTA_OnTransactionLogDetailPlayer(obj)
+	module:OnTransactionLogDetailPlayer(obj)
+end
+
+function SOTA_OnTransactionLogDetailPlayer(obj)
+	module:SOTA_OnTransactionLogDetailPlayer(obj)
+end

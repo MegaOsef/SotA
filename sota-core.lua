@@ -1,9 +1,12 @@
-SOTA = AceLibrary("AceAddon-2.0"):new(
+SOTAG = AceLibrary("AceAddon-2.0"):new(
 	"AceEvent-2.0",
 	"AceConsole-2.0",
 	"AceDB-2.0",
-	"AceModuleCore-2.0"
+	"AceModuleCore-2.0",
+	"AceDebug-2.0"
 )
+
+local SOTA = SOTAG
 
 --[[
 --	SotA - State of the Art DKP Addon
@@ -15,10 +18,10 @@ SOTA = AceLibrary("AceAddon-2.0"):new(
 --	The sota-core.xml file contains templates used across all UI's.
 --]]
 
-SOTA_MESSAGE_PREFIX				= "SOTAv1"
-SOTA_ID							= "SOTA"
-SOTA_TITLE						= "SotA"
-SOTA_TITAN_TITLE				= "SotA - DKP Distribution"
+local SOTA_MESSAGE_PREFIX				= "SOTAv1"
+local SOTA_ID							= "SOTA"
+local SOTA_TITLE						= "SotA"
+local SOTA_TITAN_TITLE				= "SotA - DKP Distribution"
 
 local SOTA_DEBUG_ENABLED		= false;
 
@@ -26,13 +29,13 @@ SOTA_CHAT_END					= "|r"
 SOTA_COLOUR_INTRO				= "|c80F0F0F0"
 SOTA_COLOUR_CHAT				= "|c8040A0F8"
 
-local WARN_CHANNEL				= "RAID_WARNING"
-local RAID_CHANNEL				= "RAID"
-local PARTY_CHANNEL				= "PARTY"
-local YELL_CHANNEL				= "YELL"
-local SAY_CHANNEL				= "SAY"
-local GUILD_CHANNEL				= "GUILD"
-local WHISPER_CHANNEL			= "WHISPER"
+--local WARN_CHANNEL				= "RAID_WARNING"
+--local RAID_CHANNEL				= "RAID"
+--local PARTY_CHANNEL				= "PARTY"
+--local YELL_CHANNEL				= "YELL"
+--local SAY_CHANNEL				= "SAY"
+--local GUILD_CHANNEL				= "GUILD"
+--local WHISPER_CHANNEL			= "WHISPER"
 
 -- Max # of lines for class dkp displayed locally when using "/sota class":
 local MAX_CLASS_DKP_DISPLAYED	= 10;
@@ -43,41 +46,16 @@ local MAX_CLASS_DKP_WHISPERED	= 5;
 -- true if a DKP job is already running
 local JobIsRunning				= false
 
--- Guild Roster: table of guild players:	{ Name, DKP, Class, Rank(text), Online, Zone, Rank(value) }
-local GuildRosterTable			= { }
 
--- Raid Roster: table of raid players:		{ Name, DKP, Class, Rank, Online }
-local RaidRosterTable			= { }
 local RaidRosterLazyUpdate		= false;
 
 
-SOTA_CHANNELS = {
+local SOTA_CHANNELS = {
 	{ 'Raid Warning (/rw)',			WARN_CHANNEL },
 	{ 'Raid channel (/raid)',		RAID_CHANNEL },
 	{ 'Yell (/yell)',				YELL_CHANNEL },
 	{ 'Say (/say)',					SAY_CHANNEL },
 	{ 'Guild chat (/guild)',		GUILD_CHANNEL },
-}
-
-SOTA_QUALITY_COLORS = {
-	{0, "Poor",				{ 157,157,157 } },	--9d9d9d
-	{1, "Common",			{ 255,255,255 } },	--ffffff
-	{2, "Uncommon",			{  30,255,  0 } },	--1eff00
-	{3, "Rare",				{   0,112,255 } },	--0070ff
-	{4, "Epic",				{ 163, 53,238 } },	--a335ee
-	{5, "Legendary",		{ 255,128,  0 } }	--ff8000
-}
-
-SOTA_CLASS_COLORS = {
-	{ "Druid",				{ 255,125, 10 } },	--255 	125 	10		1.00 	0.49 	0.04 	#FF7D0A
-	{ "Hunter",				{ 171,212,115 } },	--171 	212 	115 	0.67 	0.83 	0.45 	#ABD473 
-	{ "Mage",				{ 105,204,240 } },	--105 	204 	240 	0.41 	0.80 	0.94 	#69CCF0 
-	{ "Paladin",			{ 245,140,186 } },	--245 	140 	186 	0.96 	0.55 	0.73 	#F58CBA
-	{ "Priest",				{ 255,255,255 } },	--255 	255 	255 	1.00 	1.00 	1.00 	#FFFFFF
-	{ "Rogue",				{ 255,245,105 } },	--255 	245 	105 	1.00 	0.96 	0.41 	#FFF569
-	{ "Shaman",				{ 245,140,186 } },	--245 	140 	186 	0.96 	0.55 	0.73 	#F58CBA
-	{ "Warlock",			{ 148,130,201 } },	--148 	130 	201 	0.58 	0.51 	0.79 	#9482C9
-	{ "Warrior",			{ 199,156,110 } }	--199 	156 	110 	0.78 	0.61 	0.43 	#C79C6E
 }
 
 
@@ -114,6 +92,13 @@ SOTA_MSG_OnDKPSharedRange	= "OnDKPSharedRange";
 SOTA_MSG_OnDKPReplaced		= "OnDKPReplaced";
 
 
+local MSG                    = {
+	ON_DKPADDED = "%i DKP was added to %s",
+	ON_DKPADDED_RAID = "%i DKP was added to all players in raid",
+	ON_DKPREPLACED = "%s was replaced with %s (%i DKP)",
+	ON_DKP_SUBTRACT = "%i DKP was subtracted from %s",
+	ON_DKP_SUBTRACT_RAID = "%i DKP was subtracted from all players in raid",
+}
 
 --	Settings (persisted)
 -- Pane 1:
@@ -138,116 +123,67 @@ function echo(msg)
 	end
 end
 
-function debugEcho(msg)
-	if SOTA_DEBUG_ENABLED and msg then
-		DEFAULT_CHAT_FRAME:AddMessage(SOTA_COLOUR_CHAT .. "DEBUG: ".. msg .. SOTA_CHAT_END)
+--function debugEcho(msg)
+--	if SOTA_DEBUG_ENABLED and msg then
+--		DEFAULT_CHAT_FRAME:AddMessage(SOTA_COLOUR_CHAT .. "DEBUG: ".. msg .. SOTA_CHAT_END)
+--	end
+--end
+
+--function publicEcho(msgInfo)
+--
+--	if(msgInfo) and (msgInfo[3] ~= "") then
+--		local channelName;
+--
+--		if msgInfo[2] == 0 then
+--			-- Message has been disabled!
+--			return;
+--		elseif msgInfo[2] == 1 then
+--			channelName = WARN_CHANNEL;
+--		elseif msgInfo[2] == 2 then
+--			channelName = RAID_CHANNEL;
+--		elseif msgInfo[2] == 3 then
+--			channelName = GUILD_CHANNEL;
+--		elseif msgInfo[2] == 4 then
+--			channelName = YELL_CHANNEL;
+--		elseif msgInfo[2] == 5 then
+--			channelName = SAY_CHANNEL;
+--		else
+--			-- Unknown channel
+--			self:Print("Unknown channel: ".. msgInfo[2]..", msg: "..msgInfo[3]);
+--			return;
+--		end;
+--
+--		SendChatMessage(string.format("[%s] %s", SOTA_TITLE, msgInfo[3]), channelName);
+--	end;
+--end;
+
+function SOTA:Broadcast(channel, msg)
+	if msg and channel and msg ~= "" then
+		SendChatMessage(string.format("[%s] %s", SOTA_TITLE, msg), channel);
 	end
 end
+--
+--function raidEcho(msg)
+--	SendChatMessage(msg, RAID_CHANNEL);
+--end
+--
+--function guildEcho(msg)
+--	SendChatMessage(msg, GUILD_CHANNEL)
+--end
+--
+--function addonEcho(msg)
+--	SendAddonMessage(SOTA_MESSAGE_PREFIX, msg, "RAID")
+--end
 
-function publicEcho(msgInfo)
-
-	if(msgInfo) and (msgInfo[3] ~= "") then
-		local channelName;
-
-		if msgInfo[2] == 0 then
-			-- Message has been disabled!
-			return;
-		elseif msgInfo[2] == 1 then
-			channelName = WARN_CHANNEL;
-		elseif msgInfo[2] == 2 then
-			channelName = RAID_CHANNEL;
-		elseif msgInfo[2] == 3 then
-			channelName = GUILD_CHANNEL;
-		elseif msgInfo[2] == 4 then
-			channelName = YELL_CHANNEL;
-		elseif msgInfo[2] == 5 then
-			channelName = SAY_CHANNEL;
-		else
-			-- Unknown channel
-			localEcho("Unknown channel: ".. msgInfo[2]..", msg: "..msgInfo[3]);
-			return;
-		end;
-
-		SendChatMessage(string.format("[%s] %s", SOTA_TITLE, msgInfo[3]), channelName);
-	end;
-end;
-
-function localEcho(msg)
-	echo("<"..SOTA_COLOUR_INTRO..SOTA_TITLE..SOTA_COLOUR_CHAT.."> "..msg);
-end;
-
-function raidEcho(msg)
-	SendChatMessage(msg, RAID_CHANNEL);
-end
-
-function guildEcho(msg)
-	SendChatMessage(msg, GUILD_CHANNEL)
-end
-
-function addonEcho(msg)
-	SendAddonMessage(SOTA_MESSAGE_PREFIX, msg, "RAID")
-end
-
-function SOTA_whisper(receiver, msg)
+function SOTA:whisper(receiver, msg)
 	if receiver == UnitName("player") then
-		localEcho(msg);
+		self:Print(msg);
 	else
 		SendChatMessage(msg, WHISPER_CHANNEL, nil, receiver);
 	end
 end
 
 
---[[
---	Misc. utility functions:
---]]
-function SOTA_GetTimestamp()
-	return date("%H:%M:%S", time());
-end
-
-function SOTA_GetDateTimestamp()
-	return date("%Y/%m/%d %H:%M:%S", time());
-end
-
-
---[[
---	Convert a msg so first letter is uppercase, and rest as lower case.
---]]
-function SOTA_UCFirst(msg)
-	if not msg then
-		return ""
-	end	
-
-	local f = string.sub(msg, 1, 1)
-	local r = string.sub(msg, 2)
-	return string.upper(f) .. string.lower(r)
-end
-
-function SOTA_GetQualityColor(quality)
-	for n=1, table.getn(SOTA_QUALITY_COLORS), 1 do
-		local q = SOTA_QUALITY_COLORS[n];
-		if q[1] == quality then
-			return q[3]
-		end
-	end
-	
-	-- Unknown quality code; can't happen! Let's just return poor quality!
-	return SOTA_QUALITY_COLORS[1][3];
-end
-
-function SOTA_GetClassColorCodes(classname)
-	local colors = { 128,128,128 }
-	classname = SOTA_UCFirst(classname);
-
-	local cc;
-	for n=1, table.getn(SOTA_CLASS_COLORS), 1 do
-		cc = SOTA_CLASS_COLORS[n];
-		if cc[1] == classname then
-			return cc[2];
-		end
-	end
-
-	return colors;
-end
 
 
 --[[
@@ -257,7 +193,7 @@ end
 --	2: If player is leader
 --]]
 function SOTA:GetRaidRank(playername)	
-	if(SOTA_IsInRaid(true)) then	
+	if(self:IsInRaid(true)) then	
 		for n=1, GetNumRaidMembers(), 1 do
 			local name, rank = GetRaidRosterInfo(n);
 			if name == playername then
@@ -268,15 +204,15 @@ function SOTA:GetRaidRank(playername)
 	return 0;
 end
 
-function SOTA_IsInRaid(silentMode)
+function SOTA:IsInRaid(silentMode)
 	local result = ( GetNumRaidMembers() > 0 )
 	if not silentMode and not result then
-		localEcho("You must be in a raid!");
+		self:Print("You must be in a raid!");
 	end
 	return result
 end
 
-function SOTA_CanReadNotes()
+function SOTA:CanReadNotes()
 	local result = true
 	if SOTA.db.realm.UseGuildNotes == SOTA_GUILDNOTE.USEPUBLIC then
 		-- Guild notes can always be read; there is no WOW setting for that.
@@ -287,7 +223,7 @@ function SOTA_CanReadNotes()
 	return result
 end
 
-function SOTA_CanWriteNotes()
+function SOTA:CanWriteNotes()
 	local result = false
 	if SOTA.db.realm.UseGuildNotes == SOTA_GUILDNOTE.USEPUBLIC then
 		result = CanEditPublicNote();
@@ -299,9 +235,9 @@ end
 
 
 function SOTA:GetUnitIDFromGroup(playerName)
-	playerName = SOTA_UCFirst(playerName);
+	playerName = self:UCFirst(playerName);
 
-	if SOTA_IsInRaid(false) then
+	if self:IsInRaid(false) then
 		for n=1, GetNumRaidMembers(), 1 do
 			if UnitName("raid"..n) == playerName then
 				return "raid"..n;
@@ -319,64 +255,6 @@ function SOTA:GetUnitIDFromGroup(playerName)
 end
 
 
---[[
---	Table functions:
---]]
-function SOTA_RenumberTable(sourcetable)
-	local index = 1;
-	local temptable = { };
-	for key,value in ipairs(sourcetable) do
-		if value and table.getn(value) > 0 then
-			temptable[index] = value;
-			index = index + 1
-		end
-	end
-	return temptable;
-end
-
-function SOTA_SortTableAscending(sourcetable, index)
-	local doSort = true
-	while doSort do
-		doSort = false
-		for n=table.getn(sourcetable), 2, -1 do
-			local a = sourcetable[n - 1];
-			local b = sourcetable[n];
-			if (a[index]) > (b[index]) then
-				sourcetable[n - 1] = b;
-				sourcetable[n] = a;
-				doSort = true;
-			end
-		end
-	end
-	return sourcetable;
-end
-
-function SOTA_SortTableDescending(sourcetable, index)
-	local doSort = true
-	while doSort do
-		doSort = false
-		for n=1,table.getn(sourcetable) - 1, 1 do
-			local a = sourcetable[n]
-			local b = sourcetable[n + 1]
-			if (a[index]) < (b[index]) then
-				sourcetable[n] = b
-				sourcetable[n + 1] = a
-				doSort = true
-			end
-		end
-	end
-	return sourcetable;
-end
-
-function SOTA_CloneTable(sourcetable)
-	local destinationtable = { };
-	for n=1, table.getn(sourcetable), 1 do
-		destinationtable[n] = sourcetable[n];
-	end
-	return destinationtable;
-end
-
-
 
 --
 --	Guild Roster Functions
@@ -386,27 +264,31 @@ function SOTA:RequestUpdateGuildRoster()
 end
 
 function SOTA:GUILD_ROSTER_UPDATE()
-	SOTA_RefreshGuildRoster();
+	self:Print("GUILD_ROSTER_UPDATE",
+	"self:CanReadNotes():", self:CanReadNotes(),
+	"self:CanDoDKP():", self:CanDoDKP(),
+	"JobIsRunning:", JobIsRunning)
+	self:RefreshGuildRoster();
 
-	if SOTA_CanReadNotes() then
-		if not JobIsRunning then	
+	if self:CanReadNotes() then
+		if not JobIsRunning then
 			JobIsRunning = true
 			
-			local job = SOTA_GetNextJob()
+			local job = self:GetNextJob()
 			while job do
-				job[1](job)				
-				job = SOTA_GetNextJob()
+				job[1](job)
+				job = self:GetNextJob()
 			end
 			
-			if SOTA_IsInRaid(true) then
-				SOTA_RefreshRaidRoster()
+			if self:IsInRaid(true) then
+				self:RefreshRaidRoster()
 			end
  
 			JobIsRunning = false
 		end
 	end
 	
-	SOTA_RefreshLogElements();
+	self:TriggerEvent("SOTA_LOGSUI_REFRESHLOGELEMENTS")
 end
 
 
@@ -415,9 +297,9 @@ end
 --	Used to display DKP values for non-raiding members
 --	(/gdclass and /gdstat)
 --]]
-function SOTA_RefreshGuildRoster()
+function SOTA:RefreshGuildRoster()
 	
-	if not SOTA_CanReadNotes() then
+	if not self:CanReadNotes() then
 		return;
 	end
 
@@ -456,7 +338,7 @@ function SOTA_RefreshGuildRoster()
 		NewGuildRosterTable[n] = { name, (1 * dkp), class, rank, online, zone, rankIndex };
 	end
 	
-	GuildRosterTable = NewGuildRosterTable;
+	self.guildRosterTable = NewGuildRosterTable;
 end
 
 
@@ -468,12 +350,12 @@ end
 --	Get information belonging to a specific player in the guild.
 --	Returns NIL if player was not found.
 --]]
-function SOTA_GetGuildPlayerInfo(player)
-	player = SOTA_UCFirst(player);
+function SOTA:GetGuildPlayerInfo(player)
+	player = self:UCFirst(player);
 
-	for n=1, table.getn(GuildRosterTable), 1 do
-		if GuildRosterTable[n][1] == player then
-			return GuildRosterTable[n];
+	for n=1, table.getn(self.guildRosterTable), 1 do
+		if self.guildRosterTable[n][1] == player then
+			return self.guildRosterTable[n];
 		end
 	end
 	
@@ -481,25 +363,21 @@ function SOTA_GetGuildPlayerInfo(player)
 end
 
 
-function SOTA:RAID_ROSTER_UPDATE()
-	RaidRosterLazyUpdate = true;
+--function SOTA:RAID_ROSTER_UPDATE()
+--	RaidRosterLazyUpdate = true;
+--
+--	SOTA_RefreshLogElements();
+--	
+--	if not self:IsInRaid(true) then
+--		SOTA_transactionLog = { };
+--	end	
+--end
 
-	SOTA_RefreshLogElements();
-	
-	if SOTA_IsInRaid(true) then
-		SOTA_Synchronize();
-	else
-		SOTA_transactionLog = { };
-		
-		SOTA_ClearMaster();		
-	end	
-end
-
-function SOTA_GetRaidRoster()
+function SOTA:GetRaidRoster()
 	if RaidRosterLazyUpdate then
-		SOTA_RefreshRaidRoster();
+		self:RefreshRaidRoster();
 	end
-	return RaidRosterTable;
+	return self.raidRosterTable;
 end
 
 
@@ -507,11 +385,11 @@ end
 --	Return raid info for specific player.
 --	{ Name, DKP, Class, Rank, Online }
 --]]
-function SOTA_GetRaidInfoForPlayer(playername)
-	if SOTA_IsInRaid(true) and playername then
-		playername = SOTA_UCFirst(playername);
+function SOTA:GetRaidInfoForPlayer(playername)
+	if self:IsInRaid(true) and playername then
+		playername = self:UCFirst(playername);
 		
-		local raid = SOTA_GetRaidRoster();		
+		local raid = self:GetRaidRoster();
 		for n=1, table.getn(raid), 1 do
 			if raid[n][1] == playername then
 				return raid[n];
@@ -526,20 +404,20 @@ end
 --	Re-read the raid status and namely the DKP values.
 --	Should be called after each roster update.
 --]]
-function SOTA_RefreshRaidRoster()
+function SOTA:RefreshRaidRoster()
 	local playerCount = GetNumRaidMembers()
 	
 	if playerCount then
-		RaidRosterTable = { }
+		self.raidRosterTable = { }
 		local index = 1
-		local memberCount = table.getn(GuildRosterTable);
+		local memberCount = table.getn(self.guildRosterTable);
 		for n=1,playerCount,1 do
 			local name, _, _, _, class = GetRaidRosterInfo(n);
 
 			for m=1,memberCount,1 do
-				local info = GuildRosterTable[m]
+				local info = self.guildRosterTable[m]
 				if name == info[1] then
-					RaidRosterTable[index] = info;
+					self.raidRosterTable[index] = info;
 					index = index + 1
 				end
 			end
@@ -548,8 +426,8 @@ function SOTA_RefreshRaidRoster()
 	
 	RaidRosterLazyUpdate = false;
 	
-	for n=1,table.getn(RaidRosterTable), 1 do
-		local rr = RaidRosterTable[n];
+	for n=1,table.getn(self.raidRosterTable), 1 do
+		local rr = self.raidRosterTable[n];
 --		echo("RaidRosterUpdate:");
 --		echo(string.format("Name=%s, DKP=%d, Class=%s, Rank=%s", rr[1], rr[2], rr[3], rr[4]));
 	end
@@ -560,59 +438,59 @@ end
 --	DKP handling
 --
 
-function SOTA_Call_CheckPlayerDKP(playername, sender)
+function SOTA:Call_CheckPlayerDKP(playername, sender)
 	if playername then
-		playername = SOTA_UCFirst(playername);
+		playername = self:UCFirst(playername);
 	else
 		playername = UnitName("player");
 	end		
 
-	local dkp = SOTA_GetDKP(playername);
+	local dkp = self:GetDKP(playername);
 	if dkp then
 		dkp = 1 * dkp;
 		if sender then
-			SOTA_whisper(sender, string.format("%s have %d DKP.", playername, dkp));
+			self:whisper(sender, string.format("%s have %d DKP.", playername, dkp));
 		else
-			localEcho(string.format("%s have %d DKP.", playername, dkp));
+			self:Print(string.format("%s have %d DKP.", playername, dkp));
 		end
 	else
 		if sender then
-			SOTA_whisper(sender, string.format("There are no DKP information for %s.", playername));
+			self:whisper(sender, string.format("There are no DKP information for %s.", playername));
 		else
-			localEcho(string.format("There are no DKP information for %s.", playername));
+			self:Print(string.format("There are no DKP information for %s.", playername));
 		end
 	end
 end
 
 
-function SOTA_Call_CheckClassDKP(playerclass, sender)
+function SOTA:Call_CheckClassDKP(playerclass, sender)
 	if playerclass then
-		playerclass = SOTA_UCFirst(playerclass);
+		playerclass = self:UCFirst(playerclass);
 	else
 		playerclass = UnitClass("player");
 	end		
 
 	local classtable = { }
-	for n=1, table.getn(GuildRosterTable), 1 do
-		if GuildRosterTable[n][3] == playerclass then
-			classtable[ table.getn(classtable) + 1] = GuildRosterTable[n];
+	for n=1, table.getn(self.guildRosterTable), 1 do
+		if self.guildRosterTable[n][3] == playerclass then
+			classtable[ table.getn(classtable) + 1] = self.guildRosterTable[n];
 		end
 	end
 
-	SOTA_SortTableDescending(classtable, 2);
+	self:SortTableDescending(classtable, 2);
 	
 	if sender then
-		SOTA_whisper(sender, string.format("Top %d DKP for %ss:", MAX_CLASS_DKP_WHISPERED, playerclass));
+		self:whisper(sender, string.format("Top %d DKP for %ss:", MAX_CLASS_DKP_WHISPERED, playerclass));
 		for n=1, table.getn(classtable), 1 do
 			if n <= MAX_CLASS_DKP_WHISPERED then
-				SOTA_whisper(sender, string.format("%d - %s: %d DKP", n, classtable[n][1], 1*(classtable[n][2])));
+				self:whisper(sender, string.format("%d - %s: %d DKP", n, classtable[n][1], 1*(classtable[n][2])));
 			end
 		end
 	else
-		localEcho(string.format("Top %d DKP for %ss:", MAX_CLASS_DKP_DISPLAYED, playerclass));
+		self:Print(string.format("Top %d DKP for %ss:", MAX_CLASS_DKP_DISPLAYED, playerclass));
 		for n=1, table.getn(classtable), 1 do
 			if n <= MAX_CLASS_DKP_DISPLAYED then
-				localEcho(string.format("%d - %s: %d DKP", n, classtable[n][1], 1*(classtable[n][2])));
+				self:Print(string.format("%d - %s: %d DKP", n, classtable[n][1], 1*(classtable[n][2])));
 			end
 		end
 	end
@@ -623,9 +501,9 @@ end
 --	Get DKP belonging to a specific player.
 --	Returns NIL if player was not found. Players with no DKP will return 0.
 --]]
-function SOTA_GetDKP(playername)
+function SOTA:GetDKP(playername)
 	local dkp = nil;
-	local playerInfo = SOTA_GetGuildPlayerInfo(playername);
+	local playerInfo = self:GetGuildPlayerInfo(playername);
 	if playerInfo then
 		dkp = 1 * (playerInfo[2]);
 	end
@@ -634,105 +512,120 @@ function SOTA_GetDKP(playername)
  end
 
 
+function SOTA:CanDoDKP(silentmode)
+
+	if not SOTA:IsInRaid() then
+		return false;
+	end 
+
+	if not SOTA:CanWriteNotes() then
+		if not silentmode then
+			SOTA:Print("You do not have access to change notes!");
+		end
+		return false;
+	end
+
+	if not SOTA_IsPromoted() then
+		if not silentmode then
+			SOTA:Print("You are not promoted!");
+		end
+		return false;
+	end
+
+	return true;
+end
+
 --[[
 --	Add <dkp> DKP to <playername>
 --]]
-function SOTA_Call_AddPlayerDKP(playername, dkp)
-	if SOTA_CanDoDKP() then
+function SOTA:Call_AddPlayerDKP(playername, dkp)
+	if self:CanDoDKP() then
 		RaidState = RAID_STATE_ENABLED;
-		SOTA_RequestMaster();
-		SOTA_AddJob( function(job) SOTA_AddPlayerDKP(job[2], job[3]) end, playername, dkp )
-		SOTA_RequestUpdateGuildRoster();
+		self:AddJob( function(job) self:AddPlayerDKP(job[2], job[3]) end, playername, dkp )
+		self:RequestUpdateGuildRoster();
 	end
 end
-function SOTA_AddPlayerDKP(playername, dkpValue, silentmode)
+function SOTA:AddPlayerDKP(playername, dkpValue, silentmode)
 	dkpValue = 1 * dkpValue;
-	if SOTA_ApplyPlayerDKP(playername, dkpValue) then
-		playername = SOTA_UCFirst(playername);
+	if self:ApplyPlayerDKP(playername, dkpValue) then
+		playername = self:UCFirst(playername);
 		if not silentmode then
-			--publicEcho(string.format("%d DKP was added to %s", dkpValue, playername));
-			SOTA_EchoEvent(SOTA_MSG_OnDKPAdded, "", dkpValue, playername);
+			self:Broadcast(self.CHANNEL.WARN, string.format(MSG.ON_DKPADDED, dkpValue, playername))
 		end
-		SOTA_LogSingleTransaction("+Player", playername, dkpValue);
+		self:TriggerEvent("SOTA_LOG_SINGLE_TRANSACTION", "+Player", playername, dkpValue);
 	end
 end
 
 --[[
 --	Swap players in a transaction: Remove dkp from <p> and add to <r> instead
 --]]
-function SOTA_Call_SwapPlayersInTransaction(transactionID, newPlayer)
-	if SOTA_CanDoDKP(true) then
-		RaidState = RAID_STATE_ENABLED;
-		SOTA_RequestMaster();
-		SOTA_AddJob( function(job) SOTA_SwapPlayersInTransaction(job[2], job[3]) end, transactionID, newPlayer )
-		SOTA_RequestUpdateGuildRoster();
-	end
-end
-function SOTA_SwapPlayersInTransaction(transactionID, newPlayer, silentmode)
-	local transaction = SOTA_GetTransaction(transactionID);
-	if not transaction then
-		--	Transaction not found!
-		return;
-	end
-	
-	if not table.getn(transaction[6]) == 1 then
-		-- Not a single-player transaction!
-		return;	
-	end
-	
-	local originalPlayer = transaction[6][1][1];
-	local dkpValue = 1 * (transaction[6][1][2]);
-
-	if SOTA_ApplyPlayerDKP(newPlayer, dkpValue) then
-		newPlayer = SOTA_UCFirst(newPlayer);
-		SOTA_LogSingleTransaction("+Swap", newPlayer, dkpValue);
-		
-		if SOTA_ApplyPlayerDKP(originalPlayer, -1 * dkpValue) then
-			originalPlayer = SOTA_UCFirst(originalPlayer);
-			SOTA_LogSingleTransaction("-Swap", originalPlayer, -1 * dkpValue);
-			
---			publicEcho(string.format("%s was replaced with %s (%d DKP)", originalPlayer, newPlayer, dkpValue));
-			SOTA_EchoEvent(SOTA_MSG_OnDKPReplaced, "", dkpValue, "", "", originalPlayer, newPlayer);
-		end
-	end
-end
+--function SOTA:Call_SwapPlayersInTransaction(transactionID, newPlayer)
+--	if self:CanDoDKP(true) then
+--		RaidState = RAID_STATE_ENABLED;
+--		self:AddJob( function(job) self:SwapPlayersInTransaction(job[2], job[3]) end, transactionID, newPlayer )
+--		self:RequestUpdateGuildRoster();
+--	end
+--end
+--function SOTA:SwapPlayersInTransaction(transactionID, newPlayer, silentmode)
+--	local transaction = self:GetTransaction(transactionID);
+--	if not transaction then
+--		--	Transaction not found!
+--		return;
+--	end
+--	
+--	if not table.getn(transaction[6]) == 1 then
+--		-- Not a single-player transaction!
+--		return;	
+--	end
+--	
+--	local originalPlayer = transaction[6][1][1];
+--	local dkpValue = 1 * (transaction[6][1][2]);
+--
+--	if self:ApplyPlayerDKP(newPlayer, dkpValue) then
+--		newPlayer = self:UCFirst(newPlayer);
+--		self:TriggerEvent("SOTA_LOG_SINGLE_TRANSACTION", "+Swap", newPlayer, dkpValue);
+--		
+--		if self:ApplyPlayerDKP(originalPlayer, -1 * dkpValue) then
+--			originalPlayer = self:UCFirst(originalPlayer);
+--			self:TriggerEvent("SOTA_LOG_SINGLE_TRANSACTION", "-Swap", originalPlayer, -1 * dkpValue);
+--			self:Broadcast(self.CHANNEL.WARN, string.format(MSG.ON_DKPREPLACED, originalPlayer, newPlayer, dkpValue))
+--		end
+--	end
+--end
 
 --[[
 --	Subtract <dkp> DKP from <playername>
 --]]
-function SOTA_Call_SubtractPlayerDKP(playername, dkp)
-	if SOTA_CanDoDKP() and tonumber(dkp) then
+function SOTA:Call_SubtractPlayerDKP(playername, dkp)
+	if self:CanDoDKP() and tonumber(dkp) then
 		RaidState = RAID_STATE_ENABLED;
-		SOTA_RequestMaster();
-		SOTA_AddJob( function(job) SOTA_SubtractPlayerDKP(job[2], job[3]) end, playername, dkp )
-		SOTA_RequestUpdateGuildRoster();
+		self:AddJob( function(job) self:SubtractPlayerDKP(job[2], job[3]) end, playername, dkp )
+		self:RequestUpdateGuildRoster();
 	end
 end
-function SOTA_SubtractPlayerDKP(playername, dkpValue, silentmode)
+function SOTA:SubtractPlayerDKP(playername, dkpValue, silentmode)
 	dkpValue = -1 * dkpValue;
-	if SOTA_ApplyPlayerDKP(playername, dkpValue) then
-		playername = SOTA_UCFirst(playername);
+	if self:ApplyPlayerDKP(playername, dkpValue) then
+		playername = self:UCFirst(playername);
 		if not silentmode then
---			publicEcho(string.format("%d DKP was subtracted from %s", abs(dkpValue), playername));
-			SOTA_EchoEvent(SOTA_MSG_OnDKPSubtract, "", abs(dkpValue), playername);
+			self:Broadcast(self.CHANNEL.WARN, string.format(MSG.ON_DKP_SUBTRACT, abs(dkpValue), playername))
 		end
-		SOTA_LogSingleTransaction("-Player", playername, dkpValue);
+		self:TriggerEvent("SOTA_LOG_SINGLE_TRANSACTION", "-Player", playername, dkpValue);
 	end
 end
 
 --[[
 --	Add <n> DKP to all players in raid
 --]]
-function SOTA_Call_AddRaidDKP(dkp)
-	if SOTA_IsInRaid(true) then
+function SOTA:Call_AddRaidDKP(dkp)
+	if self:IsInRaid(true) then
 		RaidState = RAID_STATE_ENABLED;
-		SOTA_RequestMaster();
-		SOTA_AddJob( function(job) SOTA_AddRaidDKP(job[2]) end, dkp, "_" )
-		SOTA_RequestUpdateGuildRoster();
+		self:AddJob( function(job) self:AddRaidDKP(job[2]) end, dkp, "_" )
+		self:RequestUpdateGuildRoster();
 	end
 end
-function SOTA_AddRaidDKP(dkp, silentmode, callMethod)
-	if SOTA_IsInRaid(true) then	
+function SOTA:AddRaidDKP(dkp, silentmode, callMethod)
+	if self:IsInRaid(true) then	
 		dkp = 1 * dkp;
 		
 		if not callMethod then
@@ -742,20 +635,22 @@ function SOTA_AddRaidDKP(dkp, silentmode, callMethod)
 		local tidIndex = 1
 		local tidChanges = { }
 
-		local raidRoster = SOTA_GetRaidRoster();
+		local raidRoster = self:GetRaidRoster();
 		for n=1, table.getn(raidRoster), 1 do
-			SOTA_ApplyPlayerDKP(raidRoster[n][1], dkp);
+			self:ApplyPlayerDKP(raidRoster[n][1], dkp);
 			
 			tidChanges[tidIndex] = { raidRoster[n][1], dkp };
 			tidIndex = tidIndex + 1;
 		end
 		
 		if not silentmode then
---			publicEcho(string.format("%d DKP was added to all players in raid", dkp));
-			SOTA_EchoEvent(SOTA_MSG_OnDKPAddedRaid, "", dkp);
+			self:Broadcast(self.CHANNEL.WARN, string.format(MSG.ON_DKPADDED_RAID, dkp))
 		end
 		
-		SOTA_LogMultipleTransactions(callMethod, tidChanges)				
+		local module = self:GetModule("LogsUI", true)
+		if module then
+			module:LogMultipleTransactions(callMethod, tidChanges)
+		end
 		return true;
 	end
 	return false;
@@ -764,16 +659,15 @@ end
 --[[
 --	Subtract <n> DKP from each raid
 --]]
-function SOTA_Call_SubtractRaidDKP(dkp)
-	if SOTA_IsInRaid(true) then
+function SOTA:Call_SubtractRaidDKP(dkp)
+	if self:IsInRaid(true) then
 		RaidState = RAID_STATE_ENABLED;
-		SOTA_RequestMaster();
-		SOTA_AddJob( function(job) SOTA_SubtractRaidDKP(job[2]) end, dkp, "_" )
-		SOTA_RequestUpdateGuildRoster();
+		self:AddJob( function(job) self:SubtractRaidDKP(job[2]) end, dkp, "_" )
+		self:RequestUpdateGuildRoster();
 	end
 end
-function SOTA_SubtractRaidDKP(dkp, silentmode, callMethod)
-	if SOTA_IsInRaid(true) then	
+function SOTA:SubtractRaidDKP(dkp, silentmode, callMethod)
+	if self:IsInRaid(true) then	
 		dkp = -1 * dkp;
 
 		if not callMethod then
@@ -783,202 +677,210 @@ function SOTA_SubtractRaidDKP(dkp, silentmode, callMethod)
 		local tidIndex = 1
 		local tidChanges = { }
 		
-		local raidRoster = SOTA_GetRaidRoster();
+		local raidRoster = self:GetRaidRoster();
+		--for n=1, table.getn(raidRoster), 1 do
+		--	SOTA:Debug(
+		--		self.raidRosterTable[n][1],
+		--		self.raidRosterTable[n][2],
+		--		self.raidRosterTable[n][3],
+		--		self.raidRosterTable[n][4],
+		--		self.raidRosterTable[n][5]
+		--	)
+		--end
 		for n=1, table.getn(raidRoster), 1 do
-			SOTA_ApplyPlayerDKP(raidRoster[n][1], dkp);
+			self:ApplyPlayerDKP(raidRoster[n][1], dkp);
 			
 			tidChanges[tidIndex] = { raidRoster[n][1], dkp };
 			tidIndex = tidIndex + 1;
 		end
 
 		if not silentmode then
---			publicEcho(string.format("%d DKP was subtracted from all players in raid", abs(dkp)));
-			SOTA_EchoEvent(SOTA_MSG_OnDKPSubtractRaid, "", dkp);
+			self:Broadcast(self.CHANNEL.WARN, string.format(MSG.ON_DKP_SUBTRACT_RAID, dkp))
 		end
 
-		SOTA_LogMultipleTransactions(callMethod, tidChanges)
-		return true;
-	end
-	return false;
-end
-
-
---[[
---	Add <n> DKP to all in 100 yard range.
---	1.0.2: result is number of people affected, and not true/false.
---]]
-function SOTA_Call_AddRangedDKP(dkp)
-	if SOTA_IsInRaid(true) then
-		RaidState = RAID_STATE_ENABLED;
-		SOTA_RequestMaster();
-		SOTA_AddJob( function(job) SOTA_AddRangedDKP(job[2]) end, dkp, "_" )
-		SOTA_RequestUpdateGuildRoster();
-	end
-end
-function SOTA_AddRangedDKP(dkp, silentmode, dkpLabel, shareTheDKP)
-	dkp = 1 * dkp;
-
-	local raidUpdateCount = 0;
-	local tidIndex = 1;
-	local tidChanges = { };
-	
-	if not dkpLabel then
-		dkpLabel = "+Range";
-	end
-
-	-- If true, we must share the dkp across all players, so do a player count to calculate the avg dkp:
-	if shareTheDKP then
-		local playerCount = 0;
-		for n=1, 40, 1 do
-			local unitid = "raid"..n;
-			local player = UnitName(unitid);
-
-			if player then
-				if UnitIsConnected(unitid) and UnitIsVisible(unitid) then
-					playerCount = playerCount + 1;
-				end
-			end
-		end
-
-		if playerCount > 0 then
-			dkp = math.ceil(dkp / playerCount);
-		else
-			dkp = 0;
-		end;
-	end;
-	
-
-	for n=1, 40, 1 do
-		local unitid = "raid"..n;
-		local player = UnitName(unitid);
-
-		if player then
-			if UnitIsConnected(unitid) and UnitIsVisible(unitid) then
-				SOTA_ApplyPlayerDKP(player, dkp, true);
-				
-				tidChanges[tidIndex] = { player, dkp };
-				tidIndex = tidIndex + 1;
-				raidUpdateCount = raidUpdateCount + 1;
-			end
-		end
-	end
-	
-	if not silentmode then
---		publicEcho(string.format("%d DKP has been added for %d players in range.", dkp, raidUpdateCount));
-		SOTA_EchoEvent(SOTA_MSG_OnDKPAddedRange, "", dkp, "", "", raidUpdateCount);
-	end
-	
-	SOTA_LogMultipleTransactions(dkpLabel, tidChanges)	
-	return raidUpdateCount;
-end
-
-
-function SOTA_ShareBossDKP()
-	local bossDkp = "".. (SOTA_GetMinimumBid() * 10);
-	
-	if SOTA_CanDoDKP(true) then		
-		StaticPopupDialogs["SOTA_POPUP_SHARE_DKP"] = {
-			text = "Share the following DKP across raid:",
-			hasEditBox = true,
-			maxLetters = 6,
-			button1 = "Share",
-			button2 = "Cancel",
-			OnAccept = function() SOTA_ExcludePlayerFromTransaction(SOTA_selectedTransactionID, playername)  end,
-			timeout = 0,
-			whileDead = true,
-			hideOnEscape = true,
-			preferredIndex = 3,			
-			OnShow = function()	
-				local c = getglobal(this:GetName().."EditBox");
-				c:SetText(bossDkp);
-			end,
-			OnAccept = function(self, data)
-				local c = getglobal(this:GetParent():GetName().."EditBox");			
-				SOTA_ShareSelectedBossDKP(c:GetText());
-			end			
-		}
-		StaticPopup_Show("SOTA_POPUP_SHARE_DKP");		
-	end
-end
-
-function SOTA_ShareSelectedBossDKP(text)
-	local dkp = tonumber(text);
-	if dkp then
-		SOTA_Call_ShareDKP(dkp);
-	end
-end
-
-
---[[
---	Share <n> DKP to all members in raid
---]]
-function SOTA_Call_ShareDKP(dkp)
-	if SOTA_IsInRaid(true) then
-		RaidState = RAID_STATE_ENABLED;
-		SOTA_RequestMaster();
-		SOTA_AddJob( function(job) SOTA_ShareDKP(job[2]) end, dkp, "_");
-		SOTA_RequestUpdateGuildRoster();
-	end
-end
-function SOTA_ShareDKP(sharedDkp)
-	if SOTA_IsInRaid(true) then	
-		sharedDkp = abs(1 * sharedDkp);
-
-		local tidIndex = 1;
-		local tidChanges = { };
-		
-		local dkp = 0;
-		local raidRoster = SOTA_GetRaidRoster();
-		local count = table.getn(raidRoster);
-		if count > 0 then
-			dkp = ceil(sharedDkp / count);
-		end
-		
-		if SOTA_AddRaidDKP(dkp, true, "+Share") then
---			publicEcho(string.format("%d DKP was shared (%s DKP per player)", sharedDkp, dkp));
-			SOTA_EchoEvent(SOTA_MSG_OnDKPShared, "", dkp, "", "", sharedDkp);
+		local module = self:GetModule("LogsUI", true)
+		if module then
+			module:LogMultipleTransactions(callMethod, tidChanges)
 		end
 		return true;
 	end
 	return false;
 end
 
---[[
---	Share <n> DKP to all members in range in raid
---	Added in 1.0.2.
---]]
-function SOTA_Call_ShareRangedDKP(dkp)
-	if SOTA_IsInRaid(true) then
-		RaidState = RAID_STATE_ENABLED;
-		SOTA_RequestMaster();
-		SOTA_AddJob( function(job) SOTA_ShareRangedDKP(job[2]) end, dkp, "_");
-		SOTA_RequestUpdateGuildRoster();
-	end
-end
-function SOTA_ShareRangedDKP(sharedDkp)
-	if SOTA_IsInRaid(true) then	
-		sharedDkp = abs(1 * sharedDkp);
-		
-		local inRange = SOTA_AddRangedDKP(sharedDkp, true, "+ShRange", true);
-		if inRange > 0 then
-			local dkp = ceil(sharedDkp / inRange);
-			SOTA_EchoEvent(SOTA_MSG_OnDKPSharedRange, "", dkp, "", "", sharedDkp, inRange);
-		end
-		return true;
-	end
-	return false;
-end
+
+----[[
+----	Add <n> DKP to all in 100 yard range.
+----	1.0.2: result is number of people affected, and not true/false.
+----]]
+--function SOTA:Call_AddRangedDKP(dkp)
+--	if self:IsInRaid(true) then
+--		RaidState = RAID_STATE_ENABLED;
+--		self:AddJob( function(job) self:AddRangedDKP(job[2]) end, dkp, "_" )
+--		self:RequestUpdateGuildRoster();
+--	end
+--end
+--function SOTA:AddRangedDKP(dkp, silentmode, dkpLabel, shareTheDKP)
+--	dkp = 1 * dkp;
+--
+--	local raidUpdateCount = 0;
+--	local tidIndex = 1;
+--	local tidChanges = { };
+--	
+--	if not dkpLabel then
+--		dkpLabel = "+Range";
+--	end
+--
+--	-- If true, we must share the dkp across all players, so do a player count to calculate the avg dkp:
+--	if shareTheDKP then
+--		local playerCount = 0;
+--		for n=1, 40, 1 do
+--			local unitid = "raid"..n;
+--			local player = UnitName(unitid);
+--
+--			if player then
+--				if UnitIsConnected(unitid) and UnitIsVisible(unitid) then
+--					playerCount = playerCount + 1;
+--				end
+--			end
+--		end
+--
+--		if playerCount > 0 then
+--			dkp = math.ceil(dkp / playerCount);
+--		else
+--			dkp = 0;
+--		end;
+--	end;
+--	
+--
+--	for n=1, 40, 1 do
+--		local unitid = "raid"..n;
+--		local player = UnitName(unitid);
+--
+--		if player then
+--			if UnitIsConnected(unitid) and UnitIsVisible(unitid) then
+--				self:ApplyPlayerDKP(player, dkp, true);
+--				
+--				tidChanges[tidIndex] = { player, dkp };
+--				tidIndex = tidIndex + 1;
+--				raidUpdateCount = raidUpdateCount + 1;
+--			end
+--		end
+--	end
+--	
+--	if not silentmode then
+----		publicEcho(string.format("%d DKP has been added for %d players in range.", dkp, raidUpdateCount));
+--		SOTA_EchoEvent(SOTA_MSG_OnDKPAddedRange, "", dkp, "", "", raidUpdateCount);
+--	end
+--	
+--	SOTA_LogMultipleTransactions(dkpLabel, tidChanges)	
+--	return raidUpdateCount;
+--end
+
+
+--function SOTA:ShareBossDKP()
+--	local bossDkp = "".. (SOTA_GetMinimumBid() * 10);
+--	
+--	if SOTA_CanDoDKP(true) then		
+--		StaticPopupDialogs["SOTA_POPUP_SHARE_DKP"] = {
+--			text = "Share the following DKP across raid:",
+--			hasEditBox = true,
+--			maxLetters = 6,
+--			button1 = "Share",
+--			button2 = "Cancel",
+--			OnAccept = function() SOTA_ExcludePlayerFromTransaction(SOTA_selectedTransactionID, playername)  end,
+--			timeout = 0,
+--			whileDead = true,
+--			hideOnEscape = true,
+--			preferredIndex = 3,			
+--			OnShow = function()	
+--				local c = getglobal(this:GetName().."EditBox");
+--				c:SetText(bossDkp);
+--			end,
+--			OnAccept = function(self, data)
+--				local c = getglobal(this:GetParent():GetName().."EditBox");			
+--				self:ShareSelectedBossDKP(c:GetText());
+--			end			
+--		}
+--		StaticPopup_Show("SOTA_POPUP_SHARE_DKP");		
+--	end
+--end
+--
+--function SOTA:ShareSelectedBossDKP(text)
+--	local dkp = tonumber(text);
+--	if dkp then
+--		self:Call_ShareDKP(dkp);
+--	end
+--end
+--
+--
+----[[
+----	Share <n> DKP to all members in raid
+----]]
+--function SOTA:Call_ShareDKP(dkp)
+--	if self:IsInRaid(true) then
+--		RaidState = RAID_STATE_ENABLED;
+--		self:AddJob( function(job) self:ShareDKP(job[2]) end, dkp, "_");
+--		self:RequestUpdateGuildRoster();
+--	end
+--end
+--function SOTA:ShareDKP(sharedDkp)
+--	if self:IsInRaid(true) then	
+--		sharedDkp = abs(1 * sharedDkp);
+--
+--		local tidIndex = 1;
+--		local tidChanges = { };
+--		
+--		local dkp = 0;
+--		local raidRoster = self:GetRaidRoster();
+--		local count = table.getn(raidRoster);
+--		if count > 0 then
+--			dkp = ceil(sharedDkp / count);
+--		end
+--		
+--		if self:AddRaidDKP(dkp, true, "+Share") then
+----			publicEcho(string.format("%d DKP was shared (%s DKP per player)", sharedDkp, dkp));
+--			SOTA_EchoEvent(SOTA_MSG_OnDKPShared, "", dkp, "", "", sharedDkp);
+--		end
+--		return true;
+--	end
+--	return false;
+--end
+--
+----[[
+----	Share <n> DKP to all members in range in raid
+----	Added in 1.0.2.
+----]]
+--function SOTA:Call_ShareRangedDKP(dkp)
+--	if self:IsInRaid(true) then
+--		RaidState = RAID_STATE_ENABLED;
+--		self:AddJob( function(job) self:ShareRangedDKP(job[2]) end, dkp, "_");
+--		self:RequestUpdateGuildRoster();
+--	end
+--end
+--function SOTA:ShareRangedDKP(sharedDkp)
+--	if self:IsInRaid(true) then	
+--		sharedDkp = abs(1 * sharedDkp);
+--		
+--		local inRange = self:AddRangedDKP(sharedDkp, true, "+ShRange", true);
+--		if inRange > 0 then
+--			local dkp = ceil(sharedDkp / inRange);
+--			SOTA_EchoEvent(SOTA_MSG_OnDKPSharedRange, "", dkp, "", "", sharedDkp, inRange);
+--		end
+--		return true;
+--	end
+--	return false;
+--end
 
 
 --[[
 --	Perform a DKP decay without really removing DKP. Result is echoed out locally.
 --	Added in 1.1.0
 --]]
-function SOTA_Call_Decaytest(percent)
-	SOTA_AddJob( function(job) SOTA_Decaytest(job[2]) end, percent, "_" )
-	SOTA_RequestUpdateGuildRoster();
+function SOTA:Call_Decaytest(percent)
+	self:AddJob( function(job) self:Decaytest(job[2]) end, percent, "_" )
+	self:RequestUpdateGuildRoster();
 end
-function SOTA_Decaytest(percent, silentmode)
+function SOTA:Decaytest(percent, silentmode)
 	--	Note: arg may contain a percent sign; remove this first:
 	if not tonumber(percent) then
 		local pctSign = string.sub(percent, string.len(percent), string.len(percent));
@@ -988,7 +890,7 @@ function SOTA_Decaytest(percent, silentmode)
 	end
 	
 	if not tonumber(percent) then
-		localEcho("Guild Decay test cancelled: Percent is not a valid number: ".. percent);
+		self:Print("Guild Decay test cancelled: Percent is not a valid number: ".. percent);
 		return false;
 	end
 	
@@ -1019,15 +921,15 @@ function SOTA_Decaytest(percent, silentmode)
 			dkp = dkp - minus;
 			reducedDkp = reducedDkp + minus;
 			playerCount = playerCount + 1;
-			note = string.gsub(note, "<(-?%d*)>", SOTA_CreateDkpString(dkp), 1);
+			note = string.gsub(note, "<(-?%d*)>", self:CreateDkpString(dkp), 1);
 		else
 			dkp = 0;
-			note = note..SOTA_CreateDkpString(dkp);
+			note = note..self:CreateDkpString(dkp);
 		end
 	end
 	
-	localEcho("Testing Guild DKP decay using a "..percent.."% decay value.");
-	localEcho("Decay will remove a total of "..reducedDkp.." DKP from ".. playerCount .." players.")
+	self:Print("Testing Guild DKP decay using a "..percent.."% decay value.");
+	self:Print("Decay will remove a total of "..reducedDkp.." DKP from ".. playerCount .." players.")
 	
 	return true;
 end
@@ -1037,11 +939,11 @@ end
 --	Perform Guild Decay of <n>% DKP
 --	This function requires Show Offline Members to be enabled.
 --]]
-function SOTA_Call_DecayDKP(percent)
-	SOTA_AddJob( function(job) SOTA_DecayDKP(job[2]) end, percent, "_" )
-	SOTA_RequestUpdateGuildRoster();
+function SOTA:Call_DecayDKP(percent)
+	self:AddJob( function(job) self:DecayDKP(job[2]) end, percent, "_" )
+	self:RequestUpdateGuildRoster();
 end
-function SOTA_DecayDKP(percent, silentmode)
+function SOTA:DecayDKP(percent, silentmode)
 	--	Note: arg may contain a percent sign; remove this first:
 	if not tonumber(percent) then
 		local pctSign = string.sub(percent, string.len(percent), string.len(percent));
@@ -1052,7 +954,7 @@ function SOTA_DecayDKP(percent, silentmode)
 	
 	if not tonumber(percent) then
 		if not silentmode then
-			localEcho("Guild Decay cancelled: Percent is not a valid number: ".. percent);
+			self:Print("Guild Decay cancelled: Percent is not a valid number: ".. percent);
 		end
 		return false;
 	end
@@ -1063,7 +965,7 @@ function SOTA_DecayDKP(percent, silentmode)
 	--	Otherwise offline members will not get decayed!
 	if not GetGuildRosterShowOffline() == 1 then
 		if not silentmode then
-			localEcho("Guild Decay cancelled: You need to enable Offline Guild Members in the guild roster first.")
+			self:Print("Guild Decay cancelled: You need to enable Offline Guild Members in the guild roster first.")
 		end
 		return false;
 	end
@@ -1093,10 +995,10 @@ function SOTA_DecayDKP(percent, silentmode)
 			dkp = dkp - minus;
 			reducedDkp = reducedDkp + minus;
 			playerCount = playerCount + 1;
-			note = string.gsub(note, "<(-?%d*)>", SOTA_CreateDkpString(dkp), 1);
+			note = string.gsub(note, "<(-?%d*)>", self:CreateDkpString(dkp), 1);
 		else
 			dkp = 0;
-			note = note..SOTA_CreateDkpString(dkp);
+			note = note..self:CreateDkpString(dkp);
 		end
 		
 		if SOTA.db.realm.UseGuildNotes == SOTA_GUILDNOTE.USEPUBLIC then
@@ -1105,15 +1007,18 @@ function SOTA_DecayDKP(percent, silentmode)
 			GuildRosterSetOfficerNote(n, note);
 		end
 		
-		SOTA_UpdateLocalDKP(name, dkp);
+		self:UpdateLocalDKP(name, dkp);
 	end
 	
 	if not silentmode then
-		guildEcho("Guild DKP decay by "..percent.."% was performed by ".. UnitName("player") ..".")
-		guildEcho("Guild DKP removed a total of "..reducedDkp.." DKP from ".. playerCount .." players.")
+		SOTA:Broadcast(SOTA.CHANNEL.GUILD, "Guild DKP decay by "..percent.."% was performed by ".. UnitName("player") ..".")
+		SOTA:Broadcast(SOTA.CHANNEL.GUILD, "Guild DKP removed a total of "..reducedDkp.." DKP from ".. playerCount .." players.")
 	end
 	
-	SOTA_LogMultipleTransactions("-Decay", tidChanges)
+	local module = self:GetModule("LogsUI", true)
+	if module then
+		module:LogMultipleTransactions("-Decay", tidChanges)
+	end
 	
 	return true;
 end
@@ -1122,142 +1027,143 @@ end
 --[[
 --	Include <player> in an existing (multi-line) transaction
 --]]
-function SOTA_Call_IncludePlayer(transactionID, playername)
-	if SOTA_IsInRaid(true) then
-		RaidState = RAID_STATE_ENABLED;
-		SOTA_AddJob( function(job) SOTA_IncludePlayer(job[2], job[3]) end, transactionID, playername )
-		SOTA_RequestUpdateGuildRoster();
-	end
-end
-function SOTA_IncludePlayer(transactionID, playername, silentmode, skipApplyDkp)
-	local transaction = SOTA_GetTransaction(transactionID);
-	if not transaction then
-		debugEcho(string.format("SOTA_IncludePlayer: Transaction not found, TID=%s", transactionID));
-		return;
-	end
-
-	if not (table.getn(transaction[6]) > 0) then
-		debugEcho(string.format("SOTA_IncludePlayer: There must be at least one person already, since DKP value is stored there! TID=%s", transactionID));
-		return;	
-	end
-
-	-- Fetch the first valid DKP value:
-	local dkpValue = 1 * (transaction[6][1][2]);	
-	playername = SOTA_UCFirst(playername);
-
-
-	-- Check type: It must be a Multi-line type, except for Decay:
-	local trType = transaction[4];
-	local validTypes = { "-Raid", "+Raid", "+Share", "+Range" }
-	local found = false;
-	for n=1, table.getn(validTypes), 1 do
-		if validTypes[n] == trType then
-			found = 1;
-			break;
-		end
-	end
-	if not found then
-		debugEcho(string.format("SOTA_IncludePlayer: Invalid transaction type in TID=%s : %s", transactionID, trType));
-		return;
-	end
-	
-	-- Check player is not in the transaction already:
-	for n=1, table.getn(transaction[6]), 1 do
-		if transaction[6][n][1] == playername then
-			debugEcho(string.format("SOTA_IncludePlayer: Player %s already exists in transaction TID=%s", playername, transactionID));
-			return;
-		end
-	end
-
-	transaction[6][ table.getn(transaction[6]) + 1] = { playername, dkpValue };
-	debugEcho(string.format("SOTA_IncludePlayer: Player %s included in TID=%s", playername, transactionID));
-
-	if not skipApplyDkp then	
-		if SOTA_ApplyPlayerDKP(playername, dkpValue) then
-			SOTA_LogIncludeExcludeTransaction("Include", playername, transactionID, dkpValue);
-
-			localEcho(string.format("%s was included in transaction %d for %d DKP", playername, transactionID, dkpValue));
-		end
-	end
-end
-
-
---[[
---	Exclude <player> from an existing (multi-line) transaction
---]]
-function SOTA_Call_ExcludePlayer(transactionID, playername)
-	if SOTA_IsInRaid(true) then
-		RaidState = RAID_STATE_ENABLED;
-		SOTA_AddJob( function(job) SOTA_ExcludePlayer(job[2], job[3]) end, transactionID, playername )
-		SOTA_RequestUpdateGuildRoster();
-	end
-end
-function SOTA_ExcludePlayer(transactionID, playername, silentmode, skipApplyDkp)
-	local transaction = SOTA_GetTransaction(transactionID);
-	if not transaction then
-		if not transactionID then
-			transactionID = "(NIL)";
-		end
-		debugEcho(string.format("Transaction with TID=%s was not found; cannot exclude player", transactionID));
-		return;
-	end
-
-	playername = SOTA_UCFirst(playername);
-	
-	-- Check type: It must be a Multi-line type, except for Decay:
-	local trType = transaction[4];
-	local validTypes = { "-Raid", "+Raid", "+Share", "+Range" }
-	local found = false;
-	for n=1, table.getn(validTypes), 1 do
-		if validTypes[n] == trType then
-			found = 1;
-			break;
-		end
-	end	
-	if not found then
-		debugEcho("Invalid transaction type: ".. trType);
-		return;
-	end
-
-	-- Find player in the transaction:
-	local dkpValue = nil;
-	local newtable = { };
-	for n=1, table.getn(transaction[6]), 1 do
-		if transaction[6][n][1] == playername then
-			dkpValue = transaction[6][n][2];
-		else
-			newtable[ table.getn(newtable) + 1] = transaction[6][n];
-		end
-	end
-	transaction[6] = newtable;
-
-	if not dkpValue then
-		if not playername then
-			playername = "(NIL)";
-		end
-		if not transactionID then
-			transactionID = "(NIL)";
-		end		
-		debugEcho(string.format("The player %s was not found in the transaction with TID=%s; cannot exclude player", playername, transactionID));
-		return;
-	end
-	
-	if not skipApplyDkp then
-		if SOTA_ApplyPlayerDKP(playername, -1 * dkpValue) then
-			SOTA_LogIncludeExcludeTransaction("Exclude", playername, transactionID, dkpValue);			
-			localEcho(string.format("%s was excluded from transaction %d for %d DKP", playername, transactionID, dkpValue));
-		end
-	end
-end
+--function SOTA:Call_IncludePlayer(transactionID, playername)
+--	if self:IsInRaid(true) then
+--		RaidState = RAID_STATE_ENABLED;
+--		self:AddJob( function(job) self:IncludePlayer(job[2], job[3]) end, transactionID, playername )
+--		self:RequestUpdateGuildRoster();
+--	end
+--end
+--function SOTA:IncludePlayer(transactionID, playername, silentmode, skipApplyDkp)
+--	local transaction = self:GetTransaction(transactionID);
+--	if not transaction then
+--		self:Debug("SOTA_IncludePlayer: Transaction not found, TID:", transactionID);
+--		return;
+--	end
+--
+--	if not (table.getn(transaction[6]) > 0) then
+--		self:Debug("SOTA_IncludePlayer: There must be at least one person already, since DKP value is stored there! TID:", transactionID);
+--		return;	
+--	end
+--
+--	-- Fetch the first valid DKP value:
+--	local dkpValue = 1 * (transaction[6][1][2]);	
+--	playername = self:UCFirst(playername);
+--
+--
+--	-- Check type: It must be a Multi-line type, except for Decay:
+--	local trType = transaction[4];
+--	local validTypes = { "-Raid", "+Raid", "+Share", "+Range" }
+--	local found = false;
+--	for n=1, table.getn(validTypes), 1 do
+--		if validTypes[n] == trType then
+--			found = 1;
+--			break;
+--		end
+--	end
+--	if not found then
+--		self:Debug("SOTA_IncludePlayer: Invalid transaction type in TID:", transactionID, ":", trType);
+--		return;
+--	end
+--	
+--	-- Check player is not in the transaction already:
+--	for n=1, table.getn(transaction[6]), 1 do
+--		if transaction[6][n][1] == playername then
+--			self:Debug(string.format("SOTA_IncludePlayer: Player %s already exists in transaction TID=%s", playername, transactionID));
+--			return;
+--		end
+--	end
+--
+--	transaction[6][ table.getn(transaction[6]) + 1] = { playername, dkpValue };
+--	self:Debug(string.format("SOTA_IncludePlayer: Player %s included in TID=%s", playername, transactionID));
+--
+--	if not skipApplyDkp then	
+--		if self:ApplyPlayerDKP(playername, dkpValue) then
+--			SOTA_LogIncludeExcludeTransaction("Include", playername, transactionID, dkpValue);
+--
+--			self:Print(string.format("%s was included in transaction %d for %d DKP", playername, transactionID, dkpValue));
+--		end
+--	end
+--end
+--
+--
+----[[
+----	Exclude <player> from an existing (multi-line) transaction
+----]]
+--function SOTA:Call_ExcludePlayer(transactionID, playername)
+--	if self:IsInRaid(true) then
+--		RaidState = RAID_STATE_ENABLED;
+--		self:AddJob( function(job) self:ExcludePlayer(job[2], job[3]) end, transactionID, playername )
+--		self:RequestUpdateGuildRoster();
+--	end
+--end
+--function SOTA:ExcludePlayer(transactionID, playername, silentmode, skipApplyDkp)
+--	local transaction = SOTA_GetTransaction(transactionID);
+--	if not transaction then
+--		if not transactionID then
+--			transactionID = "(NIL)";
+--		end
+--		self:Debug(string.format("Transaction with TID=%s was not found; cannot exclude player", transactionID));
+--		return;
+--	end
+--
+--	playername = self:UCFirst(playername);
+--	
+--	-- Check type: It must be a Multi-line type, except for Decay:
+--	local trType = transaction[4];
+--	local validTypes = { "-Raid", "+Raid", "+Share", "+Range" }
+--	local found = false;
+--	for n=1, table.getn(validTypes), 1 do
+--		if validTypes[n] == trType then
+--			found = 1;
+--			break;
+--		end
+--	end	
+--	if not found then
+--		self:Debug("Invalid transaction type:", trType);
+--		return;
+--	end
+--
+--	-- Find player in the transaction:
+--	local dkpValue = nil;
+--	local newtable = { };
+--	for n=1, table.getn(transaction[6]), 1 do
+--		if transaction[6][n][1] == playername then
+--			dkpValue = transaction[6][n][2];
+--		else
+--			newtable[ table.getn(newtable) + 1] = transaction[6][n];
+--		end
+--	end
+--	transaction[6] = newtable;
+--
+--	if not dkpValue then
+--		if not playername then
+--			playername = "(NIL)";
+--		end
+--		if not transactionID then
+--			transactionID = "(NIL)";
+--		end		
+--		self:debug(string.format("The player %s was not found in the transaction with TID=%s; cannot exclude player", playername, transactionID));
+--		return;
+--	end
+--	
+--	if not skipApplyDkp then
+--		if self:ApplyPlayerDKP(playername, -1 * dkpValue) then
+--			SOTA_LogIncludeExcludeTransaction("Exclude", playername, transactionID, dkpValue);			
+--			self:Print(string.format("%s was excluded from transaction %d for %d DKP", playername, transactionID, dkpValue));
+--		end
+--	end
+--end
 
 
 --[[
 --	Generic function to add(or remove) DKP from a player.
 --]]
-function SOTA_ApplyPlayerDKP(playername, dkpValue, silentmode)
+function SOTA:ApplyPlayerDKP(playername, dkpValue, silentmode)
+	SOTA:Debug("ApplyPlayerDKP--playername:", playername, "dkpvalue:", dkpValue, "silentmode:", silentmode)
 	dkpValue = 1 * dkpValue;
 	
-	playername = SOTA_UCFirst(playername);
+	playername = self:UCFirst(playername);
 	
 	local memberCount = GetNumGuildMembers()
 	for n=1,memberCount,1 do
@@ -1272,10 +1178,10 @@ function SOTA_ApplyPlayerDKP(playername, dkpValue, silentmode)
 
 			if dkp and tonumber(dkp)  then
 				dkp = (1 * dkp) + dkpValue;
-				note = string.gsub(note, "<(-?%d*)>", SOTA_CreateDkpString(dkp), 1);
+				note = string.gsub(note, "<(-?%d*)>", self:CreateDkpString(dkp), 1);
 			else
 				dkp = dkpValue;
-				note = note..SOTA_CreateDkpString(dkp);
+				note = note..self:CreateDkpString(dkp);
 			end
 			
 			if SOTA.db.realm.UseGuildNotes == SOTA_GUILDNOTE.USEPUBLIC then
@@ -1284,13 +1190,13 @@ function SOTA_ApplyPlayerDKP(playername, dkpValue, silentmode)
 				GuildRosterSetOfficerNote(n, note);
 			end
 			
-			SOTA_UpdateLocalDKP(name, dkp);			
+			self:UpdateLocalDKP(name, dkp);			
 			return true;
 		end
    	end
    	
    	if not silentmode then
-   		localEcho(string.format("%s was not found in the guild; DKP was not updated.", playername));
+   		self:Print(string.format("%s was not found in the guild; DKP was not updated.", playername));
    	end
    	return false;
 end
@@ -1300,9 +1206,9 @@ end
 --	Update local stored DKP
 --	Input: receiver, dkpadded
 ]]
-function SOTA_UpdateLocalDKP(receiver, dkpAdded)
+function SOTA:UpdateLocalDKP(receiver, dkpAdded)
 
-	local raidRoster = SOTA_GetRaidRoster();	--{ Name, DKP, Class, Rank, Online }
+	local raidRoster = self:GetRaidRoster();	--{ Name, DKP, Class, Rank, Online }
 	for n=1, table.getn(raidRoster),1 do
 		local player = raidRoster[n];
 		local name = player[1];
@@ -1324,7 +1230,7 @@ function SOTA_UpdateLocalDKP(receiver, dkpAdded)
 	end
 end
 
-function SOTA_CreateDkpString(dkp)
+function SOTA:CreateDkpString(dkp)
 	local result;
 	
 	if not dkp or dkp == "" or not tonumber(dkp) then
@@ -1349,124 +1255,143 @@ function SOTA_CreateDkpString(dkp)
 	return result;
 end
 
-function SOTA_ToggleIncludePlayerInTransaction(playername)
-	if not playername or not SOTA_selectedTransactionID then
-		return;
-	end
-
-	local transaction = SOTA_GetTransaction(SOTA_selectedTransactionID);
-	if not transaction then
-		return;
-	end
-
-	-- See if the player is included in the transaction already:
-	local currentPlayername = "";
-	local includedInTransaction = false;
-	local trInfo = transaction[6];
-	local trSize = table.getn(trInfo);
-	for n=1, trSize, 1 do
-		currentPlayername = trInfo[n][1];
-		if currentPlayername == playername then
-			includedInTransaction = true;
-			break;
-		end
-	end
-	
-	
-	-- Check transaction types:
-	local singlePlayerTransaction = false;
-	local multiPlayerTransaction = false;
-	local trType = transaction[4];
-
-	local validTypes = { "-Player", "+Player", "%Player" }
-	for n=1, table.getn(validTypes), 1 do
-		if validTypes[n] == trType then
-			singlePlayerTransaction = true;
-			break;
-		end
-	end	
-
-	local validTypes = { "-Raid", "+Raid", "+Share", "+Range" }
-	for n=1, table.getn(validTypes), 1 do
-		if validTypes[n] == trType then
-			multiPlayerTransaction = true;
-			break;
-		end
-	end	
-
-	local tInfo = SOTA_transactionLog[SOTA_selectedTransactionID];
-	if not tInfo then
-		return;
-	end
-	-- Already undone:
-	if tInfo[5] == 0 then
-		return;
-	end
-	
-	if includedInTransaction then
-		if singlePlayerTransaction then
-			--	Single-player transaction, clicked on Current player; offer to cancel transaction:
-			SOTA_RequestUndoTransaction(transactionID);
-		elseif multiPlayerTransaction then
-			--	Multiplayer transaction, clicked on current player. Offer to exclude player:
-			StaticPopupDialogs["SOTA_POPUP_TRANSACTION_PLAYER"] = {
-				text = string.format("Do you want to exclude %s from this transaction?", playername),
-				button1 = "Yes",
-				button2 = "No",
-				OnAccept = function() SOTA_ExcludePlayerFromTransaction(SOTA_selectedTransactionID, playername)  end,
-				timeout = 0,
-				whileDead = true,
-				hideOnEscape = true,
-				preferredIndex = 3,
-			}
-			StaticPopup_Show("SOTA_POPUP_TRANSACTION_PLAYER");	
-		end	
-	else
-		if singlePlayerTransaction then		
-			--	Single-player transaction, clicked on Other player; offer to replace player:
-			StaticPopupDialogs["SOTA_POPUP_TRANSACTION_PLAYER"] = {
-				text = string.format("Do you want to replace %s with %s ?", currentPlayername, playername),
-				button1 = "Yes",
-				button2 = "No",
-				OnAccept = function() SOTA_ReplacePlayerInTransaction(SOTA_selectedTransactionID, currentPlayername, playername)  end,
-				timeout = 0,
-				whileDead = true,
-				hideOnEscape = true,
-				preferredIndex = 3,
-			}
-			StaticPopup_Show("SOTA_POPUP_TRANSACTION_PLAYER");	
-		elseif multiPlayerTransaction then
-			--	Multiplayer transaction, clicked on current player. Offer to exclude player:
-			StaticPopupDialogs["SOTA_POPUP_TRANSACTION_PLAYER"] = {
-				text = string.format("Do you want to include %s to this transaction?", playername),
-				button1 = "Yes",
-				button2 = "No",
-				OnAccept = function() SOTA_IncludePlayerInTransaction(SOTA_selectedTransactionID, playername)  end,
-				timeout = 0,
-				whileDead = true,
-				hideOnEscape = true,
-				preferredIndex = 3,
-			}
-			StaticPopup_Show("SOTA_POPUP_TRANSACTION_PLAYER");	
-		end	
-	end	
-end
-
-
-function SOTA_GetConfigurableTextMessages()
-	return SOTA_CONFIG_Messages;
-end;
-
-function SOTA_SetConfigurableTextMessages(messages)
-	SOTA_CONFIG_Messages = messages;
-end;
+--function SOTA:ToggleIncludePlayerInTransaction(playername)
+--	if not playername or not SOTA_selectedTransactionID then
+--		return;
+--	end
+--
+--	local transaction = SOTA_GetTransaction(SOTA_selectedTransactionID);
+--	if not transaction then
+--		return;
+--	end
+--
+--	-- See if the player is included in the transaction already:
+--	local currentPlayername = "";
+--	local includedInTransaction = false;
+--	local trInfo = transaction[6];
+--	local trSize = table.getn(trInfo);
+--	for n=1, trSize, 1 do
+--		currentPlayername = trInfo[n][1];
+--		if currentPlayername == playername then
+--			includedInTransaction = true;
+--			break;
+--		end
+--	end
+--	
+--	
+--	-- Check transaction types:
+--	local singlePlayerTransaction = false;
+--	local multiPlayerTransaction = false;
+--	local trType = transaction[4];
+--
+--	local validTypes = { "-Player", "+Player", "%Player" }
+--	for n=1, table.getn(validTypes), 1 do
+--		if validTypes[n] == trType then
+--			singlePlayerTransaction = true;
+--			break;
+--		end
+--	end	
+--
+--	local validTypes = { "-Raid", "+Raid", "+Share", "+Range" }
+--	for n=1, table.getn(validTypes), 1 do
+--		if validTypes[n] == trType then
+--			multiPlayerTransaction = true;
+--			break;
+--		end
+--	end	
+--
+--	local tInfo = SOTA_transactionLog[SOTA_selectedTransactionID];
+--	if not tInfo then
+--		return;
+--	end
+--	-- Already undone:
+--	if tInfo[5] == 0 then
+--		return;
+--	end
+--	
+--	if includedInTransaction then
+--		if singlePlayerTransaction then
+--			--	Single-player transaction, clicked on Current player; offer to cancel transaction:
+--			SOTA_RequestUndoTransaction(transactionID);
+--		elseif multiPlayerTransaction then
+--			--	Multiplayer transaction, clicked on current player. Offer to exclude player:
+--			StaticPopupDialogs["SOTA_POPUP_TRANSACTION_PLAYER"] = {
+--				text = string.format("Do you want to exclude %s from this transaction?", playername),
+--				button1 = "Yes",
+--				button2 = "No",
+--				OnAccept = function() SOTA_ExcludePlayerFromTransaction(SOTA_selectedTransactionID, playername)  end,
+--				timeout = 0,
+--				whileDead = true,
+--				hideOnEscape = true,
+--				preferredIndex = 3,
+--			}
+--			StaticPopup_Show("SOTA_POPUP_TRANSACTION_PLAYER");	
+--		end	
+--	else
+--		if singlePlayerTransaction then		
+--			--	Single-player transaction, clicked on Other player; offer to replace player:
+--			StaticPopupDialogs["SOTA_POPUP_TRANSACTION_PLAYER"] = {
+--				text = string.format("Do you want to replace %s with %s ?", currentPlayername, playername),
+--				button1 = "Yes",
+--				button2 = "No",
+--				OnAccept = function() SOTA_ReplacePlayerInTransaction(SOTA_selectedTransactionID, currentPlayername, playername)  end,
+--				timeout = 0,
+--				whileDead = true,
+--				hideOnEscape = true,
+--				preferredIndex = 3,
+--			}
+--			StaticPopup_Show("SOTA_POPUP_TRANSACTION_PLAYER");	
+--		elseif multiPlayerTransaction then
+--			--	Multiplayer transaction, clicked on current player. Offer to exclude player:
+--			StaticPopupDialogs["SOTA_POPUP_TRANSACTION_PLAYER"] = {
+--				text = string.format("Do you want to include %s to this transaction?", playername),
+--				button1 = "Yes",
+--				button2 = "No",
+--				OnAccept = function() SOTA_IncludePlayerInTransaction(SOTA_selectedTransactionID, playername)  end,
+--				timeout = 0,
+--				whileDead = true,
+--				hideOnEscape = true,
+--				preferredIndex = 3,
+--			}
+--			StaticPopup_Show("SOTA_POPUP_TRANSACTION_PLAYER");	
+--		end	
+--	end	
+--end
+--
+--
+--function SOTA_GetConfigurableTextMessages()
+--	return SOTA_CONFIG_Messages;
+--end;
+--
+--function SOTA:SetConfigurableTextMessages(messages)
+--	SOTA_CONFIG_Messages = messages;
+--end;
 
 function SOTA:OnInitialize()
+	--	List of {jobname,name,dkp} tables
+	self.jobQueue          = {}
+
+	-- Guild Roster: table of guild players:	{ Name, DKP, Class, Rank(text), Online, Zone, Rank(value) }
+	self.guildRosterTable = {}
+
+	-- Raid Roster: table of raid players:		{ Name, DKP, Class, Rank, Online }
+	self.raidRosterTable   = {}
+
+	self.CHANNEL           = {
+		WARN = "RAID_WARNING",
+		RAID = "RAID",
+		PARTY = "PARTY",
+		YELL = "YELL",
+		SAY = "SAY",
+		GUILD = "GUILD",
+		WHISPER = "WHISPER",
+	}
 end
 
 
 function SOTA:OnEnable()
-	localEcho(string.format("Loot Distribution Addon version %s by %s", GetAddOnMetadata("SOTA", "Version"), GetAddOnMetadata("SOTA", "Author")));
+	self:SetDebugging(false)
+	self:Print(string.format("Loot Distribution Addon version %s by %s", GetAddOnMetadata("SOTA", "Version"), GetAddOnMetadata("SOTA", "Author")));
 
 	SOTA:RegisterDB("SOTADB")
 	SOTA:RegisterDefaults("realm",
@@ -1481,27 +1406,22 @@ function SOTA:OnEnable()
     
 	self:RegisterEvent("ENTERING_WORLD");
 	self:RegisterEvent("GUILD_ROSTER_UPDATE");
-	self:RegisterEvent("RAID_ROSTER_UPDATE");
+	--self:RegisterEvent("RAID_ROSTER_UPDATE");
 	--self:RegisterEvent("CHAT_MSG_ADDON");
 
     
-	SOTA_RefreshRaidRoster();
+	self:RefreshRaidRoster();
 	
 	self:RequestUpdateGuildRoster()
-	
-	SOTA_SetMasterState(SOTA_Master, CLIENT_STATE);
-	
-	if SOTA_IsInRaid(true) then	
-		SOTA_Synchronize();
-	end
 	
 	if not SOTA_CONFIG_VersionNumber then
 		SOTA_CONFIG_VersionNumber = 1;
 	end;
 	if not SOTA_CONFIG_VersionDate then
-		SOTA_CONFIG_VersionDate = SOTA_GetDateTimestamp();
+		SOTA_CONFIG_VersionDate = self:GetDateTimestamp();
 	end;
 
+	SOTA_InitializeUI()
 	SOTA_InitializeTextElements();
 
 	self:ScheduleRepeatingEvent("SOTA_RequestUpdateGuildRoster", self.RequestUpdateGuildRoster, 5, self)
@@ -1540,9 +1460,9 @@ function SOTA:HandleSOTACommand(msg)
 	--	Command: rule
 	--	Syntax: "rule"
 	--	Added for rule engine testing.
-	if cmd == "rule" then
-		return SOTA_PerformSampleRuleTest();
-	end;
+	--if cmd == "rule" then
+	--	return self:PerformSampleRuleTest();
+	--end;
 
 
 	--	Command: help
@@ -1561,22 +1481,11 @@ function SOTA:HandleSOTACommand(msg)
 	end
 
 
-	--	Command: master
-	--	Syntax: "master"	
-	if cmd == "master" then
-		SOTA_RequestMaster(false);
-		return;	
-	end
-
 
 	--	Command: version
 	--	Syntax: "version"
 	if cmd == "version" then
-		if SOTA_IsInRaid(true) then
-			addonEcho("TX_VERSION##");
-		else
-			localEcho(string.format("%s is using SOTA version %s", UnitName("player"), GetAddOnMetadata("SOTA", "Version")));
-		end
+			self:Print(string.format("%s is using SOTA version %s", UnitName("player"), GetAddOnMetadata("SOTA", "Version")));
 		return;
 	end
 	
@@ -1603,26 +1512,26 @@ function SOTA:HandleSOTACommand(msg)
 	--	Command: dkp
 	--	Syntax: "dkp [<playername>]"
 	if cmd == "dkp" then
-		return SOTA_Call_CheckPlayerDKP(arg);
+		return self:Call_CheckPlayerDKP(arg);
 	end
 
 	--	Command: class
 	--	Syntax: "class [<classname>]"
 	if cmd == "class" then
-		return SOTA_Call_CheckClassDKP(arg);
+		return self:Call_CheckClassDKP(arg);
 	end
 
 	--	Command: bid, os, ms
 	--	Syntax: "bid <%d>", "bid min", "bid max"
-	if cmd == "bid" or cmd == "ms" or cmd == "os" then
-		return SOTA_HandlePlayerBid(playername, msg);
-	end
+	--if cmd == "bid" or cmd == "ms" or cmd == "os" then
+	--	return self:HandlePlayerBid(playername, msg);
+	--end
 
 	--	Command: pass
 	--	Syntax: "pass"
-	if cmd == "pass" then
-		return SOTA_HandlePlayerPass(playername);
-	end
+	--if cmd == "pass" then
+	--	return self:HandlePlayerPass(playername);
+	--end
 
 	
 	
@@ -1632,82 +1541,82 @@ function SOTA:HandleSOTACommand(msg)
 		--	Syntax: "raid -<%d>"
 		if sign == "-" then
 			arg = string.sub(arg, 2);
-			return SOTA_Call_SubtractRaidDKP(arg);
+			return self:Call_SubtractRaidDKP(arg);
 		--	Command: raid
 		--	Syntax: "raid +<%d>"
 		elseif sign == "+" then
 			arg = string.sub(arg, 2);
-			return SOTA_Call_AddRaidDKP(arg);
+			return self:Call_AddRaidDKP(arg);
 		else
-			localEcho("DKP must be written as +999 or -999");
+			self:Print("DKP must be written as +999 or -999");
 			return;
 		end
 	end
 
-	if cmd == "range" then
-		sign = string.sub(arg, 1, 1);
-		--	Command: range
-		--	Syntax: "range [+]<%d>"
-		--	Plus is optional (default)
-		if sign == "+" then
-			arg = string.sub(arg, 2);
-		end
-		return SOTA_Call_AddRangedDKP(arg);
-	end
+	--if cmd == "range" then
+	--	sign = string.sub(arg, 1, 1);
+	--	--	Command: range
+	--	--	Syntax: "range [+]<%d>"
+	--	--	Plus is optional (default)
+	--	if sign == "+" then
+	--		arg = string.sub(arg, 2);
+	--	end
+	--	return self:Call_AddRangedDKP(arg);
+	--end
 
-	if cmd == "share" then
-		--	Command: share
-		--	Syntax: "share [[+]<%d>]"
-		--	Parameter is optional; if omitted, current Boss DKP will be shared.
-		--	Plus is optional (default, undocumented)
-		if not arg or arg == "" then
-			arg = SOTA_GetMinimumBid() * 10;
-			if arg == 0 then
-				localEcho("Boss DKP value could not be calculated - DKP was not shared.");
-				return;
-			end
-		else
-			sign = string.sub(arg, 1, 1);
-			if sign == "+" then
-				arg = string.sub(arg, 2);
-			end
-		end
-		return SOTA_Call_ShareDKP(arg);
-	end	
+	--if cmd == "share" then
+	--	--	Command: share
+	--	--	Syntax: "share [[+]<%d>]"
+	--	--	Parameter is optional; if omitted, current Boss DKP will be shared.
+	--	--	Plus is optional (default, undocumented)
+	--	if not arg or arg == "" then
+	--		arg = SOTA_GetMinimumBid() * 10;
+	--		if arg == 0 then
+	--			self:Print("Boss DKP value could not be calculated - DKP was not shared.");
+	--			return;
+	--		end
+	--	else
+	--		sign = string.sub(arg, 1, 1);
+	--		if sign == "+" then
+	--			arg = string.sub(arg, 2);
+	--		end
+	--	end
+	--	return self:Call_ShareDKP(arg);
+	--end	
 
-	if cmd == "sharerange" or
-	   cmd == "rangeshare" or
-	   cmd == "sr" then
-		--	Command: sharerange / rangeshare / sr
-		--	Syntax: "sharerange [[+]<%d>]"
-		--	Parameter is optional; if omitted, current Boss DKP will be shared.
-		--	Plus is optional (default, undocumented)
-		if not arg or arg == "" then
-			arg = SOTA_GetMinimumBid() * 10;
-			if arg == 0 then
-				localEcho("Boss DKP value could not be calculated - DKP was not shared.");
-				return;
-			end
-		else
-			sign = string.sub(arg, 1, 1);
-			if sign == "+" then
-				arg = string.sub(arg, 2);
-			end
-		end
-		return SOTA_Call_ShareRangedDKP(arg);
-	end	
+	--if cmd == "sharerange" or
+	--   cmd == "rangeshare" or
+	--   cmd == "sr" then
+	--	--	Command: sharerange / rangeshare / sr
+	--	--	Syntax: "sharerange [[+]<%d>]"
+	--	--	Parameter is optional; if omitted, current Boss DKP will be shared.
+	--	--	Plus is optional (default, undocumented)
+	--	if not arg or arg == "" then
+	--		arg = SOTA_GetMinimumBid() * 10;
+	--		if arg == 0 then
+	--			self:Print("Boss DKP value could not be calculated - DKP was not shared.");
+	--			return;
+	--		end
+	--	else
+	--		sign = string.sub(arg, 1, 1);
+	--		if sign == "+" then
+	--			arg = string.sub(arg, 2);
+	--		end
+	--	end
+	--	return self:Call_ShareRangedDKP(arg);
+	--end	
 
 	--	Command: decay
 	--	Syntax: "decay <%d>[%]"
 	if cmd == "decay" then
-		return SOTA_Call_DecayDKP(arg);		
+		return self:Call_DecayDKP(arg);		
 	end
 
 
 	--	Command: decaytest
 	--	Syntax: "decaytest <%d>[%]"
 	if cmd == "decaytest" then
-		return SOTA_Call_Decaytest(arg);		
+		return self:Call_Decaytest(arg);		
 	end
 
 
@@ -1720,7 +1629,7 @@ function SOTA:HandleSOTACommand(msg)
 	--	Syntax: "+<%d> <playername>"
 	if sign == "+" then
 		local cmd = string.sub(cmd, 2);
-		return SOTA_Call_AddPlayerDKP(arg, cmd);
+		return self:Call_AddPlayerDKP(arg, cmd);
 	end
 	
 
@@ -1728,9 +1637,9 @@ function SOTA:HandleSOTACommand(msg)
 		cmd = string.sub(cmd, 2);		
 		--	Command: -
 		--	Syntax: "-<%d> <playername>"
-		return SOTA_Call_SubtractPlayerDKP(arg, cmd);
+		return self:Call_SubtractPlayerDKP(arg, cmd);
 	end
 	
-	localEcho("Unknown command: ".. msg);
+	self:Print("Unknown command: ".. msg);
 end
 

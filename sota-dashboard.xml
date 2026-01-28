@@ -89,32 +89,6 @@
 							</OnLeave>
 						</Scripts>
 					</Button>
-					<!-- Button 1B: Make Master ("Kings") -->
-					<Button name="$parentConfigurationButton" inherits="ActionButtonTemplate" frameStrata="HIGH" hidden="false">
-						<Size>
-							<AbsDimension x="32" y="32" />
-						</Size>
-						<Anchors>
-							<Anchor point="LEFT">
-								<Offset>
-									<AbsDimension x="220" y="0" />
-								</Offset>
-							</Anchor>
-						</Anchors>
-						<NormalTexture file="Interface\ICONS\Spell_Magic_Magearmor.blp" />
-						<PushedTexture file="Interface\ICONS\Spell_Magic_GreaterBlessingOfKings.blp" />
-						<Scripts>
-							<OnClick>
-								SOTA_RequestSOTAMaster();
-							</OnClick>
-							<OnEnter>
-								SOTA_ShowDashboardToolTip(this, "Request SOTA Master status");
-							</OnEnter>
-							<OnLeave>
-								SOTA_HideDashboardToolTip(this);
-							</OnLeave>
-						</Scripts>
-					</Button>
 					<!-- Button 2B: Share DKP ("Coins") -->
 					<Button name="$parentShareDKPButton" inherits="ActionButtonTemplate" frameStrata="HIGH" hidden="false">
 						<Size>

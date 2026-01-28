@@ -7,14 +7,16 @@
 --	underlying functionality to support changing the options.
 --]]
 
+local SOTA = SOTAG
+
 local SOTA_MAX_MESSAGES			= 15
 local ConfigurationDialogOpen	= false;
 
 
-function SOTA_EchoEvent(msgKey, item, dkp, bidder, rank, param1, param2, param3)
-	local msgInfo = SOTA_getConfigurableMessage(msgKey, item, dkp, bidder, rank, param1, param2, param3);
-	publicEcho(msgInfo);
-end;
+--function SOTA_EchoEvent(msgKey, item, dkp, bidder, rank, param1, param2, param3)
+--	local msgInfo = SOTA_getConfigurableMessage(msgKey, item, dkp, bidder, rank, param1, param2, param3);
+--	publicEcho(msgInfo);
+--end;
 
 
 function SOTA_GetEventText(eventName)
@@ -42,7 +44,7 @@ function SOTA_getConfigurableMessage(msgKey, item, dkp, bidder, rank, param1, pa
 	local msgInfo = SOTA_GetEventText(msgKey);
 
 	if(not msgInfo) then
-		localEcho("*** Oops, SOTA_CONFIG_Messages[".. msgKey .."] was not found");
+		SOTA:Print("*** Oops, SOTA_CONFIG_Messages[".. msgKey .."] was not found");
 		return nil;
 	end;
 
@@ -189,70 +191,70 @@ function SOTA:ENTERING_WORLD()
 end
 
 
-function SOTA_VerifyEventMessages()
-
-	-- Syntax: [index] = { EVENT_NAME, CHANNEL, TEXT }
-	-- Channel value: 0: Off, 1: RW, 2: Raid, 3: Guild, 4: Yell, 5: Say
-	local defaultMessages = { 
-		{ SOTA_MSG_OnOpen			, 1, "Auction open for $i" },
-		{ SOTA_MSG_OnAnnounceBid	, 2, "/w $s bid <your bid>" },
-		{ SOTA_MSG_OnAnnounceMinBid	, 2, "Minimum bid: $m DKP" },
-		{ SOTA_MSG_On10SecondsLeft	, 2, "10 seconds left for $i" },
-		{ SOTA_MSG_On9SecondsLeft	, 2, "9 seconds left" },
-		{ SOTA_MSG_On8SecondsLeft	, 0, "8 seconds left" },
-		{ SOTA_MSG_On7SecondsLeft	, 0, "7 seconds left" },
-		{ SOTA_MSG_On6SecondsLeft	, 0, "6 seconds left" },
-		{ SOTA_MSG_On5SecondsLeft	, 0, "5 seconds left" },
-		{ SOTA_MSG_On4SecondsLeft	, 0, "4 seconds left" },
-		{ SOTA_MSG_On3SecondsLeft	, 2, "3 seconds left" },
-		{ SOTA_MSG_On2SecondsLeft	, 2, "2 seconds left" },
-		{ SOTA_MSG_On1SecondLeft	, 2, "1 second left" },
-		{ SOTA_MSG_OnMainspecBid	, 1, "$b ($r) is bidding $d DKP for $i" },
-		{ SOTA_MSG_OnOffspecBid		, 1, "$b is bidding $d Off-spec for $i" },
-		{ SOTA_MSG_OnMainspecMaxBid	, 1, "$b ($r) went all in ($d DKP) for $i" },
-		{ SOTA_MSG_OnOffspecMaxBid	, 1, "$b went all in ($d) Off-spec for $i" },
-		{ SOTA_MSG_OnComplete		, 2, "$i sold to $b for $d DKP." },
-		{ SOTA_MSG_OnPause			, 2, "Auction has been Paused" },
-		{ SOTA_MSG_OnResume			, 2, "Auction has been Resumed" },
-		{ SOTA_MSG_OnClose			, 1, "Auction for $i is over" },
-		{ SOTA_MSG_OnCancel			, 1, "Auction was Cancelled" },
-		{ SOTA_MSG_OnDKPAdded		, 1, "$d DKP was added to $b" },
-		{ SOTA_MSG_OnDKPAddedRaid	, 1, "$d DKP was added to all players in raid" },
-		{ SOTA_MSG_OnDKPAddedRange	, 1, "$d DKP has been added for $1 players in range." },
-		{ SOTA_MSG_OnDKPSubtract	, 1, "$d DKP was subtracted from $b" },
-		{ SOTA_MSG_OnDKPSubtractRaid, 1, "$d DKP was subtracted from all players in raid" },
-		{ SOTA_MSG_OnDKPPercent		, 1, "$1 % ($d DKP) was subtracted from $b" },
-		{ SOTA_MSG_OnDKPShared		, 1, "$1 DKP was shared ($d DKP per player)" },
-		{ SOTA_MSG_OnDKPSharedRange , 1, "$1 DKP was shared for $2 players in range ($d DKP per player)" },
-		{ SOTA_MSG_OnDKPReplaced	, 1, "$1 was replaced with $2 ($d DKP)" }
-	}
-
-	-- Merge default messages into saved messages; in case we added some new event names.
-	local messages = SOTA_GetConfigurableTextMessages();
-	if not messages or table.getn(messages) == 0 then
-		SOTA_SetConfigurableTextMessages(defaultMessages);
-		return;
-	end;
-
-	--echo("--- Merging messages");
-	for n=1,table.getn(defaultMessages), 1 do
-		local foundMessage = false;
-		for f=1,table.getn(messages), 1 do
-			if(messages[f][1] == defaultMessages[n][1]) then
-				foundMessage = true;
---				echo("Found msg: ".. messages[f][1]);
-				break;
-			end;
-		end;
-
-		if(not foundMessage) then
---			echo("Adding message: ".. defaultMessages[n][1]);
-			messages[table.getn(messages)+1] = defaultMessages[n];
-		end;
-	end
-
-	SOTA_SetConfigurableTextMessages(messages);
-end;
+--function SOTA_VerifyEventMessages()
+--
+--	-- Syntax: [index] = { EVENT_NAME, CHANNEL, TEXT }
+--	-- Channel value: 0: Off, 1: RW, 2: Raid, 3: Guild, 4: Yell, 5: Say
+--	local defaultMessages = { 
+--		{ SOTA_MSG_OnOpen			, 1, "Auction open for $i" },
+--		{ SOTA_MSG_OnAnnounceBid	, 2, "/w $s bid <your bid>" },
+--		{ SOTA_MSG_OnAnnounceMinBid	, 2, "Minimum bid: $m DKP" },
+--		{ SOTA_MSG_On10SecondsLeft	, 2, "10 seconds left for $i" },
+--		{ SOTA_MSG_On9SecondsLeft	, 2, "9 seconds left" },
+--		{ SOTA_MSG_On8SecondsLeft	, 0, "8 seconds left" },
+--		{ SOTA_MSG_On7SecondsLeft	, 0, "7 seconds left" },
+--		{ SOTA_MSG_On6SecondsLeft	, 0, "6 seconds left" },
+--		{ SOTA_MSG_On5SecondsLeft	, 0, "5 seconds left" },
+--		{ SOTA_MSG_On4SecondsLeft	, 0, "4 seconds left" },
+--		{ SOTA_MSG_On3SecondsLeft	, 2, "3 seconds left" },
+--		{ SOTA_MSG_On2SecondsLeft	, 2, "2 seconds left" },
+--		{ SOTA_MSG_On1SecondLeft	, 2, "1 second left" },
+--		{ SOTA_MSG_OnMainspecBid	, 1, "$b ($r) is bidding $d DKP for $i" },
+--		{ SOTA_MSG_OnOffspecBid		, 1, "$b is bidding $d Off-spec for $i" },
+--		{ SOTA_MSG_OnMainspecMaxBid	, 1, "$b ($r) went all in ($d DKP) for $i" },
+--		{ SOTA_MSG_OnOffspecMaxBid	, 1, "$b went all in ($d) Off-spec for $i" },
+--		{ SOTA_MSG_OnComplete		, 2, "$i sold to $b for $d DKP." },
+--		{ SOTA_MSG_OnPause			, 2, "Auction has been Paused" },
+--		{ SOTA_MSG_OnResume			, 2, "Auction has been Resumed" },
+--		{ SOTA_MSG_OnClose			, 1, "Auction for $i is over" },
+--		{ SOTA_MSG_OnCancel			, 1, "Auction was Cancelled" },
+--		{ SOTA_MSG_OnDKPAdded		, 1, "$d DKP was added to $b" },
+--		{ SOTA_MSG_OnDKPAddedRaid	, 1, "$d DKP was added to all players in raid" },
+--		{ SOTA_MSG_OnDKPAddedRange	, 1, "$d DKP has been added for $1 players in range." },
+--		{ SOTA_MSG_OnDKPSubtract	, 1, "$d DKP was subtracted from $b" },
+--		{ SOTA_MSG_OnDKPSubtractRaid, 1, "$d DKP was subtracted from all players in raid" },
+--		{ SOTA_MSG_OnDKPPercent		, 1, "$1 % ($d DKP) was subtracted from $b" },
+--		{ SOTA_MSG_OnDKPShared		, 1, "$1 DKP was shared ($d DKP per player)" },
+--		{ SOTA_MSG_OnDKPSharedRange , 1, "$1 DKP was shared for $2 players in range ($d DKP per player)" },
+--		{ SOTA_MSG_OnDKPReplaced	, 1, "$1 was replaced with $2 ($d DKP)" }
+--	}
+--
+--	-- Merge default messages into saved messages; in case we added some new event names.
+--	local messages = SOTA_GetConfigurableTextMessages();
+--	if not messages or table.getn(messages) == 0 then
+--		SOTA_SetConfigurableTextMessages(defaultMessages);
+--		return;
+--	end;
+--
+--	--echo("--- Merging messages");
+--	for n=1,table.getn(defaultMessages), 1 do
+--		local foundMessage = false;
+--		for f=1,table.getn(messages), 1 do
+--			if(messages[f][1] == defaultMessages[n][1]) then
+--				foundMessage = true;
+----				echo("Found msg: ".. messages[f][1]);
+--				break;
+--			end;
+--		end;
+--
+--		if(not foundMessage) then
+----			echo("Adding message: ".. defaultMessages[n][1]);
+--			messages[table.getn(messages)+1] = defaultMessages[n];
+--		end;
+--	end
+--
+--	SOTA_SetConfigurableTextMessages(messages);
+--end;
 
 
 function SOTA_HandleCheckbox(checkbox)
@@ -413,7 +415,7 @@ function SOTA_RefreshVisibleTextList(offset)
 		
 		local frame = getglobal("FrameConfigMessageTableListEntry"..n);
 		if(not frame) then
-			echo("*** Oops, frame is nil");
+			SOTA:Print("*** Oops, frame is nil");
 			return;
 		end;
 
