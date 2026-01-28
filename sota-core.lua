@@ -139,6 +139,7 @@ end
 --	Guild Roster Functions
 --
 function SOTA:RequestUpdateGuildRoster()
+	SetGuildRosterShowOffline(1);
 	GuildRoster();
 end
 
