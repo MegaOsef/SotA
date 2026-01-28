@@ -11,6 +11,9 @@ local SOTA = SOTAG
 
 local module = SOTA:NewModule("LogsUI", "AceEvent-2.0")
 
+local SOTA_COLOUR_INTRO				= "|c80F0F0F0"
+local SOTA_COLOUR_CHAT				= "|c8040A0F8"
+
 
 ---- Max # of transaction logs shown in UI (excluding Header)
 local MAX_TRANSACTIONS_DISPLAYED	= 18;
@@ -50,7 +53,7 @@ function module:OnEnable()
 
 	self:TransactionLogUIInit()
 
-	self:RegisterEvent("SOTA_LOGSUI_REFRESHLOGELEMENTS", "RefreshLogElements")
+	self:RegisterEvent("GUILD_ROSTER_UPDATE", "RefreshLogElements")
 	self:RegisterEvent("SOTA_LOG_SINGLE_TRANSACTION")
 end
 

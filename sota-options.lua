@@ -12,6 +12,10 @@ local SOTA = SOTAG
 local SOTA_MAX_MESSAGES			= 15
 local ConfigurationDialogOpen	= false;
 
+--	Settings (persisted)
+-- Pane 1:
+local SOTA_CONFIG_Messages			= { }	-- Contains configurable raid messages (if any)
+
 
 --function SOTA_EchoEvent(msgKey, item, dkp, bidder, rank, param1, param2, param3)
 --	local msgInfo = SOTA_getConfigurableMessage(msgKey, item, dkp, bidder, rank, param1, param2, param3);

@@ -241,7 +241,7 @@ end
 function module:HandlePlayerBid(sender, message)
 	local playerGuildInfos = SOTA:GetGuildPlayerInfo(sender);
 	if not playerGuildInfos then
-		SOTA:whisper(sender, "You need to be in the guild to do bidding!");
+		SOTA:Whisper(sender, "You need to be in the guild to do bidding!");
 		return;
 	end
 
@@ -269,7 +269,7 @@ function module:HandlePlayerBid(sender, message)
 
 	local minimumBid = self:GetMinimumBid(bidtype);
 	if not minimumBid then
-		SOTA:whisper(sender, "You cannot OS bid if an MS bid is already made.");
+		SOTA:Whisper(sender, "You cannot OS bid if an MS bid is already made.");
 		return;
 	end
 	
@@ -287,7 +287,7 @@ function module:HandlePlayerBid(sender, message)
 	end	
 
 	if not (self:GetAuctionState() == AUCTION_STATE.RUNNING) then
-		SOTA:whisper(sender, "There is currently no auction running - bid was ignored.");
+		SOTA:Whisper(sender, "There is currently no auction running - bid was ignored.");
 		return;
 	end	
 
@@ -310,7 +310,7 @@ function module:HandlePlayerBid(sender, message)
 
 	-- Check user at least did bid more than last bidder:
 	if not(dkp > hiBid) then
-		SOTA:whisper(sender, string.format("Current highest bid is %s DKP - your bid of %s DKP was ignored.", hiBid, dkp));
+		SOTA:Whisper(sender, string.format("Current highest bid is %s DKP - your bid of %s DKP was ignored.", hiBid, dkp));
 		return;
 	end;
 
@@ -322,14 +322,14 @@ function module:HandlePlayerBid(sender, message)
 				dkp = availableDkp;
 				userWentAllIn = true;
 			else
-				SOTA:whisper(sender, string.format("You only have %d DKP - bid was ignored.", availableDkp));
+				SOTA:Whisper(sender, string.format("You only have %d DKP - bid was ignored.", availableDkp));
 				return;
 			end;
 		end
 	end;
 
 	if not(userWentAllIn) and (dkp < minimumBid) then
-		SOTA:whisper(sender, string.format("You must bid at least %s DKP - bid was ignored.", minimumBid));
+		SOTA:Whisper(sender, string.format("You must bid at least %s DKP - bid was ignored.", minimumBid));
 		return;
 	end
 

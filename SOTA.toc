@@ -2,7 +2,7 @@
 ## Version: 2.0.0
 ## Author: Raven
 ## Interface: 11200
-## SavedVariables: SOTA_CONFIG_Messages, SOTA_CONFIG_VersionNumber, SOTA_CONFIG_VersionDate, SOTADB
+## SavedVariables: SOTADB
 
 Libs\AceLibrary\AceLibrary.lua
 

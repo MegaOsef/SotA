@@ -25,18 +25,6 @@ local SOTA_TITAN_TITLE				= "SotA - DKP Distribution"
 
 local SOTA_DEBUG_ENABLED		= false;
 
-SOTA_CHAT_END					= "|r"
-SOTA_COLOUR_INTRO				= "|c80F0F0F0"
-SOTA_COLOUR_CHAT				= "|c8040A0F8"
-
---local WARN_CHANNEL				= "RAID_WARNING"
---local RAID_CHANNEL				= "RAID"
---local PARTY_CHANNEL				= "PARTY"
---local YELL_CHANNEL				= "YELL"
---local SAY_CHANNEL				= "SAY"
---local GUILD_CHANNEL				= "GUILD"
---local WHISPER_CHANNEL			= "WHISPER"
-
 -- Max # of lines for class dkp displayed locally when using "/sota class":
 local MAX_CLASS_DKP_DISPLAYED	= 10;
 
@@ -46,51 +34,7 @@ local MAX_CLASS_DKP_WHISPERED	= 5;
 -- true if a DKP job is already running
 local JobIsRunning				= false
 
-
 local RaidRosterLazyUpdate		= false;
-
-
-local SOTA_CHANNELS = {
-	{ 'Raid Warning (/rw)',			WARN_CHANNEL },
-	{ 'Raid channel (/raid)',		RAID_CHANNEL },
-	{ 'Yell (/yell)',				YELL_CHANNEL },
-	{ 'Say (/say)',					SAY_CHANNEL },
-	{ 'Guild chat (/guild)',		GUILD_CHANNEL },
-}
-
-
-SOTA_MSG_OnAnnounceBid		= "OnAnnounceBid";
-SOTA_MSG_OnAnnounceMinBid	= "OnAnnounceMinBid";	-- Deprecated; add "\n" to break lines!
-SOTA_MSG_On10SecondsLeft	= "On10SecondsLeft";
-SOTA_MSG_On9SecondsLeft		= "On9SecondsLeft";
-SOTA_MSG_On8SecondsLeft		= "On8SecondsLeft";
-SOTA_MSG_On7SecondsLeft		= "On7SecondsLeft";
-SOTA_MSG_On6SecondsLeft		= "On6SecondsLeft";
-SOTA_MSG_On5SecondsLeft		= "On5SecondsLeft";
-SOTA_MSG_On4SecondsLeft		= "On4SecondsLeft";
-SOTA_MSG_On3SecondsLeft		= "On3SecondsLeft";
-SOTA_MSG_On2SecondsLeft		= "On2SecondsLeft";
-SOTA_MSG_On1SecondLeft		= "On1SecondLeft";
-SOTA_MSG_OnMainspecBid		= "OnMainspecBid";
-SOTA_MSG_OnOffspecBid		= "OnOffspecBid";
-SOTA_MSG_OnMainspecMaxBid	= "OnMainspecMaxBid";
-SOTA_MSG_OnOffspecMaxBid	= "OnOffspecMaxBid";
-SOTA_MSG_OnOpen				= "OnAuctionOpened";
-SOTA_MSG_OnComplete			= "OnComplete";
-SOTA_MSG_OnPause			= "OnPause";
-SOTA_MSG_OnResume			= "OnResume";
-SOTA_MSG_OnClose			= "OnEnd";
-SOTA_MSG_OnCancel			= "OnCancel";
-SOTA_MSG_OnDKPAdded			= "OnDKPAddedPlayer";
-SOTA_MSG_OnDKPAddedRaid		= "OnDKPAddedRaid";
-SOTA_MSG_OnDKPAddedRange	= "OnDKPAddedRange";
-SOTA_MSG_OnDKPSubtract		= "OnDKPSubtractedPlayer";
-SOTA_MSG_OnDKPSubtractRaid	= "OnDKPSubtractedRaid";
-SOTA_MSG_OnDKPPercent		= "OnDKPSubtractedPercent";
-SOTA_MSG_OnDKPShared		= "OnDKPShared";
-SOTA_MSG_OnDKPSharedRange	= "OnDKPSharedRange";
-SOTA_MSG_OnDKPReplaced		= "OnDKPReplaced";
-
 
 local MSG                    = {
 	ON_DKPADDED = "%i DKP was added to %s",
@@ -100,90 +44,25 @@ local MSG                    = {
 	ON_DKP_SUBTRACT_RAID = "%i DKP was subtracted from all players in raid",
 }
 
---	Settings (persisted)
--- Pane 1:
-SOTA_CONFIG_Messages			= { }	-- Contains configurable raid messages (if any)
-SOTA_CONFIG_VersionNumber		= nil;	-- Increases for every change!
-SOTA_CONFIG_VersionDate			= nil;	-- Date of last change!
-
-
 SOTA_GUILDNOTE               = {
 	USEOFFICER = 0,
 	USEPUBLIC = 1,
 }
-SOTA_CONFIG_DKPSTRING_LENGTH  = 5;
-
-
---[[
---	ECHO functions:
---]]
-function echo(msg)
-	if msg then
-		DEFAULT_CHAT_FRAME:AddMessage(SOTA_COLOUR_CHAT .. msg .. SOTA_CHAT_END)
-	end
-end
-
---function debugEcho(msg)
---	if SOTA_DEBUG_ENABLED and msg then
---		DEFAULT_CHAT_FRAME:AddMessage(SOTA_COLOUR_CHAT .. "DEBUG: ".. msg .. SOTA_CHAT_END)
---	end
---end
-
---function publicEcho(msgInfo)
---
---	if(msgInfo) and (msgInfo[3] ~= "") then
---		local channelName;
---
---		if msgInfo[2] == 0 then
---			-- Message has been disabled!
---			return;
---		elseif msgInfo[2] == 1 then
---			channelName = WARN_CHANNEL;
---		elseif msgInfo[2] == 2 then
---			channelName = RAID_CHANNEL;
---		elseif msgInfo[2] == 3 then
---			channelName = GUILD_CHANNEL;
---		elseif msgInfo[2] == 4 then
---			channelName = YELL_CHANNEL;
---		elseif msgInfo[2] == 5 then
---			channelName = SAY_CHANNEL;
---		else
---			-- Unknown channel
---			self:Print("Unknown channel: ".. msgInfo[2]..", msg: "..msgInfo[3]);
---			return;
---		end;
---
---		SendChatMessage(string.format("[%s] %s", SOTA_TITLE, msgInfo[3]), channelName);
---	end;
---end;
+local DKPSTRING_LENGTH  = 5;
 
 function SOTA:Broadcast(channel, msg)
 	if msg and channel and msg ~= "" then
 		SendChatMessage(string.format("[%s] %s", SOTA_TITLE, msg), channel);
 	end
 end
---
---function raidEcho(msg)
---	SendChatMessage(msg, RAID_CHANNEL);
---end
---
---function guildEcho(msg)
---	SendChatMessage(msg, GUILD_CHANNEL)
---end
---
---function addonEcho(msg)
---	SendAddonMessage(SOTA_MESSAGE_PREFIX, msg, "RAID")
---end
 
-function SOTA:whisper(receiver, msg)
+function SOTA:Whisper(receiver, msg)
 	if receiver == UnitName("player") then
 		self:Print(msg);
 	else
-		SendChatMessage(msg, WHISPER_CHANNEL, nil, receiver);
+		SendChatMessage(msg, "WHISPER", nil, receiver);
 	end
 end
-
-
 
 
 --[[
@@ -287,8 +166,6 @@ function SOTA:GUILD_ROSTER_UPDATE()
 			JobIsRunning = false
 		end
 	end
-	
-	self:TriggerEvent("SOTA_LOGSUI_REFRESHLOGELEMENTS")
 end
 
 
@@ -449,13 +326,13 @@ function SOTA:Call_CheckPlayerDKP(playername, sender)
 	if dkp then
 		dkp = 1 * dkp;
 		if sender then
-			self:whisper(sender, string.format("%s have %d DKP.", playername, dkp));
+			self:Whisper(sender, string.format("%s have %d DKP.", playername, dkp));
 		else
 			self:Print(string.format("%s have %d DKP.", playername, dkp));
 		end
 	else
 		if sender then
-			self:whisper(sender, string.format("There are no DKP information for %s.", playername));
+			self:Whisper(sender, string.format("There are no DKP information for %s.", playername));
 		else
 			self:Print(string.format("There are no DKP information for %s.", playername));
 		end
@@ -480,10 +357,10 @@ function SOTA:Call_CheckClassDKP(playerclass, sender)
 	self:SortTableDescending(classtable, 2);
 	
 	if sender then
-		self:whisper(sender, string.format("Top %d DKP for %ss:", MAX_CLASS_DKP_WHISPERED, playerclass));
+		self:Whisper(sender, string.format("Top %d DKP for %ss:", MAX_CLASS_DKP_WHISPERED, playerclass));
 		for n=1, table.getn(classtable), 1 do
 			if n <= MAX_CLASS_DKP_WHISPERED then
-				self:whisper(sender, string.format("%d - %s: %d DKP", n, classtable[n][1], 1*(classtable[n][2])));
+				self:Whisper(sender, string.format("%d - %s: %d DKP", n, classtable[n][1], 1*(classtable[n][2])));
 			end
 		end
 	else
@@ -1238,7 +1115,7 @@ function SOTA:CreateDkpString(dkp)
 	end
 	dkp = tonumber(dkp);
 	
-	local dkpLen = tonumber(SOTA_CONFIG_DKPSTRING_LENGTH);
+	local dkpLen = tonumber(DKPSTRING_LENGTH);
 	if dkpLen > 0 then
 		local dkpStr = "".. abs(dkp)
 		while string.len(dkpStr) < dkpLen do
@@ -1414,13 +1291,6 @@ function SOTA:OnEnable()
 	
 	self:RequestUpdateGuildRoster()
 	
-	if not SOTA_CONFIG_VersionNumber then
-		SOTA_CONFIG_VersionNumber = 1;
-	end;
-	if not SOTA_CONFIG_VersionDate then
-		SOTA_CONFIG_VersionDate = self:GetDateTimestamp();
-	end;
-
 	SOTA_InitializeUI()
 	SOTA_InitializeTextElements();
 
