@@ -149,8 +149,12 @@ end
 --	Guild Roster Functions
 --
 function SOTA:RequestUpdateGuildRoster()
-	SetGuildRosterShowOffline(1);
-	GuildRoster();
+	if GetGuildRosterShowOffline() then
+		GuildRoster();
+	else
+		-- Wow does an update of the guild roster in this function.
+		SetGuildRosterShowOffline(1);
+	end
 end
 
 function SOTA:GUILD_ROSTER_UPDATE()
