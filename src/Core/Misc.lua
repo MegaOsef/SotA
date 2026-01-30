@@ -71,3 +71,19 @@ function SOTA:GetClassColorCodes(classname)
 
 	return colors;
 end
+
+function SOTA:FindItemPriority(itemId)
+	local prioTableCounter = table.getn(SOTA.db.realm.ItemPriorities)
+	for n = 1, prioTableCounter, 1 do
+		local p = SOTA.db.realm.ItemPriorities[n]
+		if p.item_id == itemId then
+			return p
+		end
+	end
+	return nil
+end
+
+function SOTA:GetItemIDFromLink(itemLink)
+	local _, _, itemId = string.find(itemLink, "item:(%d+):")
+	return tonumber(itemId)
+end

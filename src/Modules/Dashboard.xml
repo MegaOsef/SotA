@@ -1,14 +1,152 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<Script file="Dashboard.lua" />
 
+	<!-- template for Bid entries -->
+	<Button name="SOTA_LootTemplate" hidden="true" virtual="true">
+		<Size>
+			<AbsDimension x="296" y="36" />
+		</Size>
+			<Frames>
+				<Frame name="$parentItem">
+					<Size>
+						<AbsDimension x="36" y="36" />
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT">
+							<Offset>
+								<AbsDimension x="0" y="0" />
+							</Offset>
+						</Anchor>
+					</Anchors>
+					<Layers>
+						<Layer level="ARTWORK">
+							<Texture name="$parentTexture" file="">
+								<Anchors>
+									<Anchor point="TOP" relativeTo="$parentHeaderTexture">
+										<Offset>
+											<AbsDimension x="0" y="-14" />
+										</Offset>
+									</Anchor>
+								</Anchors>
+							</Texture>
+						</Layer>
+					</Layers>
+				</Frame>
+			</Frames>
+		<Layers>
+			<Layer>
+				<FontString name="$parentItemSoftLink" justifyH="LEFT" inherits="GameFontNormal"
+					hidden="true">
+					<Size>
+						<AbsDimension x="296" y="16" />
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="0" y="0" />
+							</Offset>
+						</Anchor>
+					</Anchors>
+					<Color r="1" g="1" b="1" />
+				</FontString>
+				<FontString name="$parentItemLink" justifyH="LEFT" inherits="GameFontNormal"
+					hidden="true">
+					<Size>
+						<AbsDimension x="296" y="16" />
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="0" y="0" />
+							</Offset>
+						</Anchor>
+					</Anchors>
+					<Color r="1" g="1" b="1" />
+				</FontString>
+				<!-- Item name -->
+				<FontString name="$parentItemName" justifyH="LEFT" inherits="GameFontNormal"
+					font="Fonts\FRIZQT__.TTF">
+						<FontHeight val="12" />
+					<Size>
+						<AbsDimension x="296" y="10" />
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="37" y="-1" />
+							</Offset>
+						</Anchor>
+					</Anchors>
+					<Color r="1" g="1" b="1" />
+				</FontString>
+				<!-- Item Prio -->
+				<FontString name="$parentItemPrio" justifyH="LEFT" inherits="GameFontNormal"
+					font="Fonts\FRIZQT__.TTF">
+						<FontHeight val="10" />
+					<Size>
+						<AbsDimension x="296" y="10" />
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="37" y="-13" />
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<!-- Item Notes -->
+				<FontString name="$parentItemNotes" justifyH="LEFT" inherits="GameFontNormal"
+					font="Fonts\FRIZQT__.TTF">
+						<FontHeight val="10" />
+					<Size>
+						<AbsDimension x="296" y="10" />
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="37" y="-23" />
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnClick>
+				SOTA_OnLootClick(this);
+			</OnClick>
+			<OnEnter>
+				getglobal(this:GetName().."BG"):SetVertexColor(1, 1, 1, 1)
+				local link = getglobal(this:GetName() .. "ItemSoftLink"):GetText();
+				if link and link ~= "" then
+					GameTooltip:SetOwner(this, "ANCHOR_RIGHT");
+					GameTooltip:SetHyperlink(link);
+					GameTooltip:Show();
+				else
+					SOTA_ShowDashboardToolTip(this, getglobal(this:GetName() .. "ItemName"):GetText() or "");
+				end
+			</OnEnter>
+			<OnLeave>
+				getglobal(this:GetName().."BG"):SetVertexColor(0.5, 0.5, 0.3, 1)
+				GameTooltip:Hide();
+			</OnLeave>
+			<OnLoad>
+				this:GetScript("OnLeave")(this)
+			</OnLoad>
+		</Scripts>
+		<NormalTexture name="$parentBG">
+			<Color r="0.0" g="0.0" b="0.2" a="1" />
+		</NormalTexture>
+	</Button>
+
 	<!-- SotA Dashboard -->
 	<Frame name="DashboardUIFrame" parent="UIParent" toplevel="true" hidden="true">
 		<Size>
-			<AbsDimension x="296" y="80" />
+			<AbsDimension x="296" y="40" />
 		</Size>
 		<Anchors>
 			<Anchor point="TOPLEFT">
-				<Offset x="312" y="-118" />
+				<Offset x="0" y="0" />
 			</Anchor>
 		</Anchors>
 		<Frames>
@@ -20,13 +158,13 @@
 				<Anchors>
 					<Anchor point="TOPLEFT">
 						<Offset>
-							<AbsDimension x="16" y="-24" />
+							<AbsDimension x="0" y="0" />
 						</Offset>
 					</Anchor>
 				</Anchors>
-				<Backdrop edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true" bgFile="Interface\DialogFrame\UI-DialogBox-Background">
+				<Backdrop tile="true" bgFile="Interface\DialogFrame\UI-DialogBox-Background">
 					<BackgroundInsets>
-						<AbsInset left="4" right="4" top="4" bottom="4" />
+						<AbsInset left="0" right="0" top="0" bottom="0" />
 					</BackgroundInsets>
 					<EdgeSize>
 						<AbsValue val="16" />
@@ -38,7 +176,8 @@
 				<!-- "buttons" -->
 				<Frames>
 					<!-- Button 2A: Transaction Log ("Note") -->
-					<Button name="$parentTransactionLogButton" inherits="ActionButtonTemplate" frameStrata="HIGH" hidden="false">
+					<Button name="$parentTransactionLogButton" inherits="ActionButtonTemplate"
+						frameStrata="HIGH" hidden="false">
 						<Size>
 							<AbsDimension x="32" y="32" />
 						</Size>
@@ -64,7 +203,8 @@
 						</Scripts>
 					</Button>
 					<!-- Button 3A: Configuration ("Gear") -->
-					<Button name="$parentConfigurationButton" inherits="ActionButtonTemplate" frameStrata="HIGH" hidden="false">
+					<Button name="$parentConfigurationButton" inherits="ActionButtonTemplate"
+						frameStrata="HIGH" hidden="false">
 						<Size>
 							<AbsDimension x="32" y="32" />
 						</Size>
@@ -115,6 +255,19 @@
 						</FontString>
 					</Layer>
 				</Layers>
+			</Frame>
+			<!-- Loots list frame -->
+			<Frame name="$parentLootsList">
+				<Size>
+					<AbsDimension x="296" y="170" />
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset>
+							<AbsDimension x="0" y="-40" />
+						</Offset>
+					</Anchor>
+				</Anchors>
 			</Frame>
 		</Frames>
 		<Scripts>

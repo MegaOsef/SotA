@@ -131,17 +131,6 @@ function module:SetAuctionState(auctionState, seconds)
 	self:SetSecondsCounter(seconds);
 end
 
-function module:FindItemPriority(itemId)
-	local prioTableCounter = table.getn(SOTA.db.realm.ItemPriorities)
-	for n = 1, prioTableCounter, 1 do
-		local p = SOTA.db.realm.ItemPriorities[n]
-		if p.item_id == itemId then
-			return p
-		end
-	end
-	return nil
-end
-
 function module:SOTA_REQUEST_AUCTION(itemLink)
 	SOTA:Debug("SOTA_REQUEST_AUCTION:", self:GetAuctionState())
 	if self:GetAuctionState() == AUCTION_STATE.NONE then
@@ -166,14 +155,11 @@ function module:StartAuction(itemLink)
 
 	self.auctionedItemLink = itemLink;
 	
-	-- Extract ItemId from itemLink string:
-	local _, _, itemId = string.find(itemLink, "item:(%d+):")
+	local itemId = SOTA:GetItemIDFromLink(itemLink)
 	if not itemId then
 		SOTA:Print("Item was not found: ".. itemLink);
 		return;
 	end
-	itemId = tonumber(itemId) -- String to number.
-
 	local itemName, _, itemQuality, _, _, _, _, _, itemTexture = GetItemInfo(itemId);	
 	
 	if self.itemFrame then
@@ -186,7 +172,7 @@ function module:StartAuction(itemLink)
 
 		self.itemFrame.prio:SetText("")
 		self.itemFrame.notes:SetText("")
-		local prioFound = self:FindItemPriority(itemId)
+		local prioFound = SOTA:FindItemPriority(itemId)
 		if prioFound then
 			if prioFound.priority then
 				self.itemFrame.prio:SetText(string.format("Priority: %s", prioFound.priority))
