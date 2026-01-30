@@ -1289,8 +1289,26 @@ function SOTA:OnEnable()
 			DisableDashboard = 0,
 			UseGuildNotes = SOTA_GUILDNOTE.USEOFFICER,
 			HistoryDkp = {},
+			--[[
+			ItemPriorities = { {
+
+				item_id = 2318,
+				name = "Light Leather",
+				priority = "Physical DPS",
+				notes = "Warriors > Paladins > Rogues",
+			}
+			},
+			]]--
 		}
 	)
+
+	local ItemPriorities, err = self.json.decode("[{\"item_id\": 2318, \"name\": \"Light Leather\", \"priority\" : \"Physical DPS\", \"notes\" : \"Warriors > Paladins > Rogues\"}]")
+	if ItemPriorities then
+		SOTA:Print("Ok Load")
+		SOTA.db.realm.ItemPriorities = ItemPriorities
+	else
+		SOTA:Print("Error", err)
+	end
 
 	self:RegisterChatCommand({ "/SOTA" }, function(input) self:HandleSOTACommand(input) end)
     

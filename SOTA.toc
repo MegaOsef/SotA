@@ -15,6 +15,7 @@ Libs\AceModuleCore-2.0\AceModuleCore-2.0.lua
 Libs\AceDB-2.0\AceDB-2.0.lua
 
 sota-core.xml
+Utils\Json.lua
 Utils\Jobs.lua
 Utils\Tables.lua
 Utils\Misc.lua

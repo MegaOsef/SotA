@@ -146,6 +146,33 @@
 						<FontString name="$parentItemName" inherits="GameFontNormal" font="Fonts\FRIZQT__.TTF" text="">
 							<Color r="" g="" b="" a="" />
 							<FontHeight val="20" />
+							<Anchors>
+								<Anchor point="CENTER">
+									<Offset>
+										<AbsDimension x="0" y="27" />
+									</Offset>
+								</Anchor>
+							</Anchors>
+						</FontString>
+						<FontString name="$parentItemPriority" inherits="GameFontNormal" justifyH="LEFT" text="Prio:">
+							<FontHeight val="16" />
+							<Anchors>
+								<Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parent">
+									<Offset>
+										<AbsDimension x="90" y="0" />
+									</Offset>
+								</Anchor>
+							</Anchors>
+						</FontString>
+						<FontString name="$parentItemNotes" inherits="GameFontNormal" justifyH="LEFT" text="Notes:">
+							<FontHeight val="16" />
+							<Anchors>
+								<Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parent">
+									<Offset>
+										<AbsDimension x="90" y="-16" />
+									</Offset>
+								</Anchor>
+							</Anchors>
 						</FontString>
 					</Layer>
 				</Layers>

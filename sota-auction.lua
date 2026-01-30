@@ -55,8 +55,8 @@ local MSG                    = {
 	ONCOMPLETE             = "Auction for %s is over",
 	ONCANCEL               = "Auction was Cancelled",
 	ONDECLAREWINNER        = "%s sold to %s for %i DKP (%s).",
-	ONCOMPLETE_WITHOUTWIN  = "%s won %s for %d DKP (%s)",
-	ONCOMPLETE_WITHWIN     = "No bids received for %s",
+	ONCOMPLETE_WITHWIN     = "%s won %s for %d DKP (%s)",
+	ONCOMPLETE_WITHOUTWIN  = "No bids received for %s",
 	ONCANCELBID_WITHOUTWIN = "Bid of %s for %i DKP (%s) has been removed. There is no winner.",
 	ONCANCELBID_WITHWIN    = "Bid of %s for %i DKP (%s) has been removed. Current winner is %s for %i DKP (%s).",
 }
@@ -130,6 +130,16 @@ function module:SetAuctionState(auctionState, seconds)
 	self:SetSecondsCounter(seconds);
 end
 
+function module:FindItemPriority(itemId)
+	local prioTableCounter = table.getn(SOTA.db.realm.ItemPriorities)
+	for n = 1, prioTableCounter, 1 do
+		local p = SOTA.db.realm.ItemPriorities[n]
+		if p.item_id == itemId then
+			return p
+		end
+	end
+	return nil
+end
 
 --[[
 --	Start the auction, and set state to STATE_STARTING
@@ -152,20 +162,33 @@ function module:SOTA_STARTAUCTION(itemLink)
 		SOTA:Print("Item was not found: ".. itemLink);
 		return;
 	end
+	itemId = tonumber(itemId) -- String to number.
 
 	local itemName, _, itemQuality, _, _, _, _, _, itemTexture = GetItemInfo(itemId);	
 	
 	local frame = getglobal("AuctionUIFrameItem");
 	if frame then
 		local rgb = SOTA:GetQualityColor(itemQuality);	
-		local inf = getglobal(frame:GetName().."ItemName");
-		inf:SetText(itemName);
-		inf:SetTextColor( (rgb[1]/255), (rgb[2]/255), (rgb[3]/255), 1);
+		local itemNameFrame = getglobal(frame:GetName().."ItemName");
+		itemNameFrame:SetText(itemName);
+		itemNameFrame:SetTextColor( (rgb[1]/255), (rgb[2]/255), (rgb[3]/255), 1);
 		
-		local tf = getglobal(frame:GetName().."ItemTexture");
-		if tf then
-			tf:SetTexture(itemTexture);
+		local itemTextureFrame = getglobal(frame:GetName().."ItemTexture");
+		if itemTextureFrame then
+			itemTextureFrame:SetTexture(itemTexture);
 		end
+
+		local prioStr = "None"
+		local prioNotesStr = "None"
+		local prioFound = self:FindItemPriority(itemId)
+		if prioFound then
+			prioStr = prioFound.priority
+			prioNotesStr = prioFound.notes
+		end
+		local itemPrioFrame = getglobal(frame:GetName() .. "ItemPriority");
+		local itemNotesFrame = getglobal(frame:GetName() .. "ItemNotes");
+		itemPrioFrame:SetText(string.format("Priority: %s", prioStr))
+		itemNotesFrame:SetText(string.format("Notes: %s", prioNotesStr))
 	end
 	
 	self.incomingBidsTable = { };
