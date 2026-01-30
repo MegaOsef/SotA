@@ -55,6 +55,7 @@ local MSG                    = {
 	ONCOMPLETE             = "Auction for %s is over",
 	ONCANCEL               = "Auction was Cancelled",
 	ONDECLAREWINNER        = "%s sold to %s for %i DKP (%s).",
+	ONDECLARENOWINNER      = "%s sold to no one as there was no bid.",
 	ONCOMPLETE_WITHWIN     = "%s won %s for %d DKP (%s)",
 	ONCOMPLETE_WITHOUTWIN  = "No bids received for %s",
 	ONCANCELBID_WITHOUTWIN = "Bid of %s for %i DKP (%s) has been removed. There is no winner.",
@@ -175,23 +176,23 @@ function module:StartAuction(itemLink)
 
 	local itemName, _, itemQuality, _, _, _, _, _, itemTexture = GetItemInfo(itemId);	
 	
-	if self.auctionFrame then
+	if self.itemFrame then
 		local rgb = SOTA:GetQualityColor(itemQuality);	
-		self.auctionFrame.itemName:SetText(itemName);
-		self.auctionFrame.itemName:SetTextColor( (rgb[1]/255), (rgb[2]/255), (rgb[3]/255), 1);
-		if self.auctionFrame.itemTexture then
-			self.auctionFrame.itemTexture:SetTexture(itemTexture);
+		self.itemFrame.name:SetText(itemName);
+		self.itemFrame.name:SetTextColor( (rgb[1]/255), (rgb[2]/255), (rgb[3]/255), 1);
+		if self.itemFrame.texture then
+			self.itemFrame.texture:SetTexture(itemTexture);
 		end
 
-		self.auctionFrame.itemPrio:SetText("")
-		self.auctionFrame.itemNotes:SetText("")
+		self.itemFrame.prio:SetText("")
+		self.itemFrame.notes:SetText("")
 		local prioFound = self:FindItemPriority(itemId)
 		if prioFound then
 			if prioFound.priority then
-				self.auctionFrame.itemPrio:SetText(string.format("Priority: %s", prioFound.priority))
+				self.itemFrame.prio:SetText(string.format("Priority: %s", prioFound.priority))
 			end
 			if prioFound.notes then
-				self.auctionFrame.itemNotes:SetText(string.format("Notes: %s", prioFound.notes))
+				self.itemFrame.notes:SetText(string.format("Notes: %s", prioFound.notes))
 			end
 		end
 	end
@@ -257,7 +258,7 @@ function module:CheckAuctionState()
 	--	self:SetAuctionState(AUCTION_STATE.NONE)
 	--end
 
-	self:RefreshButtonStates();
+	self:RefreshButtonsState();
 end
 
 
@@ -435,7 +436,6 @@ function module:UnregisterBid(playername, bid, bidtype)
 			self:DebugPrintIncomingBidsTable()
 			
 			self:RefreshGUIBidsList();
-			self:SelectBid();
 			return;
 		end
 	end
@@ -464,13 +464,13 @@ function module:DeclareWinner(playername, bid, bidtype)
 	if playername and bid and bidtype then
 		playername = SOTA:UCFirst(playername);
 		bid = 1 * bid;
-	
-		AuctionUIFrame:Hide();
 		
 		SOTA:Broadcast(SOTA.CHANNEL.RAID,
 			string.format(MSG.ONDECLAREWINNER, self.auctionedItemLink, playername, bid, BidTypeToText(bidtype)))
 		
 		SOTA:SubtractPlayerDKP(playername, bid)
+	else
+		SOTA:Broadcast(SOTA.CHANNEL.RAID, string.format(MSG.ONDECLARENOWINNER, self.auctionedItemLink))
 	end
 end
 
@@ -480,7 +480,7 @@ end
 --
 function module:OpenAuctionUI()
 	self:ClearSelectedPlayer();
-	AuctionUIFrame:Show();
+	self.auctionFrame:Show();
 end
 
 
@@ -497,11 +497,12 @@ function module:AuctionUIInit()
 	end
 
 	-- Save frames in self, it's faster than getglobal().
-	self.auctionFrame = getglobal("AuctionUIFrameItem")
-	self.auctionFrame.itemName = getglobal(self.auctionFrame:GetName().."ItemName");
-	self.auctionFrame.itemTexture = getglobal(self.auctionFrame:GetName().."ItemTexture");
-	self.auctionFrame.itemPrio = getglobal(self.auctionFrame:GetName().."ItemPriority");
-	self.auctionFrame.itemNotes = getglobal(self.auctionFrame:GetName().."ItemNotes");
+	self.auctionFrame = AuctionUIFrame
+	self.itemFrame = getglobal("AuctionUIFrameItem")
+	self.itemFrame.name = getglobal(self.itemFrame:GetName().."ItemName");
+	self.itemFrame.texture = getglobal(self.itemFrame:GetName().."ItemTexture");
+	self.itemFrame.prio = getglobal(self.itemFrame:GetName().."ItemPriority");
+	self.itemFrame.notes = getglobal(self.itemFrame:GetName().."ItemNotes");
 
 
 	self.bidsFrames = {}
@@ -519,7 +520,7 @@ function module:AuctionUIInit()
 	self.selectedBidFrame.infos   = getglobal(self.selectedBidFrame:GetName() .. "Infos")
 
 	self.btns = {}
-	self.btns.acceptBid           = getglobal("AcceptBidButton")
+	self.btns.declareWinner       = getglobal("DeclareWinnerButton")
 	self.btns.removeSelectedBid   = getglobal("CancelBidButton")
 	self.btns.cancelAuction       = getglobal("CancelAuctionButton")
 	self.btns.restartAuction      = getglobal("RestartAuctionButton")
@@ -560,7 +561,7 @@ function module:RefreshGUIBidsList()
 		self.bidsFrames[n].bid:SetText(bid);
 		self.bidsFrames[n].infos:SetText(infos);
 
-		self:RefreshButtonStates();
+		self:RefreshButtonsState();
 		self.bidsFrames[n]:Show();
 	end
 end
@@ -584,7 +585,7 @@ end
 --[[
 --	Refresh button states
 --]]
-function module:RefreshButtonStates()
+function module:RefreshButtonsState()
 	local isAuctionRunning = (self:GetAuctionState() == AUCTION_STATE.RUNNING);
 	local isAuctionPaused = (self:GetAuctionState() == AUCTION_STATE.PAUSED);
 
@@ -595,21 +596,18 @@ function module:RefreshButtonStates()
 	end	
 
 	if isBidderSelected then
-		if isAuctionRunning or isAuctionPaused then
-			self.btns.acceptBid:Disable()
-		else
-			self.btns.acceptBid:Enable()
-		end		
 		self.btns.removeSelectedBid:Enable()
+		self.btns.declareWinner:SetText("Declare Winner")
 	else
-		self.btns.acceptBid:Disable()
 		self.btns.removeSelectedBid:Disable()
+		self.btns.declareWinner:SetText("Declare no Winner")
 	end
 	
 	if isAuctionRunning or isAuctionPaused then
 		self.btns.cancelAuction:Disable();
 		self.btns.restartAuction:Disable();
 		self.btns.finishAuction:Enable();
+		self.btns.declareWinner:Disable()
 		if isAuctionPaused then
 			self.btns.pauseAuction:Enable();
 			self.btns.pauseAuction:SetText("Resume Auction");
@@ -618,6 +616,7 @@ function module:RefreshButtonStates()
 			self.btns.pauseAuction:SetText("Pause Auction");
 		end
 	else
+		self.btns.declareWinner:Enable()
 		self.btns.cancelAuction:Enable();
 		self.btns.restartAuction:Enable();
 		self.btns.finishAuction:Disable();
@@ -631,17 +630,19 @@ end
 --	Accept a player bid
 --	Since 0.0.3
 --]]
-function module:AcceptSelectedPlayerBid()
+function module:DeclareAuctionWinner()
 	local selectedBid = self:GetSelectedBid();
 	if not selectedBid then
-		return;
+		self:DeclareWinner()
+	else
+		self:DeclareWinner(
+			selectedBid[SELBID_COLS.PNAME],
+			selectedBid[SELBID_COLS.BID_AMNT],
+			BidTypeStrToValue(selectedBid[SELBID_COLS.BID_TP])
+		)
 	end
 
-	self:DeclareWinner(
-		selectedBid[SELBID_COLS.PNAME],
-		selectedBid[SELBID_COLS.BID_AMNT],
-		BidTypeStrToValue(selectedBid[SELBID_COLS.BID_TP])
-	)
+	self:EndAuctionTransaction()
 end
 
 
@@ -649,7 +650,7 @@ end
 --	Cancel a player bid
 --	Since 0.0.3
 --]]
-function module:CancelSelectedBid()
+function module:RemoveSelectedBid()
 	local currentState = self:GetAuctionState()
 	if currentState ~= AUCTION_STATE.COMPLETE then
 		SOTA:Print("Error: You can cancel a bid only when an auction is finished.")
@@ -660,8 +661,6 @@ function module:CancelSelectedBid()
 	if not selectedBid then
 		return;
 	end
-	
-	local previousBid = self:GetHighestBid();
 	
 	self:UnregisterBid(
 		selectedBid[SELBID_COLS.PNAME],
@@ -682,6 +681,9 @@ function module:CancelSelectedBid()
 			selectedBid[SELBID_COLS.PNAME], selectedBid[SELBID_COLS.BID_AMNT], selectedBid[SELBID_COLS.BID_TP]
 		))
 	end
+
+	self:ClearSelectedPlayer()
+	self:RefreshButtonsState()
 end
 
 
@@ -703,7 +705,7 @@ function module:PauseAuction()
 		SOTA:Broadcast(SOTA.CHANNEL.RAID, MSG.ONRESUME)
 	end
 
-	self:RefreshButtonStates();
+	self:RefreshButtonsState();
 end
 
 
@@ -743,7 +745,7 @@ function module:FinishAuction()
 		end
 	end
 	
-	self:RefreshButtonStates();
+	self:RefreshButtonsState();
 end
 
 
@@ -752,10 +754,8 @@ end
 --	Since 0.0.3
 --]]
 function module:CancelAuction()
-	self.incomingBidsTable = {}
-	self:SetAuctionState(AUCTION_STATE.NONE);
 	SOTA:Broadcast(SOTA.CHANNEL.WARN, MSG.ONCANCEL)
-	AuctionUIFrame:Hide();
+	self:EndAuctionTransaction()
 end
 
 
@@ -765,6 +765,12 @@ end
 --]]
 function module:RestartAuction()
 	self:StartAuction(self.auctionedItemLink)
+end
+
+function module:EndAuctionTransaction()
+	self.incomingBidsTable = {}
+	self:SetAuctionState(AUCTION_STATE.NONE);
+	self.auctionFrame:Hide();
 end
 
 
@@ -801,7 +807,7 @@ function module:SelectBid(playername, bid, bidtype)
 	self.selectedBidFrame.bid:SetText(bidtext);
 	self.selectedBidFrame.infos:SetText(infos);
 
-	self:RefreshButtonStates();
+	self:RefreshButtonsState();
 end
 
 function module:ClearSelectedPlayer()
@@ -872,8 +878,8 @@ end
 
 
 -- UI Events
-function SOTA_OnCancelBidClick(object)
-	module:CancelSelectedBid();
+function SOTA_OnRemoveSelectedBidClick(object)
+	module:RemoveSelectedBid();
 end
 
 function SOTA_OnPauseAuctionClick(object)
@@ -888,8 +894,8 @@ function SOTA_OnRestartAuctionClick(object)
 	module:RestartAuction();
 end
 
-function SOTA_OnAcceptBidClick(object)
-	module:AcceptSelectedPlayerBid();
+function SOTA_OnDeclareWinnerClick(object)
+	module:DeclareAuctionWinner();
 end
 
 function SOTA_OnCancelAuctionClick(object)

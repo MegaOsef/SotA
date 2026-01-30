@@ -275,7 +275,7 @@
 				</Anchors>
 				<Scripts>
 					<OnClick>
-						SOTA_OnCancelBidClick();
+						SOTA_OnRemoveSelectedBidClick();
 					</OnClick>
 				</Scripts>
 			</Button>
@@ -320,7 +320,7 @@
 				</Scripts>
 			</Button>
 			<!-- Button row to control AuctionUI -->
-			<Button name="AcceptBidButton" inherits="UIPanelButtonTemplate" text="Declare Winner">
+			<Button name="DeclareWinnerButton" inherits="UIPanelButtonTemplate" text="Declare Winner">
 				<Size>
 					<AbsDimension x="120" y="23" />
 				</Size>
@@ -330,7 +330,7 @@
 					</Anchor>
 				</Anchors>
 				<Scripts>
-					<OnClick>SOTA_OnAcceptBidClick();</OnClick>
+					<OnClick>SOTA_OnDeclareWinnerClick();</OnClick>
 				</Scripts>
 			</Button>
 			<Button name="CancelAuctionButton" inherits="UIPanelButtonTemplate" text="Cancel Auction">
