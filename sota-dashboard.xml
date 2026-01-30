@@ -71,7 +71,7 @@
 						<Anchors>
 							<Anchor point="LEFT">
 								<Offset>
-									<AbsDimension x="80" y="0" />
+									<AbsDimension x="06" y="0" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -89,50 +89,25 @@
 							</OnLeave>
 						</Scripts>
 					</Button>
-					<!-- Button 2B: Share DKP ("Coins") -->
-					<Button name="$parentShareDKPButton" inherits="ActionButtonTemplate" frameStrata="HIGH" hidden="false">
-						<Size>
-							<AbsDimension x="32" y="32" />
-						</Size>
-						<Anchors>
-							<Anchor point="LEFT">
-								<Offset>
-									<AbsDimension x="260" y="0" />
-								</Offset>
-							</Anchor>
-						</Anchors>
-						<NormalTexture file="Interface\ICONS\INV_Misc_Coin_04.blp" />
-						<PushedTexture file="Interface\ICONS\INV_Misc_Coin_02.blp" />
-						<Scripts>
-							<OnClick>
-								SOTA_ShareBossDKP();
-							</OnClick>
-							<OnEnter>
-								SOTA_ShowDashboardToolTip(this, "Share DKP across Raid");
-							</OnEnter>
-							<OnLeave>
-								SOTA_HideDashboardToolTip(this);
-							</OnLeave>
-						</Scripts>
-					</Button>
 				</Frames>
 				<Layers>
 					<Layer level="ARTWORK">
-						<FontString inherits="GameFontNormal" text="SOTA Master:">
-							s
+						<FontString inherits="GameFontNormal" text="SOTA" font="Fonts\FRIZQT__.TTF">
 							<Anchors>
 								<Anchor point="LEFT">
 									<Offset>
-										<AbsDimension x="120" y="10" />
+										<AbsDimension x="80" y="10" />
 									</Offset>
 								</Anchor>
 							</Anchors>
 						</FontString>
-						<FontString name="SOTA_MasterName" inherits="GameFontNormal" text="(none)">
+						<FontString name="SOTA_Dash_Stats" inherits="GameFontNormal"
+							font="Fonts\FRIZQT__.TTF" text="">
+							<FontHeight val="10" />
 							<Anchors>
 								<Anchor point="LEFT">
 									<Offset>
-										<AbsDimension x="120" y="-8" />
+										<AbsDimension x="80" y="-8" />
 									</Offset>
 								</Anchor>
 							</Anchors>

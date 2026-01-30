@@ -86,16 +86,15 @@ end
 
 -- Max # of bids shown in the AuctionUI
 local MAX_BIDS					= 10
--- List of valid bids: { Name, DKP, BidType(MS=1,OS=2), Class, RankName, RankIndex }
-
--- Working variables:
 
 function module:OnEnable()
-	-- Instanciate variables.
 	self.auctionState = AUCTION_STATE.NONE
 	self.secondsCounter = 0
 	self.auctionedItemLink = ""
+
+	-- List of valid bids: { Name, DKP, BidType(MS=1,OS=2), Class, RankName, RankIndex }
 	self.incomingBidsTable = {};
+
 
 	self:SetAuctionState(AUCTION_STATE.NONE, 0);
 
@@ -107,6 +106,7 @@ function module:OnEnable()
 
 	self:AuctionUIInit()
 end
+
 
 --[[
 getters and setters

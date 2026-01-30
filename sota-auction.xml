@@ -154,8 +154,9 @@
 								</Anchor>
 							</Anchors>
 						</FontString>
-						<FontString name="$parentItemPriority" inherits="GameFontNormal" justifyH="LEFT" text="Prio:">
-							<FontHeight val="16" />
+						<FontString name="$parentItemPriority" inherits="GameFontNormal"
+							font="Fonts\FRIZQT__.TTF" justifyH="LEFT" text="Prio:">
+							<FontHeight val="10" />
 							<Anchors>
 								<Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parent">
 									<Offset>
@@ -164,8 +165,9 @@
 								</Anchor>
 							</Anchors>
 						</FontString>
-						<FontString name="$parentItemNotes" inherits="GameFontNormal" justifyH="LEFT" text="Notes:">
-							<FontHeight val="16" />
+						<FontString name="$parentItemNotes" inherits="GameFontNormal"
+							font="Fonts\FRIZQT__.TTF" justifyH="LEFT" text="Notes:">
+							<FontHeight val="10" />
 							<Anchors>
 								<Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parent">
 									<Offset>

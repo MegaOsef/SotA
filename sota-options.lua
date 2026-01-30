@@ -226,8 +226,9 @@ function SOTA_Conf_ImportItemPriorities_import()
 	end
 
 	SOTA.db.realm.ItemPriorities = itemPriorities.items
-	local loadedCounter = table.getn(SOTA.db.realm.ItemPriorities)
-	SOTA:Print(loadedCounter, "priorities loaded.")
+	--local loadedCounter = table.getn(SOTA.db.realm.ItemPriorities)
+	--SOTA:debug(loadedCounter, "priorities loaded.")
+	self:TriggerEvent("SOTA_ITEMPRIOS_UPDATED")
 
 	getglobal("SOTA_ConfigurationImportItemPriorities"):Hide()
 end
