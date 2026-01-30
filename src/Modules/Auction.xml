@@ -1,5 +1,5 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<Script file="sota-auction.lua" />
+	<Script file="Auction.lua" />
 
 	<!-- template for Bid entries -->
 	<Button name="SOTA_BidTemplate" hidden="true" virtual="true">

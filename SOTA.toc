@@ -14,13 +14,19 @@ Libs\AceEvent-2.0\AceEvent-2.0.lua
 Libs\AceModuleCore-2.0\AceModuleCore-2.0.lua
 Libs\AceDB-2.0\AceDB-2.0.lua
 
-sota-core.xml
-Utils\Json.lua
-Utils\Jobs.lua
-Utils\Tables.lua
-Utils\Misc.lua
-sota-auction.xml
-sota-options.xml
-sota-transactionlog.xml
-sota-dashboard.xml
+src\Core\Core.xml
+src\Core\Json.lua
+src\Core\Jobs.lua
+src\Core\Tables.lua
+src\Core\Comm.lua
+src\Core\Rights.lua
+src\Core\DkpManagement.lua
+src\Core\Misc.lua
+src\Core\LocalRosters.lua
+
+src\Modules\Auction.xml
+src\Modules\LogsUI.xml
+src\Modules\Dashboard.xml
+
+src\sota-options.xml
 

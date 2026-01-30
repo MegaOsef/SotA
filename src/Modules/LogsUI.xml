@@ -1,5 +1,5 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<Script file="sota-transactionlog.lua" />
+	<Script file="LogsUI.lua" />
 
 	<!-- template for a Log entry in the Transaction UI -->
 	<Button name="SOTA_LogTemplate" hidden="true" virtual="true">
