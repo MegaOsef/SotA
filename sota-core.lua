@@ -1289,26 +1289,9 @@ function SOTA:OnEnable()
 			DisableDashboard = 0,
 			UseGuildNotes = SOTA_GUILDNOTE.USEOFFICER,
 			HistoryDkp = {},
-			--[[
-			ItemPriorities = { {
-
-				item_id = 2318,
-				name = "Light Leather",
-				priority = "Physical DPS",
-				notes = "Warriors > Paladins > Rogues",
-			}
-			},
-			]]--
+			ItemPriorities = {},
 		}
 	)
-
-	local ItemPriorities, err = self.json.decode("[{\"item_id\": 2318, \"name\": \"Light Leather\", \"priority\" : \"Physical DPS\", \"notes\" : \"Warriors > Paladins > Rogues\"}]")
-	if ItemPriorities then
-		SOTA:Print("Ok Load")
-		SOTA.db.realm.ItemPriorities = ItemPriorities
-	else
-		SOTA:Print("Error", err)
-	end
 
 	self:RegisterChatCommand({ "/SOTA" }, function(input) self:HandleSOTACommand(input) end)
     
@@ -1323,7 +1306,6 @@ function SOTA:OnEnable()
 	self:RequestUpdateGuildRoster()
 	
 	SOTA_InitializeUI()
-	SOTA_InitializeTextElements();
 
 	self:ScheduleRepeatingEvent("SOTA_RequestUpdateGuildRoster", self.RequestUpdateGuildRoster, 5, self)
 	self:ScheduleRepeatingEvent("SOTA_OnSecondTimer", self.OnSecondTimer, 1, self)

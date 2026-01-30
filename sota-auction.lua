@@ -178,17 +178,20 @@ function module:SOTA_STARTAUCTION(itemLink)
 			itemTextureFrame:SetTexture(itemTexture);
 		end
 
-		local prioStr = "None"
-		local prioNotesStr = "None"
-		local prioFound = self:FindItemPriority(itemId)
-		if prioFound then
-			prioStr = prioFound.priority
-			prioNotesStr = prioFound.notes
-		end
 		local itemPrioFrame = getglobal(frame:GetName() .. "ItemPriority");
 		local itemNotesFrame = getglobal(frame:GetName() .. "ItemNotes");
-		itemPrioFrame:SetText(string.format("Priority: %s", prioStr))
-		itemNotesFrame:SetText(string.format("Notes: %s", prioNotesStr))
+		itemPrioFrame:SetText("")
+		itemNotesFrame:SetText("")
+
+		local prioFound = self:FindItemPriority(itemId)
+		if prioFound then
+			if prioFound.priority then
+				itemPrioFrame:SetText(string.format("Priority: %s", prioFound.priority))
+			end
+			if prioFound.notes then
+				itemNotesFrame:SetText(string.format("Notes: %s", prioFound.notes))
+			end
+		end
 	end
 	
 	self.incomingBidsTable = { };

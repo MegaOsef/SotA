@@ -117,12 +117,12 @@
 				<Frames>
 					<Frame name="$parentItem">
 						<Size>
-							<AbsDimension x="64" y="64" />
+							<AbsDimension x="50" y="50" />
 						</Size>
 						<Anchors>
 							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="16" y="-16" />
+									<AbsDimension x="16" y="-39" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -159,7 +159,7 @@
 							<Anchors>
 								<Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parent">
 									<Offset>
-										<AbsDimension x="90" y="0" />
+										<AbsDimension x="82" y="0" />
 									</Offset>
 								</Anchor>
 							</Anchors>
@@ -169,7 +169,7 @@
 							<Anchors>
 								<Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parent">
 									<Offset>
-										<AbsDimension x="90" y="-16" />
+										<AbsDimension x="82" y="-16" />
 									</Offset>
 								</Anchor>
 							</Anchors>

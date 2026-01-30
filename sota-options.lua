@@ -35,45 +35,6 @@ function SOTA_GetEventText(eventName)
 	return nil;
 end;
 
-
---[[
---	Get configurable message and fill out placeholders:
---	Parameters:
---	%i: Item, %d: DKP, %b: Bidder, %r: Rank, $1,$2,$3: params (percent, players in range etc)
---	Automatic gathered:
---	%m: Min DKP, %s: SotA master
---]]
-function SOTA_getConfigurableMessage(msgKey, item, dkp, bidder, rank, param1, param2, param3)
-
-	local msgInfo = SOTA_GetEventText(msgKey);
-
-	if(not msgInfo) then
-		SOTA:Print("*** Oops, SOTA_CONFIG_Messages[".. msgKey .."] was not found");
-		return nil;
-	end;
-
-	if not(item)	then item = ""; end;
-	if not(dkp)		then dkp = ""; end;
-	if not(bidder)	then bidder = ""; end;
-	if not(rank)	then rank = ""; end;
-	if not(param1)	then param1 = ""; end;
-	if not(param2)	then param2 = ""; end;
-	if not(param3)	then param3 = ""; end;
-
-	local msg = msgInfo[3];
-	msg = string.gsub(msg, "$i", ""..item);
-	msg = string.gsub(msg, "$d", ""..dkp);
-	msg = string.gsub(msg, "$b", ""..bidder);
-	msg = string.gsub(msg, "$r", ""..rank);
-	msg = string.gsub(msg, "$m", ""..SOTA_GetMinimumBid());
-	msg = string.gsub(msg, "$s", UnitName("player"));
-	msg = string.gsub(msg, "$1", ""..param1);
-	msg = string.gsub(msg, "$2", ""..param2);
-	msg = string.gsub(msg, "$3", ""..param3);
-	
-	return { msgInfo[1], msgInfo[2], msg };
-end;
-
 function SOTA_SetConfigurableMessage(event, channel, message)
 	--echo("Saving new message: Event: "..event..", Channel: "..channel..", Message: "..message);
 	local messages = SOTA_GetConfigurableTextMessages();
@@ -87,29 +48,6 @@ function SOTA_SetConfigurableMessage(event, channel, message)
 	end;
 end;
 
---[[
---	Copy the updated frame pos to frame siblings.
---	Since: 1.2.0
---]]
-function SOTA_UpdateFramePos(frame)
-	local framename = frame:GetName();
-
-	if(framename ~= "FrameConfigBidding") then
-		FrameConfigBidding:SetAllPoints(frame);
-	end
-	if(framename ~= "FrameConfigMiscDkp") then
-		FrameConfigMiscDkp:SetAllPoints(frame);
-	end
-	if(framename ~= "FrameConfigMessage") then
-		FrameConfigMessage:SetAllPoints(frame);
-	end
-	if(framename ~= "FrameConfigBidRules") then
-		FrameConfigBidRules:SetAllPoints(frame);
-	end
-	if(framename ~= "FrameConfigSyncCfg") then
-		FrameConfigSyncCfg:SetAllPoints(frame);
-	end
-end;
 
 function SOTA_OpenConfigurationUI()
 	ConfigurationDialogOpen = true;
@@ -125,10 +63,6 @@ end
 
 function SOTA_CloseAllConfig()
 	FrameConfigBidding:Hide();
-	FrameConfigMiscDkp:Hide();
-	FrameConfigMessage:Hide();
-	FrameConfigBidRules:Hide();
-	FrameConfigSyncCfg:Hide();
 end;
 
 function SOTA_SaveRules_OnClick()
@@ -146,11 +80,6 @@ end;
 function SOTA_OpenBiddingConfig()
 	SOTA_CloseAllConfig();
 	FrameConfigBidding:Show();
-end
-
-function SOTA_OpenMiscDkpConfig()
-	SOTA_CloseAllConfig();
-	FrameConfigMiscDkp:Show();
 end
 
 function SOTA_OpenMessageConfig()
@@ -184,13 +113,6 @@ end
 function SOTA:ENTERING_WORLD()
 	getglobal("FrameConfigBiddingDisableDashboard"):SetChecked(SOTA.db.realm.DisableDashboard);
 
-	if SOTA.db.realm.UseGuildNotes == SOTA_GUILDNOTE.USEPUBLIC then
-		getglobal("FrameConfigMiscDkpPublicNotes"):SetChecked(1)
-	end
-
-	getglobal("FrameConfigBiddingAuctionTime"):SetValue(SOTA_CONFIG_AuctionTime);
-	getglobal("FrameConfigBiddingAuctionExtension"):SetValue(SOTA_CONFIG_AuctionExtension);
-	
 	SOTA_VerifyEventMessages();
 end
 
@@ -287,170 +209,25 @@ function SOTA_HandleCheckbox(checkbox)
 	end
 end
 
-
-local currentEvent;
-function SOTA_OnEventMessageClick(object)	
-	local event = getglobal(object:GetName().."Event"):GetText();
-	local channel = 1*getglobal(object:GetName().."Channel"):GetText();
-	local message = getglobal(object:GetName().."Message"):GetText();
-
-	currentEvent = event;
-
-	if not message then
-		message = "";
-	end
-
---	echo("** Event: "..event..", Channel: "..channel..", Message: "..message);
-
-	local frame = getglobal("FrameEventEditor");
-	getglobal(frame:GetName().."Message"):SetText(message);
-
-	getglobal(frame:GetName().."CheckbuttonRW"):SetChecked(0);		
-	getglobal(frame:GetName().."CheckbuttonRaid"):SetChecked(0);		
-	getglobal(frame:GetName().."CheckbuttonGuild"):SetChecked(0);		
-	getglobal(frame:GetName().."CheckbuttonYell"):SetChecked(0);		
-	getglobal(frame:GetName().."CheckbuttonSay"):SetChecked(0);		
-
-	if channel == 1 then
-		getglobal(frame:GetName().."CheckbuttonRW"):SetChecked(1);		
-	elseif channel == 2 then
-		getglobal(frame:GetName().."CheckbuttonRaid"):SetChecked(1);		
-	elseif channel == 3 then
-		getglobal(frame:GetName().."CheckbuttonGuild"):SetChecked(1);		
-	elseif channel == 4 then
-		getglobal(frame:GetName().."CheckbuttonYell"):SetChecked(1);		
-	elseif channel == 5 then
-		getglobal(frame:GetName().."CheckbuttonSay"):SetChecked(1);		
-	end
-	-- Yes, channel can be disabled (0) = nothing is written.
-	
-	FrameEventEditor:Show();
-	FrameEventEditorMessage:SetFocus();
+function SOTA_Conf_ImportItemPriorities_close()
+	getglobal("SOTA_ConfigurationImportItemPriorities"):Hide()
 end
 
-function SOTA_OnEventCheckboxClick(checkbox)
-	local checkboxname = checkbox:GetName();
-	local frame = getglobal("FrameEventEditor");
+function SOTA_Conf_ImportItemPriorities_open()
+	getglobal("SOTA_ConfigurationImportItemPriorities"):Show()
+end
 
-	if checkboxname == "FrameEventEditorCheckbuttonRW" then
-		if checkbox:GetChecked() then
-			getglobal(frame:GetName().."CheckbuttonRaid"):SetChecked(0);		
-			getglobal(frame:GetName().."CheckbuttonGuild"):SetChecked(0);		
-			getglobal(frame:GetName().."CheckbuttonYell"):SetChecked(0);		
-			getglobal(frame:GetName().."CheckbuttonSay"):SetChecked(0);		
-		end;
-	elseif checkboxname == "FrameEventEditorCheckbuttonRaid" then
-		if checkbox:GetChecked() then
-			getglobal(frame:GetName().."CheckbuttonRW"):SetChecked(0);		
-			getglobal(frame:GetName().."CheckbuttonGuild"):SetChecked(0);		
-			getglobal(frame:GetName().."CheckbuttonYell"):SetChecked(0);		
-			getglobal(frame:GetName().."CheckbuttonSay"):SetChecked(0);		
-		end;
-	elseif checkboxname == "FrameEventEditorCheckbuttonGuild" then
-		if checkbox:GetChecked() then
-			getglobal(frame:GetName().."CheckbuttonRW"):SetChecked(0);		
-			getglobal(frame:GetName().."CheckbuttonRaid"):SetChecked(0);		
-			getglobal(frame:GetName().."CheckbuttonYell"):SetChecked(0);		
-			getglobal(frame:GetName().."CheckbuttonSay"):SetChecked(0);		
-		end;
-	elseif checkboxname == "FrameEventEditorCheckbuttonYell" then
-		if checkbox:GetChecked() then
-			getglobal(frame:GetName().."CheckbuttonRW"):SetChecked(0);		
-			getglobal(frame:GetName().."CheckbuttonRaid"):SetChecked(0);		
-			getglobal(frame:GetName().."CheckbuttonGuild"):SetChecked(0);		
-			getglobal(frame:GetName().."CheckbuttonSay"):SetChecked(0);		
-		end;
-	elseif checkboxname == "FrameEventEditorCheckbuttonSay" then
-		if checkbox:GetChecked() then
-			getglobal(frame:GetName().."CheckbuttonRW"):SetChecked(0);		
-			getglobal(frame:GetName().."CheckbuttonRaid"):SetChecked(0);		
-			getglobal(frame:GetName().."CheckbuttonGuild"):SetChecked(0);		
-			getglobal(frame:GetName().."CheckbuttonYell"):SetChecked(0);		
-		end;
-	end;
-end;
-
-function SOTA_OnEventEditorSave()
-	local event = currentEvent;
-	local message = FrameEventEditorMessage:GetText();
-	local channel = 0;
-
-	local frame = getglobal("FrameEventEditor");
-	
-	if getglobal(frame:GetName().."CheckbuttonRW"):GetChecked() then
-		channel = 1
-	elseif getglobal(frame:GetName().."CheckbuttonRaid"):GetChecked() then
-		channel = 2
-	elseif getglobal(frame:GetName().."CheckbuttonGuild"):GetChecked() then
-		channel = 3
-	elseif getglobal(frame:GetName().."CheckbuttonYell"):GetChecked() then
-		channel = 4
-	elseif getglobal(frame:GetName().."CheckbuttonSay"):GetChecked() then
-		channel = 5
-	end;
-
-	SOTA_SetConfigurableMessage(event, channel, message);
-
-	SOTA_UpdateTextList();
-
-	FrameEventEditor:Hide();
-end;
-
-function SOTA_OnEventEditorClose()
-	FrameEventEditor:Hide();
-end;
-
-function SOTA_RefreshVisibleTextList(offset)
-	--echo(string.format("Offset=%d", offset));
-	local messages = SOTA_GetConfigurableTextMessages();
-	local msgInfo;
-
-	for n=1, SOTA_MAX_MESSAGES, 1 do
-		msgInfo = messages[n + offset]
-		if not msgInfo then
-			msgInfo = { "", 0, "" }
-		end
-		
-		local event = msgInfo[1];
-		local channel = msgInfo[2];
-		local message = msgInfo[3];
-		
-		--echo(string.format("-> Event=%s, Channel=%d, Text=%s", event, 1*channel, message));
-		
-		local frame = getglobal("FrameConfigMessageTableListEntry"..n);
-		if(not frame) then
-			SOTA:Print("*** Oops, frame is nil");
-			return;
-		end;
-
-		getglobal(frame:GetName().."Event"):SetText(event);
-		getglobal(frame:GetName().."Channel"):SetText(channel);
-		getglobal(frame:GetName().."Message"):SetText(message);
-		
-		frame:Show();
+function SOTA_Conf_ImportItemPriorities_import()
+	local jsonstr = getglobal("SOTA_ConfigurationImportItemPrioritiesScrollFrameMessage"):GetText()
+	local itemPriorities, err = SOTA.json.decode(jsonstr)
+	if not itemPriorities then
+		SOTA:Print("Error while trying to parse json:", err)
+		return
 	end
+
+	SOTA.db.realm.ItemPriorities = itemPriorities.items
+	local loadedCounter = table.getn(SOTA.db.realm.ItemPriorities)
+	SOTA:Print(loadedCounter, "priorities loaded.")
+
+	getglobal("SOTA_ConfigurationImportItemPriorities"):Hide()
 end
-
-function SOTA_UpdateTextList(frame)
---	FauxScrollFrame_Update(FrameConfigMessageTableList, SOTA_MAX_MESSAGES, 10, 20);
-	local messages = SOTA_GetConfigurableTextMessages();
-
-	SOTA_VerifyEventMessages();
-
-	FauxScrollFrame_Update(FrameConfigMessageTableList, table.getn(messages), SOTA_MAX_MESSAGES, 20);
-	local offset = FauxScrollFrame_GetOffset(FrameConfigMessageTableList);
-	
-	SOTA_RefreshVisibleTextList(offset);
-end
-
-function SOTA_InitializeTextElements()
-	local entry = CreateFrame("Button", "$parentEntry1", FrameConfigMessageTableList, "SOTA_TextTemplate");
-	entry:SetID(1);
-	entry:SetPoint("TOPLEFT", 4, -4);
-	for n=2, SOTA_MAX_MESSAGES, 1 do
-		local entry = CreateFrame("Button", "$parentEntry"..n, FrameConfigMessageTableList, "SOTA_TextTemplate");
-		entry:SetID(n);
-		entry:SetPoint("TOP", "$parentEntry"..(n-1), "BOTTOM");
-	end
-end
-
