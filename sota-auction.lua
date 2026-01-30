@@ -102,7 +102,7 @@ function module:OnEnable()
 
 	self:RegisterEvent("CHAT_MSG_RAID")
 	self:RegisterEvent("CHAT_MSG_RAID_LEADER", "CHAT_MSG_RAID")
-	self:RegisterEvent("SOTA_STARTAUCTION")
+	self:RegisterEvent("SOTA_REQUEST_AUCTION")
 
 	self:AuctionUIInit()
 end
@@ -115,7 +115,7 @@ function module:GetSecondsCounter()
 	return self.secondsCounter
 end
 function module:SetSecondsCounter(value)
-	SOTA:Debug("SetSecondsCounter("..value..")")
+	--SOTA:Debug("SetSecondsCounter("..value..")")
 	self.secondsCounter = value
 end
 function module:GetAuctionState()
@@ -141,13 +141,22 @@ function module:FindItemPriority(itemId)
 	return nil
 end
 
+function module:SOTA_REQUEST_AUCTION(itemLink)
+	SOTA:Debug("SOTA_REQUEST_AUCTION:", self:GetAuctionState())
+	if self:GetAuctionState() == AUCTION_STATE.NONE then
+		self:StartAuction(itemLink)
+	else
+		SOTA:Print("An auction is already running.")
+	end
+end
+
 --[[
 --	Start the auction, and set state to STATE_STARTING
 --	Parameters:
 --	itemLink: a Blizzard itemlink to auction.
 --	Since 0.0.1
 --]]
-function module:SOTA_STARTAUCTION(itemLink)
+function module:StartAuction(itemLink)
 	local rank = SOTA:GetRaidRank(UnitName("player"));
 	if rank < 1 then
 		SOTA:Print("You need to be Raid Assistant or Raid Leader to start auctions.");
@@ -578,8 +587,8 @@ function module:RefreshButtonStates()
 	end
 	
 	if isAuctionRunning or isAuctionPaused then
-		getglobal("CancelAuctionButton"):Enable();
-		getglobal("RestartAuctionButton"):Enable();
+		getglobal("CancelAuctionButton"):Disable();
+		getglobal("RestartAuctionButton"):Disable();
 		getglobal("FinishAuctionButton"):Enable();
 		if isAuctionPaused then
 			getglobal("PauseAuctionButton"):Enable();
@@ -723,18 +732,9 @@ end
 --	Since 0.0.3
 --]]
 function module:CancelAuction()
-	local state = self:GetAuctionState();
-
-	local highestBid = self:GetHighestBid()
-	local hasBid = (highestBid ~= nil)
-	if state == AUCTION_STATE.RUNNING
-		or state == AUCTION_STATE.PAUSED
-		or (state == AUCTION_STATE.COMPLETE and hasBid) then
-		self.incomingBidsTable = { }
-		self:SetAuctionState(AUCTION_STATE.NONE);
-		SOTA:Broadcast(SOTA.CHANNEL.WARN, MSG.ONCANCEL)
-	end
-	
+	self.incomingBidsTable = {}
+	self:SetAuctionState(AUCTION_STATE.NONE);
+	SOTA:Broadcast(SOTA.CHANNEL.WARN, MSG.ONCANCEL)
 	AuctionUIFrame:Hide();
 end
 
@@ -744,8 +744,7 @@ end
 --	Since 0.0.3
 --]]
 function module:RestartAuction()
-	self:SetAuctionState(AUCTION_STATE.NONE)
-	self:TriggerEvent("SOTA_STARTAUCTION", self.auctionedItemLink);
+	self:StartAuction(self.auctionedItemLink)
 end
 
 
