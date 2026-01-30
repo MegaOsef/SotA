@@ -9,6 +9,7 @@ function module:OnEnable()
 	self:ScheduleRepeatingEvent("SOTA_OnSecondTimer", self.OnSecondTimer, 1, self)
 
 	self:RefreshStats()
+	self:OnSecondTimer()
 end
 
 function module:OnSecondTimer()

@@ -175,30 +175,23 @@ function module:StartAuction(itemLink)
 
 	local itemName, _, itemQuality, _, _, _, _, _, itemTexture = GetItemInfo(itemId);	
 	
-	local frame = getglobal("AuctionUIFrameItem");
-	if frame then
+	if self.auctionFrame then
 		local rgb = SOTA:GetQualityColor(itemQuality);	
-		local itemNameFrame = getglobal(frame:GetName().."ItemName");
-		itemNameFrame:SetText(itemName);
-		itemNameFrame:SetTextColor( (rgb[1]/255), (rgb[2]/255), (rgb[3]/255), 1);
-		
-		local itemTextureFrame = getglobal(frame:GetName().."ItemTexture");
-		if itemTextureFrame then
-			itemTextureFrame:SetTexture(itemTexture);
+		self.auctionFrame.itemName:SetText(itemName);
+		self.auctionFrame.itemName:SetTextColor( (rgb[1]/255), (rgb[2]/255), (rgb[3]/255), 1);
+		if self.auctionFrame.itemTexture then
+			self.auctionFrame.itemTexture:SetTexture(itemTexture);
 		end
 
-		local itemPrioFrame = getglobal(frame:GetName() .. "ItemPriority");
-		local itemNotesFrame = getglobal(frame:GetName() .. "ItemNotes");
-		itemPrioFrame:SetText("")
-		itemNotesFrame:SetText("")
-
+		self.auctionFrame.itemPrio:SetText("")
+		self.auctionFrame.itemNotes:SetText("")
 		local prioFound = self:FindItemPriority(itemId)
 		if prioFound then
 			if prioFound.priority then
-				itemPrioFrame:SetText(string.format("Priority: %s", prioFound.priority))
+				self.auctionFrame.itemPrio:SetText(string.format("Priority: %s", prioFound.priority))
 			end
 			if prioFound.notes then
-				itemNotesFrame:SetText(string.format("Notes: %s", prioFound.notes))
+				self.auctionFrame.itemNotes:SetText(string.format("Notes: %s", prioFound.notes))
 			end
 		end
 	end
@@ -502,6 +495,36 @@ function module:AuctionUIInit()
 			entry:SetPoint("TOP", "$parentEntry"..(n-1), "BOTTOM");
 		end
 	end
+
+	-- Save frames in self, it's faster than getglobal().
+	self.auctionFrame = getglobal("AuctionUIFrameItem")
+	self.auctionFrame.itemName = getglobal(self.auctionFrame:GetName().."ItemName");
+	self.auctionFrame.itemTexture = getglobal(self.auctionFrame:GetName().."ItemTexture");
+	self.auctionFrame.itemPrio = getglobal(self.auctionFrame:GetName().."ItemPriority");
+	self.auctionFrame.itemNotes = getglobal(self.auctionFrame:GetName().."ItemNotes");
+
+
+	self.bidsFrames = {}
+	for n=1, MAX_BIDS, 1 do
+		self.bidsFrames[n]         = getglobal("AuctionUIFrameTableListEntry" .. n);
+		self.bidsFrames[n].bidder  = getglobal(self.bidsFrames[n]:GetName() .. "Bidder");
+		self.bidsFrames[n].bidtype = getglobal(self.bidsFrames[n]:GetName() .. "Bidtype");
+		self.bidsFrames[n].bid     = getglobal(self.bidsFrames[n]:GetName() .. "Bid");
+		self.bidsFrames[n].infos   = getglobal(self.bidsFrames[n]:GetName() .. "Infos");
+	end
+	self.selectedBidFrame         = getglobal("AuctionUIFrameSelected");
+	self.selectedBidFrame.bidder  = getglobal(self.selectedBidFrame:GetName() .. "Bidder")
+	self.selectedBidFrame.bid     = getglobal(self.selectedBidFrame:GetName() .. "Bid")
+	self.selectedBidFrame.bidtype = getglobal(self.selectedBidFrame:GetName() .. "Bidtype")
+	self.selectedBidFrame.infos   = getglobal(self.selectedBidFrame:GetName() .. "Infos")
+
+	self.btns = {}
+	self.btns.acceptBid           = getglobal("AcceptBidButton")
+	self.btns.removeSelectedBid   = getglobal("CancelBidButton")
+	self.btns.cancelAuction       = getglobal("CancelAuctionButton")
+	self.btns.restartAuction      = getglobal("RestartAuctionButton")
+	self.btns.finishAuction       = getglobal("FinishAuctionButton")
+	self.btns.pauseAuction        = getglobal("PauseAuctionButton")
 end;
 
 function module:FormatBidsListItemInfos(grank, class)
@@ -531,16 +554,14 @@ function module:RefreshGUIBidsList()
 
 		local color = SOTA:GetClassColorCodes(playerclass);
 
-		local frame = getglobal("AuctionUIFrameTableListEntry"..n);
-		getglobal(frame:GetName().."Bidder"):SetText(bidder);
-		getglobal(frame:GetName().."Bidder"):SetTextColor((color[1]/255), (color[2]/255), (color[3]/255), 255);
-		--getglobal(frame:GetName().."Bid"):SetTextColor((bidcolor[1]/255), (bidcolor[2]/255), (bidcolor[3]/255), 255);
-		getglobal(frame:GetName().."Bidtype"):SetText(bidtype);
-		getglobal(frame:GetName().."Bid"):SetText(bid);
-		getglobal(frame:GetName().."Infos"):SetText(infos);
+		self.bidsFrames[n].bidder:SetText(bidder);
+		self.bidsFrames[n].bidder:SetTextColor((color[1] / 255), (color[2] / 255), (color[3] / 255), 255);
+		self.bidsFrames[n].bidtype:SetText(bidtype);
+		self.bidsFrames[n].bid:SetText(bid);
+		self.bidsFrames[n].infos:SetText(infos);
 
 		self:RefreshButtonStates();
-		frame:Show();
+		self.bidsFrames[n]:Show();
 	end
 end
 
@@ -548,10 +569,9 @@ end
 function module:GetSelectedBid()
 	local selectedBid = nil;
 	
-	local frame = getglobal("AuctionUIFrameSelected");
-	local bidder = getglobal(frame:GetName().."Bidder"):GetText();
-	local bid = getglobal(frame:GetName().."Bid"):GetText();
-	local bidtype = getglobal(frame:GetName().."Bidtype"):GetText();
+	local bidder      = self.selectedBidFrame.bidder:GetText();
+	local bid         = self.selectedBidFrame.bid:GetText();
+	local bidtype     = self.selectedBidFrame.bidtype:GetText();
 
 	if bidder and bid and bidtype then
 		selectedBid = { bidder, bid, bidtype };
@@ -576,33 +596,33 @@ function module:RefreshButtonStates()
 
 	if isBidderSelected then
 		if isAuctionRunning or isAuctionPaused then
-			getglobal("AcceptBidButton"):Disable();
+			self.btns.acceptBid:Disable()
 		else
-			getglobal("AcceptBidButton"):Enable();
+			self.btns.acceptBid:Enable()
 		end		
-		getglobal("CancelBidButton"):Enable();
+		self.btns.removeSelectedBid:Enable()
 	else
-		getglobal("AcceptBidButton"):Disable();
-		getglobal("CancelBidButton"):Disable();
+		self.btns.acceptBid:Disable()
+		self.btns.removeSelectedBid:Disable()
 	end
 	
 	if isAuctionRunning or isAuctionPaused then
-		getglobal("CancelAuctionButton"):Disable();
-		getglobal("RestartAuctionButton"):Disable();
-		getglobal("FinishAuctionButton"):Enable();
+		self.btns.cancelAuction:Disable();
+		self.btns.restartAuction:Disable();
+		self.btns.finishAuction:Enable();
 		if isAuctionPaused then
-			getglobal("PauseAuctionButton"):Enable();
-			getglobal("PauseAuctionButton"):SetText("Resume Auction");
+			self.btns.pauseAuction:Enable();
+			self.btns.pauseAuction:SetText("Resume Auction");
 		else
-			getglobal("PauseAuctionButton"):Enable();
-			getglobal("PauseAuctionButton"):SetText("Pause Auction");
+			self.btns.pauseAuction:Enable();
+			self.btns.pauseAuction:SetText("Pause Auction");
 		end
 	else
-		getglobal("CancelAuctionButton"):Enable();
-		getglobal("RestartAuctionButton"):Enable();
-		getglobal("FinishAuctionButton"):Disable();
-		getglobal("PauseAuctionButton"):Disable();
-		getglobal("PauseAuctionButton"):SetText("Pause Auction");
+		self.btns.cancelAuction:Enable();
+		self.btns.restartAuction:Enable();
+		self.btns.finishAuction:Disable();
+		self.btns.pauseAuction:Disable();
+		self.btns.pauseAuction:SetText("Pause Auction");
 	end	
 end
 
@@ -775,22 +795,20 @@ function module:SelectBid(playername, bid, bidtype)
 	
 	local color = SOTA:GetClassColorCodes(playerclass);
 
-	local frame = getglobal("AuctionUIFrameSelected");
-	getglobal(frame:GetName().."Bidder"):SetText(bidder);
-	getglobal(frame:GetName().."Bidder"):SetTextColor((color[1]/255), (color[2]/255), (color[3]/255), 255);
-	getglobal(frame:GetName().."Bidtype"):SetText(bidtype);
-	getglobal(frame:GetName().."Bid"):SetText(bidtext);
-	getglobal(frame:GetName().."Infos"):SetText(infos);
+	self.selectedBidFrame.bidder:SetText(bidder);
+	self.selectedBidFrame.bidder:SetTextColor((color[1] / 255), (color[2] / 255), (color[3] / 255), 255);
+	self.selectedBidFrame.bidtype:SetText(bidtype);
+	self.selectedBidFrame.bid:SetText(bidtext);
+	self.selectedBidFrame.infos:SetText(infos);
 
 	self:RefreshButtonStates();
 end
 
 function module:ClearSelectedPlayer()
-	local frame = getglobal("AuctionUIFrameSelected");
-	getglobal(frame:GetName().."Bidder"):SetText("");
-	getglobal(frame:GetName().."Bid"):SetText("");
-	getglobal(frame:GetName().."Bidtype"):SetText("");
-	getglobal(frame:GetName().."Infos"):SetText("");
+	self.selectedBidFrame.bidder:SetText("");
+	self.selectedBidFrame.bid:SetText("");
+	self.selectedBidFrame.bidtype:SetText("");
+	self.selectedBidFrame.infos:SetText("");
 end
 
 
