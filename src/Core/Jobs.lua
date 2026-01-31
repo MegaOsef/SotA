@@ -4,7 +4,7 @@ local SOTA = SOTAG
 --	Job Control
 --
 function SOTA:AddJob(method, arg1, arg2)
-    SOTA:Print("New job in queue")
+    self:Print("New job added to queue, please wait...")
     self.jobQueue[table.getn(self.jobQueue) + 1] = { method, arg1, arg2 }
 end
 

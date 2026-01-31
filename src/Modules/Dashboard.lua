@@ -147,7 +147,7 @@ function SOTA_OnEarnBossDkp()
 		return
 	end
 
-	SOTA:Call_AddRaidDKP(module.bossDkpFrame.numericDkpValue);
+	SOTA:Async_AddRaidDKP(module.bossDkpFrame.numericDkpValue);
 	module.bossDkpFrame:Hide()
 	PlaySound("igBackPackCoinSelect")
 end

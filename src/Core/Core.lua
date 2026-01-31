@@ -163,12 +163,12 @@ function SOTA:HandleSOTACommand(msg)
 		--	Syntax: "raid -<%d>"
 		if sign == "-" then
 			arg = string.sub(arg, 2);
-			return self:Call_SubtractRaidDKP(arg);
+			return self:Async_SubtractRaidDKP(arg);
 			--	Command: raid
 			--	Syntax: "raid +<%d>"
 		elseif sign == "+" then
 			arg = string.sub(arg, 2);
-			return self:Call_AddRaidDKP(arg);
+			return self:Async_AddRaidDKP(arg);
 		else
 			self:Print("DKP must be written as +999 or -999");
 			return;
@@ -179,14 +179,14 @@ function SOTA:HandleSOTACommand(msg)
 	--	Command: decay
 	--	Syntax: "decay <%d>[%]"
 	if cmd == "decay" then
-		return self:Call_DecayDKP(arg);
+		return self:Async_DecayDKP(arg);
 	end
 
 
 	--	Command: decaytest
 	--	Syntax: "decaytest <%d>[%]"
 	if cmd == "decaytest" then
-		return self:Call_Decaytest(arg);
+		return self:Async_Decaytest(arg);
 	end
 
 
@@ -199,7 +199,7 @@ function SOTA:HandleSOTACommand(msg)
 	--	Syntax: "+<%d> <playername>"
 	if sign == "+" then
 		local cmd = string.sub(cmd, 2);
-		return self:Call_AddPlayerDKP(arg, cmd);
+		return self:Async_AddPlayerDKP(arg, cmd);
 	end
 
 
@@ -207,7 +207,7 @@ function SOTA:HandleSOTACommand(msg)
 		cmd = string.sub(cmd, 2);
 		--	Command: -
 		--	Syntax: "-<%d> <playername>"
-		return self:Call_SubtractPlayerDKP(arg, cmd);
+		return self:Async_SubtractPlayerDKP(arg, cmd);
 	end
 
 	self:Print("Unknown command: " .. msg);

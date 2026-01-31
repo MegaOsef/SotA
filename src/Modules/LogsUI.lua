@@ -714,7 +714,7 @@ function module:ReplacePlayerInTransaction(transactionID, currentPlayer, newPlay
 		return;
 	end
 		
-	self:Call_SwapPlayersInTransaction(transactionID, newPlayer);
+	self:Async_SwapPlayersInTransaction(transactionID, newPlayer);
 	self:OpenTransauctionUI();
 end
 
@@ -722,14 +722,14 @@ function module:IncludePlayerInTransaction(transactionID, playername)
 	if not playername or not transactionID then
 		return;
 	end
-	self:Call_IncludePlayer(transactionID, playername);
+	self:Async_IncludePlayer(transactionID, playername);
 end
 
 function module:ExcludePlayerFromTransaction(transactionID, playername)
 	if not playername or not transactionID then
 		return;
 	end
-	self:Call_ExcludePlayer(transactionID, playername);
+	self:Async_ExcludePlayer(transactionID, playername);
 end
 
 

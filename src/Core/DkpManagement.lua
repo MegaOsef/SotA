@@ -115,9 +115,8 @@ end
 --[[
 --	Add <dkp> DKP to <playername>
 --]]
-function SOTA:Call_AddPlayerDKP(playername, dkp)
+function SOTA:Async_AddPlayerDKP(playername, dkp)
     if self:CanDoDKP() then
-        RaidState = RAID_STATE_ENABLED;
         self:AddJob(function(job) self:AddPlayerDKP(job[2], job[3]) end, playername, dkp)
         self:RequestUpdateGuildRoster();
     end
@@ -137,9 +136,8 @@ end
 --[[
 --	Subtract <dkp> DKP from <playername>
 --]]
-function SOTA:Call_SubtractPlayerDKP(playername, dkp)
+function SOTA:Async_SubtractPlayerDKP(playername, dkp)
     if self:CanDoDKP() and tonumber(dkp) then
-        RaidState = RAID_STATE_ENABLED;
         self:AddJob(function(job) self:SubtractPlayerDKP(job[2], job[3]) end, playername, dkp)
         self:RequestUpdateGuildRoster();
     end
@@ -159,9 +157,8 @@ end
 --[[
 --	Add <n> DKP to all players in raid
 --]]
-function SOTA:Call_AddRaidDKP(dkp)
+function SOTA:Async_AddRaidDKP(dkp)
     if self:IsInRaid(true) then
-        RaidState = RAID_STATE_ENABLED;
         self:AddJob(function(job) self:AddRaidDKP(job[2]) end, dkp, "_")
         self:RequestUpdateGuildRoster();
     end
@@ -202,9 +199,8 @@ end
 --[[
 --	Subtract <n> DKP from each raid
 --]]
-function SOTA:Call_SubtractRaidDKP(dkp)
+function SOTA:Async_SubtractRaidDKP(dkp)
     if self:IsInRaid(true) then
-        RaidState = RAID_STATE_ENABLED;
         self:AddJob(function(job) self:SubtractRaidDKP(job[2]) end, dkp, "_")
         self:RequestUpdateGuildRoster();
     end
@@ -255,7 +251,7 @@ end
 --	Perform a DKP decay without really removing DKP. Result is echoed out locally.
 --	Added in 1.1.0
 --]]
-function SOTA:Call_Decaytest(percent)
+function SOTA:Async_Decaytest(percent)
     self:AddJob(function(job) self:Decaytest(job[2]) end, percent, "_")
     self:RequestUpdateGuildRoster();
 end
@@ -318,7 +314,7 @@ end
 --	Perform Guild Decay of <n>% DKP
 --	This function requires Show Offline Members to be enabled.
 --]]
-function SOTA:Call_DecayDKP(percent)
+function SOTA:Async_DecayDKP(percent)
     self:AddJob(function(job) self:DecayDKP(job[2]) end, percent, "_")
     self:RequestUpdateGuildRoster();
 end
