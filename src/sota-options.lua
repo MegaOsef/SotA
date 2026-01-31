@@ -209,7 +209,7 @@ function SOTA_HandleCheckbox(checkbox)
 	end
 end
 
-function SOTA_Conf_ImportBossDkpList()
+function SOTA_Conf_ImportBossDkpList_close()
 	getglobal("SOTA_ConfigurationImportBossDkpList"):Hide()
 end
 

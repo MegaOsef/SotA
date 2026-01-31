@@ -56,8 +56,8 @@ function SOTA:OnEnable()
 			DisableDashboard = 0,
 			UseGuildNotes = SOTA_GUILDNOTE.USEOFFICER,
 			HistoryDkp = {},
-			ItemPriorities = {},
-			BossDkpList = { { BossName = "Greater Plainstrider", DkpValue = 20 } },
+			ItemPriorities = {}, -- { { item_id = 12345, priority = "For healers", notes = "Better for shamans" }, ... }
+			BossDkpList = {} -- { { BossName = "Greater Plainstrider", DkpValue = 20 }, ... },
 		}
 	)
 
