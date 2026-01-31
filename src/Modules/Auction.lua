@@ -20,8 +20,8 @@ local AUCTION_STATE = {
 	COMPLETE = 40,
 }
 
-local AUCTION_TIME           = 8
-local AUCTION_EXTENSION_TIME = 8
+local AUCTION_TIME           = 7
+local AUCTION_EXTENSION_TIME = 7
 
 local MINIMUM_BID = 10
 
@@ -62,6 +62,59 @@ local MSG                    = {
 	ONCANCELBID_WITHWIN    = "Bid of %s for %i DKP (%s) has been removed. Current winner is %s for %i DKP (%s).",
 }
 
+local DEFAULT_TEXT_FONT = GameFontNormal
+
+local ZONES                  = {
+	{
+		name = "Blackwing Lair",
+		bosses = {
+			"Razorgore the Untamed",
+			"Vaelastrasz the Corrupt",
+			"Broodlord Lashlayer",
+			"Firemaw",
+			"Ebonroc",
+			"Flamegor",
+			"Chromaggus",
+			"Nefarian",
+		},
+	},
+	{
+		name = "Temple of Ahn'Qiraj",
+		bosses = {
+			"The Prophet Skeram",
+			"The Bug Family",
+			"Battleguard Sartura",
+			"Fankriss the Unyielding",
+			"Viscidus",
+			"Princess Huhuran",
+			"The Twin Emperors",
+			"Ouro",
+			"C'Thun",
+		},
+	},
+	{
+		name = "Naxxramas",
+		bosses = {
+			"Anub'Rekhan",
+			"Grand Widow Faerlina",
+			"Maexxna",
+			"Noth the Plaguebringer",
+			"Heigan the Unclean",
+			"Loatheb",
+			"Patchwerk",
+			"Grobbulus",
+			"Gluth",
+			"The Four Horsemen",
+			"Thaddius",
+			"Sapphiron",
+			"Kel'Thuzad",
+			"Trashs",
+		}
+	},
+	{ name = "Emerald Sanctum", bosses = {} },
+	{ name = "Upper Karazhan Halls", bosses = {} }
+}
+
 local function BidTypeToText(bidtype)
 	if bidtype == BIDTYPE.MS then
 		return "MS"
@@ -86,12 +139,16 @@ local function BidTypeStrToValue(bidtypestr)
 end
 
 -- Max # of bids shown in the AuctionUI
-local MAX_BIDS					= 10
+local MAX_BIDS  = 10
+local MAX_ZONES = 6
+local MAX_BOSSES = 20
 
 function module:OnEnable()
 	self.auctionState = AUCTION_STATE.NONE
 	self.secondsCounter = 0
 	self.auctionedItemLink = ""
+	self.selectedZone = 0
+	self.selectedBoss = 0
 
 	-- List of valid bids: { Name, DKP, BidType(MS=1,OS=2), Class, RankName, RankIndex }
 	self.incomingBidsTable = {};
@@ -106,6 +163,7 @@ function module:OnEnable()
 	self:RegisterEvent("SOTA_REQUEST_AUCTION")
 
 	self:AuctionUIInit()
+
 end
 
 
@@ -131,10 +189,9 @@ function module:SetAuctionState(auctionState, seconds)
 	self:SetSecondsCounter(seconds);
 end
 
-function module:SOTA_REQUEST_AUCTION(itemLink)
-	SOTA:Debug("SOTA_REQUEST_AUCTION:", self:GetAuctionState())
+function module:SOTA_REQUEST_AUCTION(itemLink, zoneName, bossName)
 	if self:GetAuctionState() == AUCTION_STATE.NONE then
-		self:StartAuction(itemLink)
+		self:StartAuction(itemLink, zoneName, bossName);
 	else
 		SOTA:Print("An auction is already running.")
 	end
@@ -146,7 +203,7 @@ end
 --	itemLink: a Blizzard itemlink to auction.
 --	Since 0.0.1
 --]]
-function module:StartAuction(itemLink)
+function module:StartAuction(itemLink, zoneName, bossName)
 	local rank = SOTA:GetRaidRank(UnitName("player"));
 	if rank < 1 then
 		SOTA:Print("You need to be Raid Assistant or Raid Leader to start auctions.");
@@ -182,9 +239,30 @@ function module:StartAuction(itemLink)
 			end
 		end
 	end
-	
+
 	self.incomingBidsTable = { };
 	self:RefreshGUIBidsList();
+
+	if zoneName == nil and bossName == nil then -- In case of restart.
+		local zoneId = self:FindZoneByName(zoneName);
+		if zoneId then
+			self:SelectZone(zoneId);
+			local bossId = self:FindBossByName(bossName)
+			if not bossId then
+				bossId = self:FindBossByName("Trashs")
+			end
+
+			if bossId then
+				self:SelectBoss(bossId);
+			else
+				self:SelectBoss(0);
+			end
+		else
+			self:SelectZone(0);
+			self:SelectBoss(0);
+		end
+	end
+
 	self:OpenAuctionUI();
 	
 	self:SetAuctionState(AUCTION_STATE.STARTING, AUCTION_TIME);
@@ -482,6 +560,26 @@ function module:AuctionUIInit()
 		end
 	end
 
+	for n=1, MAX_ZONES, 1 do
+		local entry = CreateFrame("Button", "$parentEntry"..n, AuctionUIFrameZoneList, "SOTA_ZoneTemplate");
+		entry:SetID(n);
+		if n == 1 then
+			entry:SetPoint("TOPLEFT", 4, -4);
+		else
+			entry:SetPoint("TOP", "$parentEntry"..(n-1), "BOTTOM");
+		end
+	end
+
+	for n=1, MAX_BOSSES, 1 do
+		local entry = CreateFrame("Button", "$parentEntry"..n, AuctionUIFrameBossesList, "SOTA_BossTemplate");
+		entry:SetID(n);
+		if n == 1 then
+			entry:SetPoint("TOPLEFT", 4, -4);
+		else
+			entry:SetPoint("TOP", "$parentEntry"..(n-1), "BOTTOM");
+		end
+	end
+
 	-- Save frames in self, it's faster than getglobal().
 	self.auctionFrame = AuctionUIFrame
 	self.itemFrame = getglobal("AuctionUIFrameItem")
@@ -498,6 +596,7 @@ function module:AuctionUIInit()
 		self.bidsFrames[n].bidtype = getglobal(self.bidsFrames[n]:GetName() .. "Bidtype");
 		self.bidsFrames[n].bid     = getglobal(self.bidsFrames[n]:GetName() .. "Bid");
 		self.bidsFrames[n].infos   = getglobal(self.bidsFrames[n]:GetName() .. "Infos");
+		self.bidsFrames[n]:Show();
 	end
 	self.selectedBidFrame         = getglobal("AuctionUIFrameSelected");
 	self.selectedBidFrame.bidder  = getglobal(self.selectedBidFrame:GetName() .. "Bidder")
@@ -512,6 +611,27 @@ function module:AuctionUIInit()
 	self.btns.restartAuction      = getglobal("RestartAuctionButton")
 	self.btns.finishAuction       = getglobal("FinishAuctionButton")
 	self.btns.pauseAuction        = getglobal("PauseAuctionButton")
+
+	self.zonesFrames = {}
+	for n=1, MAX_ZONES, 1 do
+		self.zonesFrames[n] = getglobal("AuctionUIFrameZoneListEntry" .. n);
+		self.zonesFrames[n].name = getglobal(self.zonesFrames[n]:GetName() .. "Name");
+
+		local zoneInfo = ZONES[n];
+		if zoneInfo then
+			self.zonesFrames[n].name:SetText(ZONES[n].name)
+			self.zonesFrames[n]:Show();
+		else
+			self.zonesFrames[n]:Hide();
+		end
+	end
+
+	self.bossesFrames = {}
+	for n=1, MAX_BOSSES, 1 do
+		self.bossesFrames[n] = getglobal("AuctionUIFrameBossesListEntry" .. n);
+		self.bossesFrames[n].name = getglobal(self.bossesFrames[n]:GetName() .. "Name");
+		self.bossesFrames[n]:Hide();
+	end
 end;
 
 function module:FormatBidsListItemInfos(grank, class)
@@ -548,7 +668,6 @@ function module:RefreshGUIBidsList()
 		self.bidsFrames[n].infos:SetText(infos);
 
 		self:RefreshButtonsState();
-		self.bidsFrames[n]:Show();
 	end
 end
 
@@ -829,6 +948,78 @@ function module:GetStartingDKP()
 	return 0;
 end
 
+function module:FindZoneByName(zoneName)
+	for n=1, table.getn(ZONES), 1 do
+		if ZONES[n].name == zoneName then
+			return n, ZONES[n]
+		end
+	end
+	return nil, nil
+end
+
+function module:FindBossByName(bossName)
+	for n=1, table.getn(ZONES[self.selectedZone].bosses), 1 do
+		if ZONES[self.selectedZone].bosses[n] == bossName then
+			return n, ZONES[self.selectedZone].bosses[n]
+		end
+	end
+	return nil, nil;
+end
+
+function module:SelectZone(zoneId)
+	if zoneId == self.selectedZone then
+		return;
+	end
+	for n = 1, table.getn(module.bossesFrames), 1 do
+		module.bossesFrames[n].name:SetTextColor(1, 1, 1, 1)
+	end
+
+
+	self.selectedZone = zoneId;
+	-- Erase all bosses first
+	for n=1, MAX_BOSSES, 1 do
+		self.bossesFrames[n].name:SetText("");
+		self.bossesFrames[n]:Hide();
+	end
+
+	for n = 1, table.getn(module.zonesFrames), 1 do
+		module.zonesFrames[n].name:SetTextColor(1, 1, 1, 1)
+	end
+	if self.selectedZone < 1 or self.selectedZone > table.getn(ZONES) then
+		return;
+	end
+
+	-- Fill bosses with selected zone's bosses
+	local zoneInfo = ZONES[self.selectedZone];
+	if not zoneInfo then
+		return;
+	end
+	for n=1, table.getn(zoneInfo.bosses), 1 do
+		self.bossesFrames[n].name:SetText(zoneInfo.bosses[n]);
+		self.bossesFrames[n]:Show();
+	end
+	--
+
+	self:SelectBoss(0);
+
+	module.zonesFrames[self.selectedZone].name:SetTextColor(DEFAULT_TEXT_FONT:GetTextColor())
+end
+
+function module:SelectBoss(bossId)
+	if self.selectedBoss == bossId then
+		return;
+	end
+	self.selectedBoss = bossId;
+	for n = 1, table.getn(module.bossesFrames), 1 do
+		module.bossesFrames[n].name:SetTextColor(1, 1, 1, 1)
+	end
+
+	if self.selectedBoss < 1 or self.selectedBoss > table.getn(ZONES[self.selectedZone].bosses) then
+		return;
+	end
+	module.bossesFrames[self.selectedBoss].name:SetTextColor(DEFAULT_TEXT_FONT:GetTextColor())
+end
+
 
 --[[
 --	Get current minimum bid.
@@ -899,4 +1090,14 @@ function SOTA_OnBidClick(object)
 	local bidtype= getglobal(object:GetName().."Bidtype"):GetText();
 
 	module:SelectBid(bidder, bid, BidTypeStrToValue(bidtype))
+end
+
+function SOTA_OnZoneClick(object)
+	local zoneID = object:GetID();
+	module:SelectZone(zoneID);
+end
+
+function SOTA_OnBossClick(object)
+	local bossID = object:GetID();
+	module:SelectBoss(bossID);
 end

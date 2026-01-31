@@ -138,7 +138,7 @@ function SOTA_OnLootClick(object)
 	if not itemLink or itemLink == "" then
 		return;
 	end
-	module:TriggerEvent("SOTA_REQUEST_AUCTION", itemLink)
+	module:TriggerEvent("SOTA_REQUEST_AUCTION", itemLink, "Naxxramas", "Grand Widow Faerlina");
 end
 
 function SOTA_OnEarnBossDkp()
