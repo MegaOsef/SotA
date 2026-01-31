@@ -63,7 +63,6 @@ function SOTA:OnEnable()
 
 	self:RegisterChatCommand({ "/SOTA" }, function(input) self:HandleSOTACommand(input) end)
 
-	self:RegisterEvent("ENTERING_WORLD");
 	self:RegisterEvent("GUILD_ROSTER_UPDATE");
 	self:RegisterEvent("RAID_ROSTER_UPDATE", "RefreshRaidRoster");
 

@@ -112,7 +112,7 @@ function module:OnSecondTimer()
 end
 
 function module:RefreshStats()
-	self.statsFrame:SetText("Loot prios counter: " .. table.getn(SOTA.db.realm.ItemPriorities))
+	--self.statsFrame:SetText("Loot prios counter: " .. table.getn(SOTA.db.realm.ItemPriorities))
 end
 
 function SOTA_OpenDashboard()

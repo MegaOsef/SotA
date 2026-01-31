@@ -28,6 +28,4 @@ src\Modules\Auction.xml
 src\Modules\LogsUI.xml
 src\Modules\Dashboard.xml
 src\Modules\BossKillTracker.lua
-
-src\sota-options.xml
-
+src\Modules\Options.xml

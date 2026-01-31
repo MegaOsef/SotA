@@ -1,5 +1,5 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<Script file="sota-options.lua" />
+	<Script file="Options.lua" />
 
 	<!-- Configuration frame template -->
 	<!-- Frame name="SOTA_ConfigurationFrameTemplate" parent="UIParent" toplevel="true" hidden="true" virtual="true" -->
@@ -264,6 +264,40 @@
 				</Scripts>
 			</CheckButton>
 		</Frames>
+		<Layers>
+			<Layer>
+				<FontString name="$parentPrioLoadedStr" justifyH="LEFT"
+					inherits="GameFontNormal"
+					font="Fonts\FRIZQT__.TTF" text="">
+					<FontHeight val="12" />
+					<Size>
+						<AbsDimension x="200" y="15" />
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="187" y="-125" />
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentBossDkpLoadedStr" justifyH="LEFT"
+					inherits="GameFontNormal"
+					font="Fonts\FRIZQT__.TTF" text="">
+					<FontHeight val="12" />
+					<Size>
+						<AbsDimension x="200" y="15" />
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="187" y="-155" />
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
 	</Frame>
 
 	<!-- Configuration Frame 2.3: Sync Cfg -->
