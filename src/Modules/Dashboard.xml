@@ -6,33 +6,33 @@
 		<Size>
 			<AbsDimension x="296" y="36" />
 		</Size>
-			<Frames>
-				<Frame name="$parentItem">
-					<Size>
-						<AbsDimension x="36" y="36" />
-					</Size>
-					<Anchors>
-						<Anchor point="LEFT">
-							<Offset>
-								<AbsDimension x="0" y="0" />
-							</Offset>
-						</Anchor>
-					</Anchors>
-					<Layers>
-						<Layer level="ARTWORK">
-							<Texture name="$parentTexture" file="">
-								<Anchors>
-									<Anchor point="TOP" relativeTo="$parentHeaderTexture">
-										<Offset>
-											<AbsDimension x="0" y="-14" />
-										</Offset>
-									</Anchor>
-								</Anchors>
-							</Texture>
-						</Layer>
-					</Layers>
-				</Frame>
-			</Frames>
+		<Frames>
+			<Frame name="$parentItem">
+				<Size>
+					<AbsDimension x="36" y="36" />
+				</Size>
+				<Anchors>
+					<Anchor point="LEFT">
+						<Offset>
+							<AbsDimension x="0" y="0" />
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK">
+						<Texture name="$parentTexture" file="">
+							<Anchors>
+								<Anchor point="TOP" relativeTo="$parentHeaderTexture">
+									<Offset>
+										<AbsDimension x="0" y="-14" />
+									</Offset>
+								</Anchor>
+							</Anchors>
+						</Texture>
+					</Layer>
+				</Layers>
+			</Frame>
+		</Frames>
 		<Layers>
 			<Layer>
 				<FontString name="$parentItemSoftLink" justifyH="LEFT" inherits="GameFontNormal"
@@ -66,7 +66,7 @@
 				<!-- Item name -->
 				<FontString name="$parentItemName" justifyH="LEFT" inherits="GameFontNormal"
 					font="Fonts\FRIZQT__.TTF">
-						<FontHeight val="12" />
+					<FontHeight val="12" />
 					<Size>
 						<AbsDimension x="296" y="10" />
 					</Size>
@@ -82,7 +82,7 @@
 				<!-- Item Prio -->
 				<FontString name="$parentItemPrio" justifyH="LEFT" inherits="GameFontNormal"
 					font="Fonts\FRIZQT__.TTF">
-						<FontHeight val="10" />
+					<FontHeight val="10" />
 					<Size>
 						<AbsDimension x="296" y="10" />
 					</Size>
@@ -97,7 +97,7 @@
 				<!-- Item Notes -->
 				<FontString name="$parentItemNotes" justifyH="LEFT" inherits="GameFontNormal"
 					font="Fonts\FRIZQT__.TTF">
-						<FontHeight val="10" />
+					<FontHeight val="10" />
 					<Size>
 						<AbsDimension x="296" y="10" />
 					</Size>
@@ -119,11 +119,12 @@
 				getglobal(this:GetName().."BG"):SetVertexColor(1, 1, 1, 1)
 				local link = getglobal(this:GetName() .. "ItemSoftLink"):GetText();
 				if link and link ~= "" then
-					GameTooltip:SetOwner(this, "ANCHOR_RIGHT");
-					GameTooltip:SetHyperlink(link);
-					GameTooltip:Show();
+				GameTooltip:SetOwner(this, "ANCHOR_RIGHT");
+				GameTooltip:SetHyperlink(link);
+				GameTooltip:Show();
 				else
-					SOTA_ShowDashboardToolTip(this, getglobal(this:GetName() .. "ItemName"):GetText() or "");
+				SOTA_ShowDashboardToolTip(this, getglobal(this:GetName() .. "ItemName"):GetText() or
+				"");
 				end
 			</OnEnter>
 			<OnLeave>
@@ -228,6 +229,101 @@
 								SOTA_HideDashboardToolTip(this);
 							</OnLeave>
 						</Scripts>
+					</Button>
+					<Button name="$parentShareBossDkp" hidden="false">
+						<Size>
+							<AbsDimension x="296" y="26" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="0" y="26" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Frames>
+							<Frame name="$parentIcon">
+								<Size>
+									<AbsDimension x="26" y="26" />
+								</Size>
+								<Anchors>
+									<Anchor point="LEFT">
+										<Offset>
+											<AbsDimension x="0" y="0" />
+										</Offset>
+									</Anchor>
+								</Anchors>
+								<Layers>
+									<Layer level="ARTWORK">
+										<Texture name="$parentTexture" file="">
+											<Anchors>
+												<Anchor point="TOP"
+													relativeTo="$parentHeaderTexture">
+													<Offset>
+														<AbsDimension x="0" y="-14" />
+													</Offset>
+												</Anchor>
+											</Anchors>
+										</Texture>
+									</Layer>
+								</Layers>
+							</Frame>
+						</Frames>
+						<Layers>
+							<Layer>
+								<!-- Boss name -->
+								<FontString name="$parentBossName" justifyH="LEFT"
+									inherits="GameFontNormal"
+									font="Fonts\FRIZQT__.TTF" text="Onyxia">
+									<FontHeight val="12" />
+									<Size>
+										<AbsDimension x="296" y="10" />
+									</Size>
+									<Anchors>
+										<Anchor point="TOPLEFT">
+											<Offset>
+												<AbsDimension x="37" y="-1" />
+											</Offset>
+										</Anchor>
+									</Anchors>
+									<Color r="1" g="1" b="1" />
+								</FontString>
+								<!-- DkpValue -->
+								<FontString name="$parentDkpValue" justifyH="LEFT"
+									inherits="GameFontNormal"
+									font="Fonts\FRIZQT__.TTF" text="Dkp Value: 100">
+									<FontHeight val="10" />
+									<Size>
+										<AbsDimension x="296" y="10" />
+									</Size>
+									<Anchors>
+										<Anchor point="TOPLEFT">
+											<Offset>
+												<AbsDimension x="37" y="-13" />
+											</Offset>
+										</Anchor>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
+						<Scripts>
+							<OnClick>
+								SOTA_OnEarnBossDkp(this);
+							</OnClick>
+							<OnEnter>
+								getglobal(this:GetName().."BG"):SetVertexColor(1, 1, 1, 1)
+							</OnEnter>
+							<OnLeave>
+								getglobal(this:GetName().."BG"):SetVertexColor(0.5, 0.5, 0.3, 1)
+								GameTooltip:Hide();
+							</OnLeave>
+							<OnLoad>
+								this:GetScript("OnLeave")(this)
+							</OnLoad>
+						</Scripts>
+						<NormalTexture name="$parentBG">
+							<Color r="0.0" g="0.0" b="0.2" a="1" />
+						</NormalTexture>
 					</Button>
 				</Frames>
 				<Layers>

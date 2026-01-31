@@ -209,6 +209,28 @@ function SOTA_HandleCheckbox(checkbox)
 	end
 end
 
+function SOTA_Conf_ImportBossDkpList()
+	getglobal("SOTA_ConfigurationImportBossDkpList"):Hide()
+end
+
+function SOTA_Conf_ImportBossDkpList_open()
+	getglobal("SOTA_ConfigurationImportBossDkpList"):Show()
+end
+
+function SOTA_Conf_ImportBossDkpList_import()
+	local jsonstr = getglobal("SOTA_ConfigurationImportBossDkpListScrollFrameMessage"):GetText()
+	local bossDkpList, err = SOTA.json.decode(jsonstr)
+	if not bossDkpList then
+		SOTA:Print("Error while trying to parse json:", err)
+		return
+	end
+
+	SOTA.db.realm.BossDKPList = bossDkpList.bosses
+	self:TriggerEvent("SOTA_BOSSDKP_UPDATED")
+
+	getglobal("SOTA_ConfigurationImportBossDkpList"):Hide()
+end
+
 function SOTA_Conf_ImportItemPriorities_close()
 	getglobal("SOTA_ConfigurationImportItemPriorities"):Hide()
 end

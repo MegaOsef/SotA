@@ -57,6 +57,7 @@ function SOTA:OnEnable()
 			UseGuildNotes = SOTA_GUILDNOTE.USEOFFICER,
 			HistoryDkp = {},
 			ItemPriorities = {},
+			BossDkpList = { { BossName = "Greater Plainstrider", DkpValue = 20 } },
 		}
 	)
 

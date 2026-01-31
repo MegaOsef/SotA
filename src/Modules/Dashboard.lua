@@ -7,6 +7,7 @@ function module:OnEnable()
 	self.statsFrame = getglobal("SOTA_Dash_Stats")
 
 	self:RegisterEvent("SOTA_ITEMPRIOS_UPDATED", "RefreshStats")
+	self:RegisterEvent("SOTA_BOSS_KILLED")
 	self:RegisterEvent("LOOT_OPENED", "RefreshLootsList")
 	self:RegisterEvent("LOOT_SLOT_CLEARED", "RefreshLootsList")
 	self:RegisterEvent("LOOT_CLOSED", "RefreshLootsList")
@@ -16,6 +17,14 @@ function module:OnEnable()
 	self:OnSecondTimer()
 
 	self:RefreshLootsList()
+
+	self.bossDkpFrame = getglobal("DashboardUIFrameItemShareBossDkp")
+	self.bossDkpFrame.texture = getglobal(self.bossDkpFrame:GetName() .. "IconTexture")
+	self.bossDkpFrame.name = getglobal(self.bossDkpFrame:GetName() .. "BossName")
+	self.bossDkpFrame.dkpValue = getglobal(self.bossDkpFrame:GetName() .. "DkpValue")
+
+	self.bossDkpFrame.texture:SetTexture("Interface\\Icons\\INV_Misc_Coin_02")
+	self.bossDkpFrame:Hide()
 end
 
 function module:RefreshLootsList()
@@ -78,6 +87,14 @@ function module:RefreshLootsList()
 	end
 end
 
+function module:SOTA_BOSS_KILLED(bossName, dkpValue)
+	self.bossDkpFrame.name:SetText(bossName)
+	self.bossDkpFrame.dkpValue:SetText("Dkp Value: " .. tostring(dkpValue))
+	self.bossDkpFrame.numericDkpValue = dkpValue
+	self.bossDkpFrame:Show()
+	PlaySound("AuctionWindowClose")
+end
+
 function module:OnSecondTimer()
 	if SOTA:IsInRaid(true) then
 		if SOTA.db.realm.DisableDashboard == 0 then
@@ -118,4 +135,15 @@ function SOTA_OnLootClick(object)
 		return;
 	end
 	module:TriggerEvent("SOTA_REQUEST_AUCTION", itemLink)
+end
+
+function SOTA_OnEarnBossDkp()
+	if not module.bossDkpFrame.numericDkpValue or module.bossDkpFrame.numericDkpValue == 0 then
+		SOTA:Print("Error: No boss dkp value to award.")
+		return
+	end
+
+	SOTA:Call_AddRaidDKP(module.bossDkpFrame.numericDkpValue);
+	module.bossDkpFrame:Hide()
+	PlaySound("igBackPackCoinSelect")
 end

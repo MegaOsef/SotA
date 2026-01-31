@@ -87,3 +87,13 @@ function SOTA:GetItemIDFromLink(itemLink)
 	local _, _, itemId = string.find(itemLink, "item:(%d+):")
 	return tonumber(itemId)
 end
+
+function SOTA:FindBossDkp(bossName)
+	local bossDkpList = SOTA.db.realm.BossDkpList
+	for n = 1, table.getn(bossDkpList), 1 do
+		if bossDkpList[n].BossName == bossName then
+			return bossDkpList[n]
+		end
+	end
+	return nil
+end
