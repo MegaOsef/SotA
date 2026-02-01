@@ -101,3 +101,17 @@ function SOTA:FindBossDkp(bossName)
 	end
 	return nil
 end
+
+function SOTA:FormatTime(seconds)
+    local h = math.floor(seconds / 3600)
+    local m = math.floor(math.mod(seconds, 3600) / 60)
+    local s = math.floor(math.mod(seconds, 60))
+
+    if h > 0 then
+        return string.format("%dh %dm %ds", h, m, s)
+    elseif m > 0 then
+        return string.format("%dm %02ds", m, s)
+    else
+        return string.format("%ds", s)
+    end
+end

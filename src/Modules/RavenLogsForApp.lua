@@ -13,6 +13,17 @@ local module = SOTA:NewModule("RavenLogsForApp", "AceEvent-2.0")
 function module:OnEnable()
     self.TsId = 0
     self.LastTs = 0
+
+    self.exportModal = getglobal("SOTA_ExportRavenLogsModal")
+    self.exportModal.editBox = getglobal("SOTA_ExportRavenLogsModalScrollFrameMessage")
+
+    self:RegisterEvent("SOTA_EXPORTRAVENLOGS_REQUEST")
+end
+
+function module:SOTA_EXPORTRAVENLOGS_REQUEST()
+    local exportString = SOTA.json.encode(SOTA.db.realm.RavenLogsForApp)
+    self.exportModal.editBox:SetText(exportString)
+    self.exportModal:Show()
 end
 
 function module:getUniqueId()
@@ -45,10 +56,12 @@ function module:LogTransaction(transactionType, playerName, dkpChange, auctionId
         bossName = bossName,
     })
 
+    self:TriggerEvent("SOTA_RAVENLOGS_UPDATED")
+
     return uniqueAuctionId
 end
 
-function module:LogAuction(itemId, bossName, winner, finalBid)
+function module:LogAuction(itemId, bossName, winner, finalBid, bidType)
     local uniqueAuctionId = self:getUniqueId()
     SOTA:Print("Logging auction with id:", uniqueAuctionId)
 
@@ -58,8 +71,15 @@ function module:LogAuction(itemId, bossName, winner, finalBid)
         bossName = bossName,
         winner = winner,
         finalBid = finalBid,
+        bidType = bidType,
         officer = UnitName("player"),
     })
 
+    self:TriggerEvent("SOTA_RAVENLOGS_UPDATED")
+
     return uniqueAuctionId
+end
+
+function SOTA_ExportRavenLogs_close()
+    module.exportModal:Hide()
 end

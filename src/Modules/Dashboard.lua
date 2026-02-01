@@ -6,14 +6,13 @@ function module:OnEnable()
 	self.lootsFrames = {}
 	self.statsFrame = getglobal("SOTA_Dash_Stats")
 
-	self:RegisterEvent("SOTA_ITEMPRIOS_UPDATED", "RefreshStats")
+	self:RegisterEvent("SOTA_RAVENLOGS_UPDATED")
 	self:RegisterEvent("SOTA_BOSS_KILLED")
 	self:RegisterEvent("LOOT_OPENED", "RefreshLootsList")
 	self:RegisterEvent("LOOT_SLOT_CLEARED", "RefreshLootsList")
 	self:RegisterEvent("LOOT_CLOSED", "RefreshLootsList")
 	self:ScheduleRepeatingEvent("SOTA_OnSecondTimer", self.OnSecondTimer, 1, self)
 
-	self:RefreshStats()
 	self:OnSecondTimer()
 
 	self:RefreshLootsList()
@@ -25,6 +24,10 @@ function module:OnEnable()
 
 	self.bossDkpFrame.texture:SetTexture("Interface\\Icons\\INV_Misc_Coin_02")
 	self.bossDkpFrame:Hide()
+end
+
+function module:SOTA_RAVENLOGS_UPDATED()
+	SOTA.db.realm.NeedsToExportRavenLogs = true
 end
 
 function module:RefreshLootsList()
@@ -109,10 +112,12 @@ function module:OnSecondTimer()
 			SOTA_CloseDashboard();
 		end
 	end
-end
 
-function module:RefreshStats()
-	--self.statsFrame:SetText("Loot prios counter: " .. table.getn(SOTA.db.realm.ItemPriorities))
+	if SOTA.db.realm.NeedsToExportRavenLogs then
+		self.statsFrame:SetText("You need to export Raven logs!");
+	else
+		self.statsFrame:SetText("");
+	end
 end
 
 function SOTA_OpenDashboard()
@@ -150,4 +155,16 @@ function SOTA_OnEarnBossDkp()
 	SOTA:Async_AddRaidDKP(module.bossDkpFrame.numericDkpValue, SOTA.LOGTYPE.BOSS, module.bossDkpFrame.name:GetText());
 	module.bossDkpFrame:Hide()
 	PlaySound("igBackPackCoinSelect")
+end
+
+
+function SOTA_ExportRavenLogsButton_OnClick()
+	module:TriggerEvent("SOTA_EXPORTRAVENLOGS_REQUEST")
+	SOTA.db.realm.NeedsToExportRavenLogs = false
+end
+
+function SOTA_ClearRavenLogsButton_OnClick()
+	SOTA.db.realm.RavenLogsForApp = { dkpMoves = {}, auctions = {} }
+	SOTA:Print("Raven logs cleared.")
+	SOTA.db.realm.NeedsToExportRavenLogs = false
 end

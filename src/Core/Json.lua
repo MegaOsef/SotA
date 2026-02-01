@@ -1,7 +1,9 @@
 -- json.lua - Simple JSON encoder/decoder pour WoW 1.12
 
+local SOTA = SOTAG
+
 local json = {}
-SOTAG.json = json
+SOTA.json = json
 
 -------------------------------------------------
 -- Utilitaires
@@ -51,11 +53,12 @@ local function encodeValue(v, out)
 
     elseif t == "number" then
         -- JSON n'aime pas NaN/inf, on les force à null
-        if v ~= v or v == math.huge or v == -math.huge then
-            table.insert(out, "null")
-        else
+        --SOTA:Print("Encoding number:", v)
+        --if v ~= v or v == math.huge or v == -math.huge then
+        --    table.insert(out, "null")
+        --else
             table.insert(out, tostring(v))
-        end
+        --end
 
     elseif t == "string" then
         table.insert(out, "\"")

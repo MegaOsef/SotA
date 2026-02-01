@@ -75,9 +75,11 @@ function SOTA:OnEnable()
 				bossName = "Onyxia",
 				winner = "PlayerName", --> doesn't exist if no winner
 				finalBid = 500, --> doesn't exist if no winner
+				bidType = "MS", --> "MS" | "OS" 
 				officer = "OfficerName",
 			  }, ... },
 			]] --
+			NeedsToExportRavenLogs = false,
 		}
 	)
 

@@ -533,15 +533,14 @@ function module:DeclareWinner(playername, bid, bidtype)
 			auctionId = module:LogAuction(
 				SOTA:GetItemIDFromLink(self.auctionedItemLink),
 				ZONES[self.selectedZone].bosses[self.selectedBoss],
-				playername,
-				bid);
+				playername, bid, BidTypeToText(bidtype));
         end
 
 		SOTA:SubtractPlayerDKP(playername, bid, SOTA.LOGTYPE.AUCTION, auctionId)
 	else
 		SOTA:Broadcast(SOTA.CHANNEL.RAID, string.format(MSG.ONDECLARENOWINNER, self.auctionedItemLink))
         if module then
-			local auctionId = module:LogAuction(
+			module:LogAuction(
 				SOTA:GetItemIDFromLink(self.auctionedItemLink),
 				ZONES[self.selectedZone].bosses[self.selectedBoss]);
 		end

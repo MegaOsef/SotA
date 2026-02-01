@@ -180,12 +180,12 @@
 					<Button name="$parentTransactionLogButton" inherits="ActionButtonTemplate"
 						frameStrata="HIGH" hidden="false">
 						<Size>
-							<AbsDimension x="32" y="32" />
+							<AbsDimension x="20" y="20" />
 						</Size>
 						<Anchors>
-							<Anchor point="LEFT">
+							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="40" y="0" />
+									<AbsDimension x="0" y="0" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -207,12 +207,12 @@
 					<Button name="$parentConfigurationButton" inherits="ActionButtonTemplate"
 						frameStrata="HIGH" hidden="false">
 						<Size>
-							<AbsDimension x="32" y="32" />
+							<AbsDimension x="20" y="20" />
 						</Size>
 						<Anchors>
-							<Anchor point="LEFT">
+							<Anchor point="TOPLEFT">
 								<Offset>
-									<AbsDimension x="06" y="0" />
+									<AbsDimension x="0" y="-20" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -224,6 +224,60 @@
 							</OnClick>
 							<OnEnter>
 								SOTA_ShowDashboardToolTip(this, "Open Configuration screen");
+							</OnEnter>
+							<OnLeave>
+								SOTA_HideDashboardToolTip(this);
+							</OnLeave>
+						</Scripts>
+					</Button>
+					<!-- Button 3A: Export Raven Logs -->
+					<Button name="$parentExportRavenLogsButton" inherits="ActionButtonTemplate"
+						frameStrata="HIGH" hidden="false">
+						<Size>
+							<AbsDimension x="32" y="32" />
+						</Size>
+						<Anchors>
+							<Anchor point="LEFT">
+								<Offset>
+									<AbsDimension x="23" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<NormalTexture file="Interface\ICONS\Ability_Hunter_Pet_Vulture.blp" />
+						<PushedTexture file="Interface\ICONS\INV_Misc_Head_Troll_02.blp" />
+						<Scripts>
+							<OnClick>
+								SOTA_ExportRavenLogsButton_OnClick();
+							</OnClick>
+							<OnEnter>
+								SOTA_ShowDashboardToolTip(this, "Get export string, to import in RavenApp");
+							</OnEnter>
+							<OnLeave>
+								SOTA_HideDashboardToolTip(this);
+							</OnLeave>
+						</Scripts>
+					</Button>
+					<!-- Button 3A: Clear Raven Logs -->
+					<Button name="$parentClearRavenLogsButton" inherits="ActionButtonTemplate"
+						frameStrata="HIGH" hidden="false">
+						<Size>
+							<AbsDimension x="32" y="32" />
+						</Size>
+						<Anchors>
+							<Anchor point="RIGHT">
+								<Offset>
+									<AbsDimension x="-4" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<NormalTexture file="Interface\ICONS\Ability_Vanish.blp" />
+						<PushedTexture file="Interface\ICONS\INV_Misc_Head_Kobold_01.blp" />
+						<Scripts>
+							<OnClick>
+								SOTA_ClearRavenLogsButton_OnClick();
+							</OnClick>
+							<OnEnter>
+								SOTA_ShowDashboardToolTip(this, "Clear Raven Logs (new session)");
 							</OnEnter>
 							<OnLeave>
 								SOTA_HideDashboardToolTip(this);
@@ -274,7 +328,7 @@
 								<!-- Boss name -->
 								<FontString name="$parentBossName" justifyH="LEFT"
 									inherits="GameFontNormal"
-									font="Fonts\FRIZQT__.TTF" text="Onyxia">
+									font="Fonts\FRIZQT__.TTF">
 									<FontHeight val="12" />
 									<Size>
 										<AbsDimension x="296" y="10" />
@@ -291,7 +345,7 @@
 								<!-- DkpValue -->
 								<FontString name="$parentDkpValue" justifyH="LEFT"
 									inherits="GameFontNormal"
-									font="Fonts\FRIZQT__.TTF" text="Dkp Value: 100">
+									font="Fonts\FRIZQT__.TTF">
 									<FontHeight val="10" />
 									<Size>
 										<AbsDimension x="296" y="10" />
@@ -330,9 +384,9 @@
 					<Layer level="ARTWORK">
 						<FontString inherits="GameFontNormal" text="SOTA" font="Fonts\FRIZQT__.TTF">
 							<Anchors>
-								<Anchor point="LEFT">
+								<Anchor point="CENTER">
 									<Offset>
-										<AbsDimension x="80" y="10" />
+										<AbsDimension x="00" y="10" />
 									</Offset>
 								</Anchor>
 							</Anchors>
@@ -341,9 +395,9 @@
 							font="Fonts\FRIZQT__.TTF" text="">
 							<FontHeight val="10" />
 							<Anchors>
-								<Anchor point="LEFT">
+								<Anchor point="CENTER">
 									<Offset>
-										<AbsDimension x="80" y="-8" />
+										<AbsDimension x="0" y="-8" />
 									</Offset>
 								</Anchor>
 							</Anchors>
