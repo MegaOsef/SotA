@@ -100,3 +100,11 @@ function SOTA_Conf_ImportItemPriorities_import()
 	module:RefreshStrings()
 	getglobal("SOTA_ConfigurationImportItemPriorities"):Hide()
 end
+
+
+-------------------------------
+--- Guild Extract Module
+
+function SOTA_Conf_ExportPlayersDKP_open()
+	module:TriggerEvent("SOTA_GUILDEXTRACT_REQUEST")
+end

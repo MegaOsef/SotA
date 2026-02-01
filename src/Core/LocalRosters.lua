@@ -86,6 +86,8 @@ function SOTA:RefreshGuildRoster()
     end
 
     self.guildRosterTable = NewGuildRosterTable;
+
+    self:TriggerEvent("SOTA_GUILDROSTER_UPDATED");
 end
 
 --[[
