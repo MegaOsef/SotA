@@ -123,13 +123,18 @@ local ZONES                  = {
 		}
 	},
 	{
-		name = "Upper Karazhan Halls",
+		name = "Tower of Karazhan",
 		bosses = {
 			"Keeper Gnarlmoon",
 			"Ley-Watcher Incantagos",
 			"Anomalus",
 			"Echo of Medivh",
 			"King (Chess fight)",
+		}
+	},
+	{
+		name = "The Rock of Desolation",
+		bosses = {
 			"Rupturan the Broken",
 			"Sanv Tasdal",
 			"Kruul",
