@@ -138,7 +138,7 @@ local ZONES                  = {
 			"Rupturan the Broken",
 			"Sanv Tasdal",
 			"Kruul",
-			"Mephistroph",
+			"Mephistroth",
 			"Trashs",
 		}
 	},
