@@ -9,6 +9,7 @@ local MAX_CLASS_DKP_WHISPERED = 5;
 local MSG                     = {
     ON_DKPADDED = "%i DKP was added to %s",
     ON_DKPADDED_RAID = "%i DKP was added to all players in raid",
+    ON_DKPADDED_RAID_WITHBOSS = "%i DKP was added to all players in raid (boss: %s)",
     ON_DKPREPLACED = "%s was replaced with %s (%i DKP)",
     ON_DKP_SUBTRACT = "%i DKP was subtracted from %s",
     ON_DKP_SUBTRACT_RAID = "%i DKP was subtracted from all players in raid",
@@ -115,57 +116,67 @@ end
 --[[
 --	Add <dkp> DKP to <playername>
 --]]
-function SOTA:Async_AddPlayerDKP(playername, dkp)
+function SOTA:Async_AddPlayerDKP(playername, dkp, transactionType)
     if self:CanDoDKP() then
-        self:AddJob(function(job) self:AddPlayerDKP(job[2], job[3]) end, playername, dkp)
+        self:AddJob(function(job) self:AddPlayerDKP(job[2], job[3], job[4]) end, playername, dkp, transactionType)
         self:RequestUpdateGuildRoster();
     end
 end
 
-function SOTA:AddPlayerDKP(playername, dkpValue, silentmode)
+function SOTA:AddPlayerDKP(playername, dkpValue, transactionType)
     dkpValue = 1 * dkpValue;
     if self:ApplyPlayerDKP(playername, dkpValue) then
         playername = self:UCFirst(playername);
-        if not silentmode then
-            self:Broadcast(self.CHANNEL.WARN, string.format(MSG.ON_DKPADDED, dkpValue, playername))
-        end
+        self:Broadcast(self.CHANNEL.WARN, string.format(MSG.ON_DKPADDED, dkpValue, playername))
         self:TriggerEvent("SOTA_LOG_SINGLE_TRANSACTION", "+Player", playername, dkpValue);
+
+        local ravenLogs = self:GetModule("RavenLogsForApp", true)
+        if ravenLogs then
+            ravenLogs:LogTransaction(transactionType, playername, dkpValue)
+        end
     end
 end
 
 --[[
 --	Subtract <dkp> DKP from <playername>
 --]]
-function SOTA:Async_SubtractPlayerDKP(playername, dkp)
+function SOTA:Async_SubtractPlayerDKP(playername, dkp, transactionType, auctionId)
     if self:CanDoDKP() and tonumber(dkp) then
-        self:AddJob(function(job) self:SubtractPlayerDKP(job[2], job[3]) end, playername, dkp)
+        self:AddJob(function(job) self:SubtractPlayerDKP(job[2], job[3], job[4], job[5]) end, playername, dkp, transactionType, auctionId)
         self:RequestUpdateGuildRoster();
     end
 end
 
-function SOTA:SubtractPlayerDKP(playername, dkpValue, silentmode)
+function SOTA:SubtractPlayerDKP(playername, dkpValue, transactionType, auctionId)
     dkpValue = -1 * dkpValue;
     if self:ApplyPlayerDKP(playername, dkpValue) then
         playername = self:UCFirst(playername);
-        if not silentmode then
-            self:Broadcast(self.CHANNEL.WARN, string.format(MSG.ON_DKP_SUBTRACT, abs(dkpValue), playername))
-        end
+        self:Broadcast(self.CHANNEL.WARN, string.format(MSG.ON_DKP_SUBTRACT, abs(dkpValue), playername))
         self:TriggerEvent("SOTA_LOG_SINGLE_TRANSACTION", "-Player", playername, dkpValue);
+
+        local ravenLogs = self:GetModule("RavenLogsForApp", true)
+        if ravenLogs then
+            ravenLogs:LogTransaction(transactionType, playername, dkpValue, auctionId)
+        end
     end
 end
 
 --[[
 --	Add <n> DKP to all players in raid
 --]]
-function SOTA:Async_AddRaidDKP(dkp)
+function SOTA:Async_AddRaidDKP(dkp, transactionType, bossName)
+    SOTA:Print("Async_AddRaidDKP called with dkp:", dkp, "transactionType:", transactionType, "bossName:", tostring(bossName))
     if self:IsInRaid(true) then
-        self:AddJob(function(job) self:AddRaidDKP(job[2]) end, dkp, "_")
+        self:AddJob(function(job) self:AddRaidDKP(job[2], "_", job[3], job[4]) end, dkp, transactionType, bossName)
         self:RequestUpdateGuildRoster();
     end
 end
 
-function SOTA:AddRaidDKP(dkp, silentmode, callMethod)
+function SOTA:AddRaidDKP(dkp, callMethod, transactionType, bossName)
+    SOTA:Print("AddRaidDKP called with dkp:", dkp, "callMethod:", callMethod, "transactionType:", transactionType, "bossName:", tostring(bossName))
     if self:IsInRaid(true) then
+        local ravenLogs = self:GetModule("RavenLogsForApp", true)
+
         dkp = 1 * dkp;
 
         if not callMethod then
@@ -179,12 +190,18 @@ function SOTA:AddRaidDKP(dkp, silentmode, callMethod)
         for n = 1, table.getn(raidRoster), 1 do
             self:ApplyPlayerDKP(raidRoster[n][RT_COL.PNAME], dkp);
 
+            if ravenLogs then
+                ravenLogs:LogTransaction(transactionType, raidRoster[n][RT_COL.PNAME], dkp, nil, bossName)
+            end
+
             tidChanges[tidIndex] = { raidRoster[n][RT_COL.PNAME], dkp };
             tidIndex = tidIndex + 1;
         end
 
-        if not silentmode then
+        if not bossName then
             self:Broadcast(self.CHANNEL.WARN, string.format(MSG.ON_DKPADDED_RAID, dkp))
+        else
+            self:Broadcast(self.CHANNEL.WARN, string.format(MSG.ON_DKPADDED_RAID_WITHBOSS, dkp, bossName))
         end
 
         local module = self:GetModule("LogsUI", true)
@@ -208,6 +225,8 @@ end
 
 function SOTA:SubtractRaidDKP(dkp, silentmode, callMethod)
     if self:IsInRaid(true) then
+        local ravenLogs = self:GetModule("RavenLogsForApp", true)
+
         dkp = -1 * dkp;
 
         if not callMethod then
@@ -229,6 +248,10 @@ function SOTA:SubtractRaidDKP(dkp, silentmode, callMethod)
         --end
         for n = 1, table.getn(raidRoster), 1 do
             self:ApplyPlayerDKP(raidRoster[n][RT_COL.PNAME], dkp);
+
+            if ravenLogs then
+                ravenLogs:LogTransaction(SOTA.LOGTYPE.RAID, raidRoster[n][RT_COL.PNAME], dkp)
+            end
 
             tidChanges[tidIndex] = { raidRoster[n][RT_COL.PNAME], dkp };
             tidIndex = tidIndex + 1;
@@ -355,6 +378,7 @@ function SOTA:DecayDKP(percent, silentmode)
     --	Iterate over all guilded players - online or not
     local name, publicNote, officerNote
     local memberCount = GetNumGuildMembers();
+    local ravenLogs = self:GetModule("RavenLogsForApp", true)
     for n = 1, memberCount, 1 do
         name, _, _, _, _, _, publicNote, officerNote = GetGuildRosterInfo(n);
         local note = officerNote;
@@ -367,6 +391,10 @@ function SOTA:DecayDKP(percent, silentmode)
             local minus = floor(dkp * percent / 100)
             tidChanges[tidIndex] = { name, (-1 * minus) }
             tidIndex = tidIndex + 1
+
+            if ravenLogs then
+                ravenLogs:LogTransaction(SOTA.LOGTYPE.DECAY, name, -1 * minus, nil)
+            end
 
             dkp = dkp - minus;
             reducedDkp = reducedDkp + minus;

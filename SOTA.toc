@@ -29,3 +29,4 @@ src\Modules\LogsUI.xml
 src\Modules\Dashboard.xml
 src\Modules\BossKillTracker.lua
 src\Modules\Options.xml
+src\Modules\RavenLogsForApp.lua

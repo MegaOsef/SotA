@@ -57,7 +57,27 @@ function SOTA:OnEnable()
 			UseGuildNotes = SOTA_GUILDNOTE.USEOFFICER,
 			HistoryDkp = {},
 			ItemPriorities = {}, -- { { item_id = 12345, priority = "For healers", notes = "Better for shamans" }, ... }
-			BossDkpList = {} -- { { BossName = "Greater Plainstrider", DkpValue = 20 }, ... },
+			BossDkpList = {}, -- { { BossName = "Greater Plainstrider", DkpValue = 20 }, ... },
+			RavenLogsForApp = { dkpMoves = {}, auctions = {} },
+			--[[
+			{ dkpMoves = { {
+				id = "20260201160343001", -->> Last 3 digits is to avoid collisions, first ones are timestamp
+				type = "manual", -->> "boss" | "auction" | "decay" | "manual" | "raid" (manual raid mvts)
+				player = "PlayerName",
+				dkpChange = 50, -->> can be negative
+				auctionId = "20260201160343001", -->> only for "auction" type
+				bossName= "Onyxia", -->> only for "boss" type
+				officer = "OfficerName",
+			}, ... },
+			  auctions = { {
+			  	id = "20260201160343001", -->> Last 3 digits is to avoid collisions, first ones are timestamp
+				itemId = 1234,
+				bossName = "Onyxia",
+				winner = "PlayerName", --> doesn't exist if no winner
+				finalBid = 500, --> doesn't exist if no winner
+				officer = "OfficerName",
+			  }, ... },
+			]] --
 		}
 	)
 
@@ -167,7 +187,7 @@ function SOTA:HandleSOTACommand(msg)
 			--	Syntax: "raid +<%d>"
 		elseif sign == "+" then
 			arg = string.sub(arg, 2);
-			return self:Async_AddRaidDKP(arg);
+			return self:Async_AddRaidDKP(arg, SOTA.LOGTYPE.RAID);
 		else
 			self:Print("DKP must be written as +999 or -999");
 			return;
@@ -197,16 +217,16 @@ function SOTA:HandleSOTACommand(msg)
 	--	Command: +
 	--	Syntax: "+<%d> <playername>"
 	if sign == "+" then
-		local cmd = string.sub(cmd, 2);
-		return self:Async_AddPlayerDKP(arg, cmd);
+		local playerName = string.sub(cmd, 2);
+		return self:Async_AddPlayerDKP(arg, playerName, SOTA.LOGTYPE.MANUAL, nil);
 	end
 
 
 	if sign == "-" then
-		cmd = string.sub(cmd, 2);
+		local playerName = string.sub(cmd, 2);
 		--	Command: -
 		--	Syntax: "-<%d> <playername>"
-		return self:Async_SubtractPlayerDKP(arg, cmd);
+		return self:Async_SubtractPlayerDKP(arg, playerName, SOTA.LOGTYPE.MANUAL, nil);
 	end
 
 	self:Print("Unknown command: " .. msg);

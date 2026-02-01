@@ -32,6 +32,10 @@ function SOTA:GetDateTimestamp()
 	return date("%Y/%m/%d %H:%M:%S", time());
 end
 
+function SOTA:GetDateTimestampId()
+	return date("%Y%m%d%H%M%S", time());
+end
+
 --[[
 --	Convert a msg so first letter is uppercase, and rest as lower case.
 --]]

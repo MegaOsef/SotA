@@ -317,11 +317,6 @@ function module:CheckAuctionState()
 		self:SetSecondsCounter(secs - 1)
 	end
 	
-	--if state == AUCTION_STATE.COMPLETE then
-	--	--	 We're idle
-	--	self:SetAuctionState(AUCTION_STATE.NONE)
-	--end
-
 	self:RefreshButtonsState();
 end
 
@@ -525,16 +520,31 @@ end
 
 
 function module:DeclareWinner(playername, bid, bidtype)
+	local module = SOTA:GetModule("RavenLogsForApp", true)
 	if playername and bid and bidtype then
 		playername = SOTA:UCFirst(playername);
 		bid = 1 * bid;
 		
 		SOTA:Broadcast(SOTA.CHANNEL.RAID,
 			string.format(MSG.ONDECLAREWINNER, self.auctionedItemLink, playername, bid, BidTypeToText(bidtype)))
-		
-		SOTA:SubtractPlayerDKP(playername, bid)
+
+		local auctionId = nil
+        if module then
+			auctionId = module:LogAuction(
+				SOTA:GetItemIDFromLink(self.auctionedItemLink),
+				ZONES[self.selectedZone].bosses[self.selectedBoss],
+				playername,
+				bid);
+        end
+
+		SOTA:SubtractPlayerDKP(playername, bid, SOTA.LOGTYPE.AUCTION, auctionId)
 	else
 		SOTA:Broadcast(SOTA.CHANNEL.RAID, string.format(MSG.ONDECLARENOWINNER, self.auctionedItemLink))
+        if module then
+			local auctionId = module:LogAuction(
+				SOTA:GetItemIDFromLink(self.auctionedItemLink),
+				ZONES[self.selectedZone].bosses[self.selectedBoss]);
+		end
 	end
 end
 
