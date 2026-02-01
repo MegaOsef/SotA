@@ -47,21 +47,55 @@ function SOTA:CanWriteNotes()
     return result
 end
 
+local function getPlayerRaidRank()
+    local playername = UnitName("player");
+
+    local members = GetNumRaidMembers();
+    for n = 1, members, 1 do
+        local name, rank = GetRaidRosterInfo(n);
+        if (name == playername) then
+            return rank;
+        end
+    end
+    return -1;
+end
+
 function SOTA:IsPromoted()
 	if not self:IsInRaid(true) then
 		return false;
 	end
 
-	local playername = UnitName("player");
+    if getPlayerRaidRank() > 0 then
+        return true;
+    end
 
-	local members = GetNumRaidMembers();
-	for n = 1, members, 1 do
-		local name, rank = GetRaidRosterInfo(n);
-		--SOTA:Print(string.format("Player %s (%s) rank is %d", name, playername, rank))
-
-		if (name == playername and rank > 0) then
-			return true;
-		end
-	end
 	return false;
+end
+
+function SOTA:IsRaidLeader()
+	if not self:IsInRaid(true) then
+		return false;
+	end
+
+    if getPlayerRaidRank() == 2 then
+        return true;
+    end
+
+	return false;
+end
+
+function SOTA:IsMasterLoot()
+    if not self:IsInRaid(true) then
+        return false;
+    end
+    local lootmethod, masterlootIdx= GetLootMethod()
+    if lootmethod ~= "master" then -- Not master looter ?
+        return false;
+    end
+
+    if masterlootIdx == 0 then -- Is player master looter ?
+        return true;
+    end
+
+    return false;
 end

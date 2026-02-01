@@ -5,6 +5,8 @@ local module = SOTA:NewModule("Dashboard", "AceEvent-2.0")
 function module:OnEnable()
 	self.lootsFrames = {}
 	self.statsFrame = getglobal("SOTA_Dash_Stats")
+	self.warnNotRL = getglobal("SOTA_DashWarn_NotRL")
+	self.warnNotML = getglobal("SOTA_DashWarn_NotML")
 	self.currentLootedMobName = nil
 
 	self:RegisterEvent("SOTA_RAVENLOGS_UPDATED")
@@ -128,6 +130,18 @@ function module:OnSecondTimer()
 		self.statsFrame:SetText("You need to export Raven logs!");
 	else
 		self.statsFrame:SetText("");
+	end
+
+	if SOTA:IsRaidLeader() then
+		self.warnNotRL:Hide()
+	else
+		self.warnNotRL:Show()
+	end
+
+	if SOTA:IsMasterLoot() then
+		self.warnNotML:Hide()
+	else
+		self.warnNotML:Show()
 	end
 end
 

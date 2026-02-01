@@ -403,6 +403,30 @@
 							</Anchors>
 							<Color r="1" g="1" b="1" a="" />
 						</FontString>
+						<FontString name="SOTA_DashWarn_NotRL" inherits="GameFontNormal"
+							font="Fonts\FRIZQT__.TTF" text="NOT RL!" hidden="true">
+							<FontHeight val="11" />
+							<Anchors>
+								<Anchor point="CENTER">
+									<Offset>
+										<AbsDimension x="-50" y="10" />
+									</Offset>
+								</Anchor>
+							</Anchors>
+							<Color r="0.5" g="1" b="0.5" a="" />
+						</FontString>
+						<FontString name="SOTA_DashWarn_NotML" inherits="GameFontNormal"
+							font="Fonts\FRIZQT__.TTF" text="NOT ML!" hidden="true">
+							<FontHeight val="11" />
+							<Anchors>
+								<Anchor point="CENTER">
+									<Offset>
+										<AbsDimension x="50" y="10" />
+									</Offset>
+								</Anchor>
+							</Anchors>
+							<Color r="0.5" g="1" b="0.5" a="" />
+						</FontString>
 					</Layer>
 				</Layers>
 			</Frame>
