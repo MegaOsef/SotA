@@ -76,6 +76,7 @@ local ZONES                  = {
 			"Flamegor",
 			"Chromaggus",
 			"Nefarian",
+			"Trashs",
 		},
 	},
 	{
@@ -90,6 +91,7 @@ local ZONES                  = {
 			"The Twin Emperors",
 			"Ouro",
 			"C'Thun",
+			"Trashs",
 		},
 	},
 	{
@@ -104,15 +106,37 @@ local ZONES                  = {
 			"Patchwerk",
 			"Grobbulus",
 			"Gluth",
-			"The Four Horsemen",
 			"Thaddius",
+			"Instructor Razuvious",
+			"Gothik the Harvester",
+			"Four Horsemen",
 			"Sapphiron",
 			"Kel'Thuzad",
 			"Trashs",
 		}
 	},
-	{ name = "Emerald Sanctum", bosses = {} },
-	{ name = "Upper Karazhan Halls", bosses = {} },
+	{
+		name = "Emerald Sanctum",
+		bosses = {
+			"Solnius the Awakener",
+			"Trashs",
+		}
+	},
+	{
+		name = "Upper Karazhan Halls",
+		bosses = {
+			"Keeper Gnarlmoon",
+			"Ley-Watcher Incantagos",
+			"Anomalus",
+			"Echo of Medivh",
+			"King (Chess fight)",
+			"Rupturan the Broken",
+			"Sanv Tasdal",
+			"Kruul",
+			"Mephistroph",
+			"Trashs",
+		}
+	},
 	-- { name = "The Barrens", bosses = { "Greater Plainstrider" }} -- For testing purposes
 }
 
