@@ -104,7 +104,7 @@ function SOTA:HandleSOTACommand(msg)
 	--	Syntax: "<itemlink>"
 	local _, _, itemId = string.find(msg, "item:(%d+):")
 	if itemId then
-		self:TriggerEvent("SOTA_REQUEST_AUCTION", msg, "Naxxramas", "Grand Widow Faerlina");
+		self:TriggerEvent("SOTA_REQUEST_AUCTION", msg, GetRealZoneText())
 		return
 	end
 
