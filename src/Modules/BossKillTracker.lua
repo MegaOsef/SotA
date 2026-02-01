@@ -13,11 +13,11 @@ function module:CHAT_MSG_COMBAT_HOSTILE_DEATH(msg)
 	local s, e = string.find(lowerMsg, findStr, 1, true)
 
 	if s then
-		local bossName = string.sub(msg, 1, s - 1)
-		if bossName ~= "" then
-			local bossDkp = SOTA:FindBossDkp(bossName)
-			if bossDkp then
-				self:TriggerEvent("SOTA_BOSS_KILLED", tostring(bossDkp.BossName), tonumber(bossDkp.DkpValue))
+		local bossTriggerName = string.sub(msg, 1, s - 1)
+		if bossTriggerName ~= "" then
+			local bossDkpListItem = SOTA:FindBossDkpFromTriggerName(bossTriggerName)
+			if bossDkpListItem then
+				self:TriggerEvent("SOTA_BOSS_KILLED", tostring(bossDkpListItem.bossName), tonumber(bossDkpListItem.dkpValue))
 				return
 			end
 		end

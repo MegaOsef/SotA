@@ -69,9 +69,9 @@ function SOTA_Conf_ImportBossDkpList_import()
 		SOTA:Print("Error while trying to parse json:", err)
 		return
 	end
-	SOTA:Print("Imported boss dkp list with", table.getn(bossDkpList.bosses), "entries.")
+	SOTA:Print("Imported boss dkp list with", table.getn(bossDkpList), "entries.")
 
-	SOTA.db.realm.BossDkpList = bossDkpList.bosses
+	SOTA.db.realm.BossDkpList = bossDkpList
 	module:RefreshStrings()
 
 	getglobal("SOTA_ConfigurationImportBossDkpList"):Hide()

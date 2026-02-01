@@ -57,7 +57,7 @@ function SOTA:OnEnable()
 			UseGuildNotes = SOTA_GUILDNOTE.USEOFFICER,
 			HistoryDkp = {},
 			ItemPriorities = {}, -- { { item_id = 12345, priority = "For healers", notes = "Better for shamans" }, ... }
-			BossDkpList = {}, -- { { BossName = "Greater Plainstrider", DkpValue = 20 }, ... },
+			BossDkpList = {}, -- { { bossName = "Four Horsemen", triggerName = "Sir Zeliek", dkpValue = 10 }, ... },
 			RavenLogsForApp = { dkpMoves = {}, auctions = {} },
 			--[[
 			{ dkpMoves = { {

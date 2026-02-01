@@ -92,10 +92,10 @@ function SOTA:GetItemIDFromLink(itemLink)
 	return tonumber(itemId)
 end
 
-function SOTA:FindBossDkp(bossName)
+function SOTA:FindBossDkpFromTriggerName(triggerName)
 	local bossDkpList = SOTA.db.realm.BossDkpList
 	for n = 1, table.getn(bossDkpList), 1 do
-		if bossDkpList[n].BossName == bossName then
+		if bossDkpList[n].triggerName == triggerName then
 			return bossDkpList[n]
 		end
 	end

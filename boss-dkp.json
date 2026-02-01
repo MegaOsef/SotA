@@ -115,6 +115,11 @@
     "dkpValue": 10
   },
   {
+    "triggerName": "Greater Plainstrider",
+    "bossName": "Greater Plainstrider2",
+    "dkpValue": 10
+  },
+  {
     "triggerName": "Thaddius",
     "bossName": "Thaddius",
     "dkpValue": 10
