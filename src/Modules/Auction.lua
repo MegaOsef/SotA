@@ -268,7 +268,7 @@ function module:StartAuction(itemLink, zoneName, bossName)
 	self.incomingBidsTable = { };
 	self:RefreshGUIBidsList();
 
-	if zoneName ~= nil and bossName ~= nil then
+	if zoneName ~= nil and bossName ~= nil then -- Automatic auction start.
 		local zoneId = self:FindZoneByName(zoneName);
 		if zoneId then
 			self:SelectZone(zoneId);
@@ -286,7 +286,15 @@ function module:StartAuction(itemLink, zoneName, bossName)
 			self:SelectZone(0);
 			self:SelectBoss(0);
 		end
-	end
+	elseif zoneName ~= nil and bossName == nil then -- Manual auction start.
+		local zoneId = self:FindZoneByName(zoneName);
+		if zoneId then
+			self:SelectZone(zoneId);
+		else
+			self:SelectZone(0);
+		end
+		self:SelectBoss(0);
+	end -- Else is auction restart: selected zone and boss are kept.
 
 	self:OpenAuctionUI();
 	
@@ -770,6 +778,15 @@ end
 --	Since 0.0.3
 --]]
 function module:DeclareAuctionWinner()
+	if self.selectedZone == 0 then
+		SOTA:Print("Error: You must select a zone before declaring a winner.");
+		return;
+	end
+	if self.selectedBoss == 0 then
+		SOTA:Print("Error: You must select a boss before declaring a winner.");
+		return;
+	end
+
 	local selectedBid = self:GetSelectedBid();
 	if not selectedBid then
 		self:DeclareWinner()
