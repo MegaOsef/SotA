@@ -165,7 +165,7 @@ end
 --	Add <n> DKP to all players in raid
 --]]
 function SOTA:Async_AddRaidDKP(dkp, transactionType, bossName)
-    SOTA:Print("Async_AddRaidDKP called with dkp:", dkp, "transactionType:", transactionType, "bossName:", tostring(bossName))
+    SOTA:Debug("Async_AddRaidDKP called with dkp:", dkp, "transactionType:", transactionType, "bossName:", tostring(bossName))
     if self:IsInRaid(true) then
         self:AddJob(function(job) self:AddRaidDKP(job[2], "_", job[3], job[4]) end, dkp, transactionType, bossName)
         self:RequestUpdateGuildRoster();
@@ -173,7 +173,7 @@ function SOTA:Async_AddRaidDKP(dkp, transactionType, bossName)
 end
 
 function SOTA:AddRaidDKP(dkp, callMethod, transactionType, bossName)
-    SOTA:Print("AddRaidDKP called with dkp:", dkp, "callMethod:", callMethod, "transactionType:", transactionType, "bossName:", tostring(bossName))
+    SOTA:Debug("AddRaidDKP called with dkp:", dkp, "callMethod:", callMethod, "transactionType:", transactionType, "bossName:", tostring(bossName))
     if self:IsInRaid(true) then
         local ravenLogs = self:GetModule("RavenLogsForApp", true)
 
