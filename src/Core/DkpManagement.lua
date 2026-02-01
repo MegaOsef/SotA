@@ -257,9 +257,7 @@ function SOTA:SubtractRaidDKP(dkp, silentmode, callMethod)
             tidIndex = tidIndex + 1;
         end
 
-        if not silentmode then
-            self:Broadcast(self.CHANNEL.WARN, string.format(MSG.ON_DKP_SUBTRACT_RAID, dkp))
-        end
+        self:Broadcast(self.CHANNEL.WARN, string.format(MSG.ON_DKP_SUBTRACT_RAID, abs(dkp)))
 
         local module = self:GetModule("LogsUI", true)
         if module then
