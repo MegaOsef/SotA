@@ -1,0 +1,122 @@
+[
+  {
+    "triggerName": "Anomalus",
+    "bossName": "Anomalus",
+    "dkpValue": 30
+  },
+  {
+    "triggerName": "Anub'Rekhan",
+    "bossName": "Anub'Rekhan",
+    "dkpValue": 10
+  },
+  {
+    "triggerName": "Echo of Medivh",
+    "bossName": "Echo of Medivh",
+    "dkpValue": 30
+  },
+  {
+    "triggerName": "Sir Zeliek",
+    "bossName": "Four Horsemen",
+    "dkpValue": 10
+  },
+  {
+    "triggerName": "Gluth",
+    "bossName": "Gluth",
+    "dkpValue": 10
+  },
+  {
+    "triggerName": "Gothik the Harvester",
+    "bossName": "Gothik the Harvester",
+    "dkpValue": 10
+  },
+  {
+    "triggerName": "Grand Widow Faerlina",
+    "bossName": "Grand Widow Faerlina",
+    "dkpValue": 10
+  },
+  {
+    "triggerName": "Grobbulus",
+    "bossName": "Grobbulus",
+    "dkpValue": 10
+  },
+  {
+    "triggerName": "Heigan the Unclean",
+    "bossName": "Heigan the Unclean",
+    "dkpValue": 10
+  },
+  {
+    "triggerName": "Instructor Razuvious",
+    "bossName": "Instructor Razuvious",
+    "dkpValue": 10
+  },
+  {
+    "triggerName": "Keeper Gnarlmoon",
+    "bossName": "Keeper Gnarlmoon",
+    "dkpValue": 30
+  },
+  {
+    "triggerName": "Kel'Thuzad",
+    "bossName": "Kel'Thuzad",
+    "dkpValue": 10
+  },
+  {
+    "triggerName": "King",
+    "bossName": "King (Chess fight)",
+    "dkpValue": 30
+  },
+  {
+    "triggerName": "Kruul",
+    "bossName": "Kruul",
+    "dkpValue": 50
+  },
+  {
+    "triggerName": "Ley-Watcher Incantagos",
+    "bossName": "Ley-Watcher Incantagos",
+    "dkpValue": 30
+  },
+  {
+    "triggerName": "Loatheb",
+    "bossName": "Loatheb",
+    "dkpValue": 10
+  },
+  {
+    "triggerName": "Maexxna",
+    "bossName": "Maexxna",
+    "dkpValue": 10
+  },
+  {
+    "triggerName": "Mephistroph",
+    "bossName": "Mephistroph",
+    "dkpValue": 50
+  },
+  {
+    "triggerName": "Noth the Plaguebringer",
+    "bossName": "Noth the Plaguebringer",
+    "dkpValue": 10
+  },
+  {
+    "triggerName": "Patchwerk",
+    "bossName": "Patchwerk",
+    "dkpValue": 10
+  },
+  {
+    "triggerName": "Fragment of Rupturan",
+    "bossName": "Rupturan the Broken",
+    "dkpValue": 50
+  },
+  {
+    "triggerName": "Sanv Tasdal",
+    "bossName": "Sanv Tasdal",
+    "dkpValue": 50
+  },
+  {
+    "triggerName": "Sapphiron",
+    "bossName": "Sapphiron",
+    "dkpValue": 10
+  },
+  {
+    "triggerName": "Thaddius",
+    "bossName": "Thaddius",
+    "dkpValue": 10
+  }
+]

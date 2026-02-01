@@ -5,12 +5,13 @@ local module = SOTA:NewModule("Dashboard", "AceEvent-2.0")
 function module:OnEnable()
 	self.lootsFrames = {}
 	self.statsFrame = getglobal("SOTA_Dash_Stats")
+	self.currentLootedMobName = nil
 
 	self:RegisterEvent("SOTA_RAVENLOGS_UPDATED")
 	self:RegisterEvent("SOTA_BOSS_KILLED")
-	self:RegisterEvent("LOOT_OPENED", "RefreshLootsList")
+	self:RegisterEvent("LOOT_OPENED")
 	self:RegisterEvent("LOOT_SLOT_CLEARED", "RefreshLootsList")
-	self:RegisterEvent("LOOT_CLOSED", "RefreshLootsList")
+	self:RegisterEvent("LOOT_CLOSED")
 	self:ScheduleRepeatingEvent("SOTA_OnSecondTimer", self.OnSecondTimer, 1, self)
 
 	self:OnSecondTimer()
@@ -28,6 +29,16 @@ end
 
 function module:SOTA_RAVENLOGS_UPDATED()
 	SOTA.db.realm.NeedsToExportRavenLogs = true
+end
+
+function module:LOOT_OPENED()
+	self.currentLootedMobName = UnitName("target")
+	self:RefreshLootsList()
+end
+
+function module:LOOT_CLOSED()
+	self.currentLootedMobName = nil
+	self:RefreshLootsList()
 end
 
 function module:RefreshLootsList()
@@ -143,7 +154,7 @@ function SOTA_OnLootClick(object)
 	if not itemLink or itemLink == "" then
 		return;
 	end
-	module:TriggerEvent("SOTA_REQUEST_AUCTION", itemLink, "Naxxramas", "Grand Widow Faerlina");
+	module:TriggerEvent("SOTA_REQUEST_AUCTION", itemLink, GetRealZoneText(), module.currentLootedMobName);
 end
 
 function SOTA_OnEarnBossDkp()

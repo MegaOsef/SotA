@@ -112,7 +112,8 @@ local ZONES                  = {
 		}
 	},
 	{ name = "Emerald Sanctum", bosses = {} },
-	{ name = "Upper Karazhan Halls", bosses = {} }
+	{ name = "Upper Karazhan Halls", bosses = {} },
+	-- { name = "The Barrens", bosses = { "Greater Plainstrider" }} -- For testing purposes
 }
 
 local function BidTypeToText(bidtype)
@@ -243,7 +244,7 @@ function module:StartAuction(itemLink, zoneName, bossName)
 	self.incomingBidsTable = { };
 	self:RefreshGUIBidsList();
 
-	if zoneName == nil and bossName == nil then -- In case of restart.
+	if zoneName ~= nil and bossName ~= nil then
 		local zoneId = self:FindZoneByName(zoneName);
 		if zoneId then
 			self:SelectZone(zoneId);

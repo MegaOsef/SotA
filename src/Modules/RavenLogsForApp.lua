@@ -39,8 +39,6 @@ end
 
 function module:LogTransaction(transactionType, playerName, dkpChange, auctionId, bossName)
     local uniqueAuctionId = self:getUniqueId()
-    SOTA:Print("Logging transaction with id:", uniqueAuctionId, transactionType, playerName, dkpChange, tostring(auctionId))
-
     local finalAuctionId = nil
     if auctionId then
         finalAuctionId = auctionId
@@ -63,7 +61,6 @@ end
 
 function module:LogAuction(itemId, bossName, winner, finalBid, bidType)
     local uniqueAuctionId = self:getUniqueId()
-    SOTA:Print("Logging auction with id:", uniqueAuctionId)
 
     table.insert(SOTA.db.realm.RavenLogsForApp.auctions, {
         id = uniqueAuctionId,
