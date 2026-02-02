@@ -80,7 +80,7 @@ local ZONES                  = {
 		},
 	},
 	{
-		name = "Temple of Ahn'Qiraj",
+		name = "Ahn'Qiraj",
 		bosses = {
 			"The Prophet Skeram",
 			"The Bug Family",
