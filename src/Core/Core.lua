@@ -43,6 +43,8 @@ function SOTA:OnInitialize()
 		GUILD = "GUILD",
 		WHISPER = "WHISPER",
 	}
+
+	self.MAX_DKP = 99999
 end
 
 function SOTA:OnEnable()

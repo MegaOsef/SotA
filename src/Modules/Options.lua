@@ -108,3 +108,9 @@ end
 function SOTA_Conf_ExportPlayersDKP_open()
 	module:TriggerEvent("SOTA_GUILDEXTRACT_REQUEST")
 end
+
+-------------------------------
+--- Transaction Import Module
+function SOTA_Conf_TransactionImport_open()
+	module:TriggerEvent("SOTA_IMPORTTOEXEC_REQUEST")
+end

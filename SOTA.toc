@@ -31,3 +31,4 @@ src\Modules\BossKillTracker.lua
 src\Modules\Options.xml
 src\Modules\RavenLogsForApp.xml
 src\Modules\GuildExtract.xml
+src\Modules\ImportToExec.xml

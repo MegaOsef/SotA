@@ -1,0 +1,96 @@
+
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<Script file="ImportToExec.lua" />
+
+	<Frame name="SOTA_ImportToExecModal" parent="UIParent" toplevel="true"
+		hidden="true">
+		<Size>
+			<AbsDimension x="565" y="300" />
+		</Size>
+		<Anchors>
+			<Anchor point="CENTER">
+				<Offset x="0" y="0" />
+			</Anchor>
+		</Anchors>
+		<Backdrop edgeFile="Interface\DialogFrame\UI-DialogBox-Border"
+			bgFile="Interface\\DialogFrame\\UI-DialogBox-Background" tile="true">
+			<BackgroundInsets>
+				<AbsInset left="11" right="12" top="12" bottom="11" />
+			</BackgroundInsets>
+			<TileSize>
+				<AbsValue val="32" />
+			</TileSize>
+			<EdgeSize>
+				<AbsValue val="32" />
+			</EdgeSize>
+		</Backdrop>
+		<Frames>
+			<Frame name="$parentScrollFrame" toplevel="true" hidden="false">
+				<Size>
+					<AbsDimension x="543" y="280" />
+				</Size>
+				<Anchors>
+					<Anchor point="CENTER">
+						<Offset x="0" y="0" />
+					</Anchor>
+				</Anchors>
+				<Frames>
+					<!-- Message input field -->
+					<EditBox name="$parentMessage" multiLine="true">
+						<Size>
+							<AbsDimension x="543" y="280" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset x="0" y="0" />
+							</Anchor>
+						</Anchors>
+						<FontString inherits="GameFontNormal" />
+						<Scripts>
+							<OnLoad>
+							</OnLoad>
+							<OnEnterPressed>
+							</OnEnterPressed>
+							<OnEscapePressed>
+							</OnEscapePressed>
+						</Scripts>
+					</EditBox>
+					<Button name="$parentValidate" inherits="UIPanelButtonTemplate" text="Import">
+						<Size>
+							<AbsDimension x="120" y="23" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOP">
+								<Offset x="0" y="30" />
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnClick>
+								SOTA_ImportToExec_validate();
+							</OnClick>
+						</Scripts>
+					</Button>
+					<Button name="$parentClose" inherits="UIPanelCloseButton">
+						<Anchors>
+							<Anchor point="TOPRIGHT">
+								<Offset x="0" y="30" />
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnClick>
+								SOTA_ImportToExec_close();
+							</OnClick>
+						</Scripts>
+					</Button>
+				</Frames>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture setAllPoints="true">
+							<Color r="0" g="0" b="0" a="0.7" />
+						</Texture>
+					</Layer>
+				</Layers>
+			</Frame>
+		</Frames>
+	</Frame>
+</Ui>
