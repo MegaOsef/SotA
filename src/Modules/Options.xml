@@ -278,6 +278,21 @@
 					</OnClick>
 				</Scripts>
 			</Button>
+			<CheckButton name="$parentEnableDebug" inherits="OptionsCheckButtonTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset x="32" y="-272"/>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						getglobal(this:GetName().."Text"):SetText("Enable Debug Mode")
+					</OnLoad>
+					<OnClick>
+						SOTA_HandleCheckbox(this);
+					</OnClick>
+				</Scripts>
+			</CheckButton>
 			<!-- Disable Dashboard ? -->
 			<CheckButton name="$parentDisableDashboard" inherits="OptionsCheckButtonTemplate">
 				<Anchors>

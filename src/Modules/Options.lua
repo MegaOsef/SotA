@@ -9,6 +9,8 @@ function module:OnEnable()
 	self.prioLoadedStr = getglobal("FrameConfigBiddingPrioLoadedStr");
 	self.bossDkpLoadedStr = getglobal("FrameConfigBiddingBossDkpLoadedStr");
 
+	getglobal("FrameConfigBiddingEnableDebug"):SetChecked(SOTA:IsDebugging());
+
 	self:RefreshStrings()
 end
 
@@ -41,11 +43,11 @@ function SOTA_HandleCheckbox(checkbox)
 
 	
 	--	Store DKP in Public Notes:		
-	if checkboxname == "FrameConfigMiscDkpPublicNotes" then
+	if checkboxname == "FrameConfigBiddingEnableDebug" then
 		if checkbox:GetChecked() then
-			SOTA.db.realm.UseGuildNotes = SOTA_GUILDNOTE.USEPUBLIC;
+			SOTA:SetDebugging(true)
 		else
-			SOTA.db.realm.UseGuildNotes = SOTA_GUILDNOTE.USEOFFICER;
+			SOTA:SetDebugging(false)
 		end
 		return;
 	end
