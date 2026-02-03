@@ -54,6 +54,7 @@ function module:RefreshLootsList()
 
 	for lootSlot = 1, GetNumLootItems(), 1 do
 		local itemLink = GetLootSlotLink(lootSlot)
+		SOTA:Debug("Loot #"..lootSlot.." link: "..tostring(itemLink))
 		if itemLink then
 			local itemId = SOTA:GetItemIDFromLink(itemLink)
 			if not itemId then

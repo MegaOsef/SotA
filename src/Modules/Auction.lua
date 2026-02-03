@@ -214,7 +214,7 @@ function module:SetAuctionState(auctionState, seconds)
 	if not seconds then
 		seconds = 0;
 	end
-	SOTA:Debug("module:SetAuctionState " .. auctionState .. " " .. seconds)
+	SOTA:Debug("SetAuctionState("..auctionState..","..seconds..")")
 	self.auctionState = auctionState;
 	self:SetSecondsCounter(seconds);
 end
@@ -319,7 +319,7 @@ function module:CHAT_MSG_RAID(message, sender)
 	local a,_,bidtype,dkp = string.find(message, "%[RavenDKP%] |c%x%x%x%x%x%x%x%x(%a+) (%d+)|r")
 	if bidtype and dkp then
 		local bidMessage = string.lower(bidtype) .. " " .. dkp;
-		SOTA:Debug("Master: Processing RavenDKP bid from ".. sender ..": ".. bidMessage);
+		SOTA:Debug("Received bid message from "..sender..": "..bidMessage)
 		self:HandlePlayerBid(sender, bidMessage);
 	end
 end
@@ -331,12 +331,11 @@ end
 --]]
 function module:CheckAuctionState()
 	local state = self:GetAuctionState();
-	
-	SOTA:Debug(string.format("SOTA_CheckAuctionState called, state = %d, secs = %d", state, self:GetSecondsCounter()));
-
-	if state == AUCTION_STATE.NONE or state == AUCTION_STATE.PAUSED then
+	if state == AUCTION_STATE.NONE or state == AUCTION_STATE.PAUSED or state == AUCTION_STATE.COMPLETE then
 		return;
 	end
+	
+	SOTA:Debug(string.format("CheckAuctionState: state=%d, secs = %d", state, self:GetSecondsCounter()));
 
 	local secs = self:GetSecondsCounter()
 	if state == AUCTION_STATE.STARTING then
@@ -349,7 +348,7 @@ function module:CheckAuctionState()
 	if state == AUCTION_STATE.RUNNING then
 		if secs < 1 then
 			-- Time is up - complete the auction:
-			self:FinishAuction();	
+			self:FinishAuction();
 		end
 		
 		self:SetSecondsCounter(secs - 1)

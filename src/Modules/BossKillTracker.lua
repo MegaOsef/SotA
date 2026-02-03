@@ -16,6 +16,9 @@ function module:CHAT_MSG_COMBAT_HOSTILE_DEATH(msg)
 		local bossTriggerName = string.sub(msg, 1, s - 1)
 		if bossTriggerName ~= "" then
 			local bossDkpListItem = SOTA:FindBossDkpFromTriggerName(bossTriggerName)
+			SOTA:Debug("BossKillTracker: Detected kill:", bossTriggerName, "SOTA Boss Name/DKP:",
+			bossDkpListItem and bossDkpListItem.bossName or "unknown",
+				bossDkpListItem and bossDkpListItem.dkpValue or "N/A")
 			if bossDkpListItem then
 				self:TriggerEvent("SOTA_BOSS_KILLED", tostring(bossDkpListItem.bossName), tonumber(bossDkpListItem.dkpValue))
 				return
