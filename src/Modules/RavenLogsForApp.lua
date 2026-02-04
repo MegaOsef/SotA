@@ -38,6 +38,8 @@ function module:getUniqueId()
 end
 
 function module:LogTransaction(transactionType, playerName, dkpChange, auctionId, bossName)
+    -- Not implemented yet in the WebApp.
+    --[[
     local uniqueAuctionId = self:getUniqueId()
     local finalAuctionId = nil
     if auctionId then
@@ -57,6 +59,7 @@ function module:LogTransaction(transactionType, playerName, dkpChange, auctionId
     self:TriggerEvent("SOTA_RAVENLOGS_UPDATED")
 
     return uniqueAuctionId
+    ]]
 end
 
 function module:LogAuction(itemId, bossName, winner, finalBid, bidType)
