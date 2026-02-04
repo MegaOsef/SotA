@@ -178,7 +178,7 @@
 				<Frames>
 					<!-- Button 2A: Transaction Log ("Note") -->
 					<Button name="$parentTransactionLogButton" inherits="ActionButtonTemplate"
-						frameStrata="HIGH" hidden="false">
+						frameStrata="MEDIUM" hidden="false">
 						<Size>
 							<AbsDimension x="20" y="20" />
 						</Size>
@@ -205,7 +205,7 @@
 					</Button>
 					<!-- Button 3A: Configuration ("Gear") -->
 					<Button name="$parentConfigurationButton" inherits="ActionButtonTemplate"
-						frameStrata="HIGH" hidden="false">
+						frameStrata="MEDIUM" hidden="false">
 						<Size>
 							<AbsDimension x="20" y="20" />
 						</Size>
@@ -232,7 +232,7 @@
 					</Button>
 					<!-- Button 3A: Export Raven Logs -->
 					<Button name="$parentExportRavenLogsButton" inherits="ActionButtonTemplate"
-						frameStrata="HIGH" hidden="false">
+						frameStrata="MEDIUM" hidden="false">
 						<Size>
 							<AbsDimension x="32" y="32" />
 						</Size>
@@ -259,7 +259,7 @@
 					</Button>
 					<!-- Button 3A: Clear Raven Logs -->
 					<Button name="$parentClearRavenLogsButton" inherits="ActionButtonTemplate"
-						frameStrata="HIGH" hidden="false">
+						frameStrata="MEDIUM" hidden="false">
 						<Size>
 							<AbsDimension x="32" y="32" />
 						</Size>
