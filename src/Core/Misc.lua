@@ -128,6 +128,7 @@ local RAID_ZONE_NAMES = {
 	{
 		realZones = {
 			"Naxxramas",
+			"The Upper Necropolis",
 			"The Frostwyrm Lair",
 			"The Plague Quarter",
 			"The Arachnid Quarter",
