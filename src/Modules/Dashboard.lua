@@ -169,7 +169,7 @@ function SOTA_OnLootClick(object)
 	if not itemLink or itemLink == "" then
 		return;
 	end
-	module:TriggerEvent("SOTA_REQUEST_AUCTION", itemLink, GetRealZoneText(), module.currentLootedMobName);
+	module:TriggerEvent("SOTA_REQUEST_AUCTION", itemLink, SOTA:RealZoneToRaidName(GetRealZoneText()), module.currentLootedMobName);
 end
 
 function SOTA_OnEarnBossDkp()

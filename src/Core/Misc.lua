@@ -115,3 +115,58 @@ function SOTA:FormatTime(seconds)
         return string.format("%ds", s)
     end
 end
+
+local RAID_ZONE_NAMES = {
+	{
+		realZones = {
+			"Ahn'Qiraj",
+			"Temple of Ahn'Qiraj",
+			"The Temple of Ahn'Qiraj",
+		},
+		raidName = "Ahn'Qiraj Temple"
+	},
+	{
+		realZones = {
+			"Naxxramas",
+			"The Frostwyrm Lair",
+			"The Plague Quarter",
+			"The Arachnid Quarter",
+			"The Military Quarter",
+			"The Construct Quarter",
+		},
+		raidName = "Naxxramas"
+	},
+	{
+		realZones = {
+			"Blackwing Lair",
+			"The Blackwing Lair",
+		},
+		raidName = "Blackwing Lair"
+	},
+	{
+		realZones = {
+			"Emerald Sanctum",
+		},
+		raidName = "Emerald Sanctum"
+	},
+	{
+		realZones = {
+			--"The Barrens", -- For testing purposes.
+			"Tower of Karazhan",
+			"The Rock of Desolation",
+		},
+		raidName = "Upper Karazhan Halls"
+	},
+}
+
+function SOTA:RealZoneToRaidName(realZone)
+	for n=1, table.getn(RAID_ZONE_NAMES), 1 do
+		local rzn = RAID_ZONE_NAMES[n]
+		for i=1, table.getn(rzn.realZones), 1 do
+			if rzn.realZones[i] == realZone then
+				return rzn.raidName
+			end
+		end
+	end
+	return nil;
+end

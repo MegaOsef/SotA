@@ -64,7 +64,7 @@ local MSG                    = {
 
 local DEFAULT_TEXT_FONT = GameFontNormal
 
-local ZONES                  = {
+local RAIDS_INFO                  = {
 	{
 		name = "Blackwing Lair",
 		bosses = {
@@ -123,18 +123,13 @@ local ZONES                  = {
 		}
 	},
 	{
-		name = "Tower of Karazhan",
+		name = "Upper Karazhan Halls",
 		bosses = {
 			"Keeper Gnarlmoon",
 			"Ley-Watcher Incantagos",
 			"Anomalus",
 			"Echo of Medivh",
 			"King (Chess fight)",
-		}
-	},
-	{
-		name = "The Rock of Desolation",
-		bosses = {
 			"Rupturan the Broken",
 			"Sanv Tasdal",
 			"Kruul",
@@ -170,14 +165,14 @@ end
 
 -- Max # of bids shown in the AuctionUI
 local MAX_BIDS  = 10
-local MAX_ZONES = 6
+local MAX_RAIDS = 6
 local MAX_BOSSES = 20
 
 function module:OnEnable()
 	self.auctionState = AUCTION_STATE.NONE
 	self.secondsCounter = 0
 	self.auctionedItemLink = ""
-	self.selectedZone = 0
+	self.selectedRaid = 0
 	self.selectedBoss = 0
 
 	-- List of valid bids: { Name, DKP, BidType(MS=1,OS=2), Class, RankName, RankIndex }
@@ -219,9 +214,9 @@ function module:SetAuctionState(auctionState, seconds)
 	self:SetSecondsCounter(seconds);
 end
 
-function module:SOTA_REQUEST_AUCTION(itemLink, zoneName, bossName)
+function module:SOTA_REQUEST_AUCTION(itemLink, raidName, bossName)
 	if self:GetAuctionState() == AUCTION_STATE.NONE then
-		self:StartAuction(itemLink, zoneName, bossName);
+		self:StartAuction(itemLink, raidName, bossName);
 	else
 		SOTA:Print("An auction is already running.")
 	end
@@ -233,12 +228,14 @@ end
 --	itemLink: a Blizzard itemlink to auction.
 --	Since 0.0.1
 --]]
-function module:StartAuction(itemLink, zoneName, bossName)
+function module:StartAuction(itemLink, raidName, bossName)
 	local rank = SOTA:GetRaidRank(UnitName("player"));
 	if rank < 1 then
 		SOTA:Print("You need to be Raid Assistant or Raid Leader to start auctions.");
 		return;
 	end
+
+	SOTA:Debug("StartAuction: itemLink="..tostring(itemLink)..", raidName="..tostring(raidName)..", bossName="..tostring(bossName))
 
 	self.auctionedItemLink = itemLink;
 	
@@ -273,10 +270,10 @@ function module:StartAuction(itemLink, zoneName, bossName)
 	self.incomingBidsTable = { };
 	self:RefreshGUIBidsList();
 
-	if zoneName ~= nil and bossName ~= nil then -- Automatic auction start.
-		local zoneId = self:FindZoneByName(zoneName);
-		if zoneId then
-			self:SelectZone(zoneId);
+	if raidName ~= nil and bossName ~= nil then -- Automatic auction start.
+		local raidId = self:FindRaidByName(raidName);
+		if raidId then
+			self:SelectRaid(raidId);
 			local bossId = self:FindBossByName(bossName)
 			if not bossId then
 				bossId = self:FindBossByName("Trashs")
@@ -288,18 +285,18 @@ function module:StartAuction(itemLink, zoneName, bossName)
 				self:SelectBoss(0);
 			end
 		else
-			self:SelectZone(0);
+			self:SelectRaid(0);
 			self:SelectBoss(0);
 		end
-	elseif zoneName ~= nil and bossName == nil then -- Manual auction start.
-		local zoneId = self:FindZoneByName(zoneName);
-		if zoneId then
-			self:SelectZone(zoneId);
+	elseif raidName ~= nil and bossName == nil then -- Manual auction start.
+		local raidId = self:FindRaidByName(raidName);
+		if raidId then
+			self:SelectRaid(raidId);
 		else
-			self:SelectZone(0);
+			self:SelectRaid(0);
 		end
 		self:SelectBoss(0);
-	end -- Else is auction restart: selected zone and boss are kept.
+	end -- Else is auction restart: selected raid and boss are kept.
 
 	self:OpenAuctionUI();
 	
@@ -557,7 +554,7 @@ end
 
 
 function module:DeclareWinner(playername, bid, bidtype)
-	local module = SOTA:GetModule("RavenLogsForApp", true)
+	local ravenLogs = SOTA:GetModule("RavenLogsForApp", true)
 	if playername and bid and bidtype then
 		playername = SOTA:UCFirst(playername);
 		bid = 1 * bid;
@@ -566,20 +563,20 @@ function module:DeclareWinner(playername, bid, bidtype)
 			string.format(MSG.ONDECLAREWINNER, self.auctionedItemLink, playername, bid, BidTypeToText(bidtype)))
 
 		local auctionId = nil
-        if module then
-			auctionId = module:LogAuction(
+        if ravenLogs then
+			auctionId = ravenLogs:LogAuction(
 				SOTA:GetItemIDFromLink(self.auctionedItemLink),
-				ZONES[self.selectedZone].bosses[self.selectedBoss],
+				RAIDS_INFO[self.selectedRaid].bosses[self.selectedBoss],
 				playername, bid, BidTypeToText(bidtype));
         end
 
 		SOTA:SubtractPlayerDKP(playername, bid, SOTA.LOGTYPE.AUCTION, auctionId)
 	else
 		SOTA:Broadcast(SOTA.CHANNEL.RAID, string.format(MSG.ONDECLARENOWINNER, self.auctionedItemLink))
-        if module then
-			module:LogAuction(
+        if ravenLogs then
+			ravenLogs:LogAuction(
 				SOTA:GetItemIDFromLink(self.auctionedItemLink),
-				ZONES[self.selectedZone].bosses[self.selectedBoss]);
+				RAIDS_INFO[self.selectedRaid].bosses[self.selectedBoss]);
 		end
 	end
 end
@@ -606,8 +603,8 @@ function module:AuctionUIInit()
 		end
 	end
 
-	for n=1, MAX_ZONES, 1 do
-		local entry = CreateFrame("Button", "$parentEntry"..n, AuctionUIFrameZoneList, "SOTA_ZoneTemplate");
+	for n=1, MAX_RAIDS, 1 do
+		local entry = CreateFrame("Button", "$parentEntry"..n, AuctionUIFrameRaidList, "SOTA_RaidTemplate");
 		entry:SetID(n);
 		if n == 1 then
 			entry:SetPoint("TOPLEFT", 4, -4);
@@ -658,17 +655,17 @@ function module:AuctionUIInit()
 	self.btns.finishAuction       = getglobal("FinishAuctionButton")
 	self.btns.pauseAuction        = getglobal("PauseAuctionButton")
 
-	self.zonesFrames = {}
-	for n=1, MAX_ZONES, 1 do
-		self.zonesFrames[n] = getglobal("AuctionUIFrameZoneListEntry" .. n);
-		self.zonesFrames[n].name = getglobal(self.zonesFrames[n]:GetName() .. "Name");
+	self.raidsFrames = {}
+	for n=1, MAX_RAIDS, 1 do
+		self.raidsFrames[n] = getglobal("AuctionUIFrameRaidListEntry" .. n);
+		self.raidsFrames[n].name = getglobal(self.raidsFrames[n]:GetName() .. "Name");
 
-		local zoneInfo = ZONES[n];
-		if zoneInfo then
-			self.zonesFrames[n].name:SetText(ZONES[n].name)
-			self.zonesFrames[n]:Show();
+		local raidInfo = RAIDS_INFO[n];
+		if raidInfo then
+			self.raidsFrames[n].name:SetText(RAIDS_INFO[n].name)
+			self.raidsFrames[n]:Show();
 		else
-			self.zonesFrames[n]:Hide();
+			self.raidsFrames[n]:Hide();
 		end
 	end
 
@@ -782,8 +779,8 @@ end
 --	Since 0.0.3
 --]]
 function module:DeclareAuctionWinner()
-	if self.selectedZone == 0 then
-		SOTA:Print("Error: You must select a zone before declaring a winner.");
+	if self.selectedRaid == 0 then
+		SOTA:Print("Error: You must select a raid before declaring a winner.");
 		return;
 	end
 	if self.selectedBoss == 0 then
@@ -1003,26 +1000,30 @@ function module:GetStartingDKP()
 	return 0;
 end
 
-function module:FindZoneByName(zoneName)
-	for n=1, table.getn(ZONES), 1 do
-		if ZONES[n].name == zoneName then
-			return n, ZONES[n]
+function module:FindRaidByName(raidName)
+	if not raidName then
+		return nil, nil;
+	end
+
+	for n=1, table.getn(RAIDS_INFO), 1 do
+		if RAIDS_INFO[n].name == raidName then
+			return n, RAIDS_INFO[n]
 		end
 	end
 	return nil, nil
 end
 
 function module:FindBossByName(bossName)
-	for n=1, table.getn(ZONES[self.selectedZone].bosses), 1 do
-		if ZONES[self.selectedZone].bosses[n] == bossName then
-			return n, ZONES[self.selectedZone].bosses[n]
+	for n=1, table.getn(RAIDS_INFO[self.selectedRaid].bosses), 1 do
+		if RAIDS_INFO[self.selectedRaid].bosses[n] == bossName then
+			return n, RAIDS_INFO[self.selectedRaid].bosses[n]
 		end
 	end
 	return nil, nil;
 end
 
-function module:SelectZone(zoneId)
-	if zoneId == self.selectedZone then
+function module:SelectRaid(raidId)
+	if raidId == self.selectedRaid then
 		return;
 	end
 	for n = 1, table.getn(module.bossesFrames), 1 do
@@ -1030,34 +1031,34 @@ function module:SelectZone(zoneId)
 	end
 
 
-	self.selectedZone = zoneId;
+	self.selectedRaid = raidId;
 	-- Erase all bosses first
 	for n=1, MAX_BOSSES, 1 do
 		self.bossesFrames[n].name:SetText("");
 		self.bossesFrames[n]:Hide();
 	end
 
-	for n = 1, table.getn(module.zonesFrames), 1 do
-		module.zonesFrames[n].name:SetTextColor(1, 1, 1, 1)
+	for n = 1, table.getn(module.raidsFrames), 1 do
+		module.raidsFrames[n].name:SetTextColor(1, 1, 1, 1)
 	end
-	if self.selectedZone < 1 or self.selectedZone > table.getn(ZONES) then
+	if self.selectedRaid < 1 or self.selectedRaid > table.getn(RAIDS_INFO) then
 		return;
 	end
 
-	-- Fill bosses with selected zone's bosses
-	local zoneInfo = ZONES[self.selectedZone];
-	if not zoneInfo then
+	-- Fill bosses with selected raid's bosses
+	local raidInfo = RAIDS_INFO[self.selectedRaid];
+	if not raidInfo then
 		return;
 	end
-	for n=1, table.getn(zoneInfo.bosses), 1 do
-		self.bossesFrames[n].name:SetText(zoneInfo.bosses[n]);
+	for n=1, table.getn(raidInfo.bosses), 1 do
+		self.bossesFrames[n].name:SetText(raidInfo.bosses[n]);
 		self.bossesFrames[n]:Show();
 	end
 	--
 
 	self:SelectBoss(0);
 
-	module.zonesFrames[self.selectedZone].name:SetTextColor(DEFAULT_TEXT_FONT:GetTextColor())
+	module.raidsFrames[self.selectedRaid].name:SetTextColor(DEFAULT_TEXT_FONT:GetTextColor())
 end
 
 function module:SelectBoss(bossId)
@@ -1069,7 +1070,7 @@ function module:SelectBoss(bossId)
 		module.bossesFrames[n].name:SetTextColor(1, 1, 1, 1)
 	end
 
-	if self.selectedBoss < 1 or self.selectedBoss > table.getn(ZONES[self.selectedZone].bosses) then
+	if self.selectedBoss < 1 or self.selectedBoss > table.getn(RAIDS_INFO[self.selectedRaid].bosses) then
 		return;
 	end
 	module.bossesFrames[self.selectedBoss].name:SetTextColor(DEFAULT_TEXT_FONT:GetTextColor())
@@ -1147,9 +1148,9 @@ function SOTA_OnBidClick(object)
 	module:SelectBid(bidder, bid, BidTypeStrToValue(bidtype))
 end
 
-function SOTA_OnZoneClick(object)
-	local zoneID = object:GetID();
-	module:SelectZone(zoneID);
+function SOTA_OnRaidClick(object)
+	local raidID = object:GetID();
+	module:SelectRaid(raidID);
 end
 
 function SOTA_OnBossClick(object)

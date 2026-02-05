@@ -70,7 +70,7 @@
 			<Color r="0.0" g="0.0" b="0.5" a="0.5" />
 		</NormalTexture>
 	</Button>
-	<Button name="SOTA_ZoneTemplate" hidden="true" virtual="true">
+	<Button name="SOTA_RaidTemplate" hidden="true" virtual="true">
 		<Size>
 			<AbsDimension x="290" y="16" />
 		</Size>
@@ -94,7 +94,7 @@
 		<Scripts>
 			<OnClick>
 				PlaySound("igMainMenuOptionCheckBoxOn")
-				SOTA_OnZoneClick(this)
+				SOTA_OnRaidClick(this)
 			</OnClick>
 			<OnEnter>
 				getglobal(this:GetName().."BG"):SetVertexColor(1, 1, 1, 1)
@@ -426,7 +426,7 @@
 					<OnClick>SOTA_OnCancelAuctionClick();</OnClick>
 				</Scripts>
 			</Button>
-			<Frame name="$parentZoneList">
+			<Frame name="$parentRaidList">
 				<Size>
 					<AbsDimension x="298" y="104" />
 				</Size>
@@ -490,7 +490,7 @@
 						</Anchor>
 					</Anchors>
 				</FontString>
-				<FontString inherits="GameFontNormal" text="Select Zone and Boss">
+				<FontString inherits="GameFontNormal" text="Select Raid and Boss">
 					<Size>
 						<AbsDimension x="298" y="16" />
 					</Size>
