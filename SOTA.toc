@@ -22,6 +22,7 @@ src\Core\Comm.lua
 src\Core\Rights.lua
 src\Core\DkpManagement.lua
 src\Core\Misc.lua
+src\Core\Tests.lua
 src\Core\LocalRosters.lua
 
 src\Modules\Auction.xml

@@ -149,6 +149,13 @@ function SOTA:HandleSOTACommand(msg)
 	end
 
 
+	--	Command: test
+	--	Syntax: "test"
+	if cmd == "test" then
+		return self:RunTests();
+	end
+
+
 	--	Command: log
 	--	Syntax: "log"
 	if cmd == "log" then
@@ -265,6 +272,7 @@ function SOTA:DisplayHelp()
 	--SOTA:Print("  Master    Request SotA master status.");
 	SOTA:Print("  <item>    Start an auction for <item>.");
 	SOTA:Print("  Version    Display the SotA client version.");
+	SOTA:Print("  Test    Run unit tests for SotA functions.");
 	SOTA:Print("  Help    (default) This help!");
 	SOTA:Print("");
 	return false;
