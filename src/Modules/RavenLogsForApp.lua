@@ -21,7 +21,10 @@ function module:OnEnable()
 end
 
 function module:SOTA_EXPORTRAVENLOGS_REQUEST()
-    local exportString = SOTA.json.encode(SOTA.db.realm.RavenLogsForApp)
+    local exportObject = {
+        auctions = SOTA.db.realm.RavenLogsForApp.auctions,
+    }
+    local exportString = SOTA.json.encode(exportObject)
     self.exportModal.editBox:SetText(exportString)
     self.exportModal:Show()
 end
@@ -38,8 +41,6 @@ function module:getUniqueId()
 end
 
 function module:LogTransaction(transactionType, playerName, dkpChange, auctionId, bossName)
-    -- Not implemented yet in the WebApp.
-    --[[
     local uniqueAuctionId = self:getUniqueId()
     local finalAuctionId = nil
     if auctionId then
@@ -56,10 +57,7 @@ function module:LogTransaction(transactionType, playerName, dkpChange, auctionId
         bossName = bossName,
     })
 
-    self:TriggerEvent("SOTA_RAVENLOGS_UPDATED")
-
     return uniqueAuctionId
-    ]]
 end
 
 function module:LogAuction(itemId, bossName, winner, finalBid, bidType)
