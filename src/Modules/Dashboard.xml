@@ -210,7 +210,7 @@
 							<AbsDimension x="20" y="20" />
 						</Size>
 						<Anchors>
-							<Anchor point="TOPLEFT">
+							<Anchor point="TOPRIGHT">
 								<Offset>
 									<AbsDimension x="0" y="-20" />
 								</Offset>
@@ -290,7 +290,7 @@
 							<AbsDimension x="20" y="20" />
 						</Size>
 						<Anchors>
-							<Anchor point="TOPRIGHT">
+							<Anchor point="TOPLEFT">
 								<Offset>
 									<AbsDimension x="0" y="-20" />
 								</Offset>
