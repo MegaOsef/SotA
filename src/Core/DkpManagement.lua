@@ -128,11 +128,11 @@ function SOTA:AddPlayerDKP(playername, dkpValue, transactionType)
     if self:ApplyPlayerDKP(playername, dkpValue) then
         playername = self:UCFirst(playername);
         self:Broadcast(self.CHANNEL.WARN, string.format(MSG.ON_DKPADDED, dkpValue, playername))
-        self:TriggerEvent("SOTA_LOG_SINGLE_TRANSACTION", "+Player", playername, dkpValue);
 
         local ravenLogs = self:GetModule("RavenLogsForApp", true)
         if ravenLogs then
-            ravenLogs:LogTransaction(transactionType, playername, dkpValue)
+            local logId = ravenLogs:LogTransaction(transactionType)
+            ravenLogs:LogDkpChange(logId, playername, dkpValue)
         end
     end
 end
@@ -152,11 +152,11 @@ function SOTA:SubtractPlayerDKP(playername, dkpValue, transactionType, auctionId
     if self:ApplyPlayerDKP(playername, dkpValue) then
         playername = self:UCFirst(playername);
         self:Broadcast(self.CHANNEL.WARN, string.format(MSG.ON_DKP_SUBTRACT, abs(dkpValue), playername))
-        self:TriggerEvent("SOTA_LOG_SINGLE_TRANSACTION", "-Player", playername, dkpValue);
 
         local ravenLogs = self:GetModule("RavenLogsForApp", true)
         if ravenLogs then
-            ravenLogs:LogTransaction(transactionType, playername, dkpValue, auctionId)
+            local logId = ravenLogs:LogTransaction(transactionType, auctionId)
+            ravenLogs:LogDkpChange(logId, playername, dkpValue)
         end
     end
 end
@@ -176,6 +176,10 @@ function SOTA:AddRaidDKP(dkp, callMethod, transactionType, bossName)
     SOTA:Debug("AddRaidDKP called with dkp:", dkp, "callMethod:", callMethod, "transactionType:", transactionType, "bossName:", tostring(bossName))
     if self:IsInRaid(true) then
         local ravenLogs = self:GetModule("RavenLogsForApp", true)
+        local logId = nil
+        if ravenLogs then
+            logId = ravenLogs:LogTransaction(transactionType, nil, bossName)
+        end
 
         dkp = 1 * dkp;
 
@@ -191,7 +195,7 @@ function SOTA:AddRaidDKP(dkp, callMethod, transactionType, bossName)
             self:ApplyPlayerDKP(raidRoster[n][RT_COL.PNAME], dkp);
 
             if ravenLogs then
-                ravenLogs:LogTransaction(transactionType, raidRoster[n][RT_COL.PNAME], dkp, nil, bossName)
+                ravenLogs:LogDkpChange(logId, raidRoster[n][RT_COL.PNAME], dkp)
             end
 
             tidChanges[tidIndex] = { raidRoster[n][RT_COL.PNAME], dkp };
@@ -204,10 +208,6 @@ function SOTA:AddRaidDKP(dkp, callMethod, transactionType, bossName)
             self:Broadcast(self.CHANNEL.WARN, string.format(MSG.ON_DKPADDED_RAID_WITHBOSS, dkp, bossName))
         end
 
-        local module = self:GetModule("LogsUI", true)
-        if module then
-            module:LogMultipleTransactions(callMethod, tidChanges)
-        end
         return true;
     end
     return false;
@@ -226,6 +226,10 @@ end
 function SOTA:SubtractRaidDKP(dkp, silentmode, callMethod)
     if self:IsInRaid(true) then
         local ravenLogs = self:GetModule("RavenLogsForApp", true)
+        local logId = nil
+        if ravenLogs then
+            logId = ravenLogs:LogTransaction(SOTA.LOGTYPE.RAID)
+        end
 
         dkp = -1 * dkp;
 
@@ -250,7 +254,7 @@ function SOTA:SubtractRaidDKP(dkp, silentmode, callMethod)
             self:ApplyPlayerDKP(raidRoster[n][RT_COL.PNAME], dkp);
 
             if ravenLogs then
-                ravenLogs:LogTransaction(SOTA.LOGTYPE.RAID, raidRoster[n][RT_COL.PNAME], dkp)
+                ravenLogs:LogDkpChange(logId, raidRoster[n][RT_COL.PNAME], dkp)
             end
 
             tidChanges[tidIndex] = { raidRoster[n][RT_COL.PNAME], dkp };
@@ -259,10 +263,6 @@ function SOTA:SubtractRaidDKP(dkp, silentmode, callMethod)
 
         self:Broadcast(self.CHANNEL.WARN, string.format(MSG.ON_DKP_SUBTRACT_RAID, abs(dkp)))
 
-        local module = self:GetModule("LogsUI", true)
-        if module then
-            module:LogMultipleTransactions(callMethod, tidChanges)
-        end
         return true;
     end
     return false;
@@ -377,6 +377,9 @@ function SOTA:DecayDKP(percent, silentmode)
     local name, publicNote, officerNote
     local memberCount = GetNumGuildMembers();
     local ravenLogs = self:GetModule("RavenLogsForApp", true)
+    if ravenLogs then
+        local logId = ravenLogs:LogTransaction(SOTA.LOGTYPE.DECAY)
+    end
     for n = 1, memberCount, 1 do
         name, _, _, _, _, _, publicNote, officerNote = GetGuildRosterInfo(n);
         local note = officerNote;
@@ -391,7 +394,7 @@ function SOTA:DecayDKP(percent, silentmode)
             tidIndex = tidIndex + 1
 
             if ravenLogs then
-                ravenLogs:LogTransaction(SOTA.LOGTYPE.DECAY, name, -1 * minus, nil)
+                ravenLogs:LogDkpChange(logId, name, -1 * minus)
             end
 
             dkp = dkp - minus;
@@ -417,11 +420,6 @@ function SOTA:DecayDKP(percent, silentmode)
             "Guild DKP decay by " .. percent .. "% was performed by " .. UnitName("player") .. ".")
         SOTA:Broadcast(SOTA.CHANNEL.GUILD,
             "Guild DKP removed a total of " .. reducedDkp .. " DKP from " .. playerCount .. " players.")
-    end
-
-    local module = self:GetModule("LogsUI", true)
-    if module then
-        module:LogMultipleTransactions("-Decay", tidChanges)
     end
 
     return true;

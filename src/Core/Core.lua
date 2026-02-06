@@ -60,16 +60,16 @@ function SOTA:OnEnable()
 			HistoryDkp = {},
 			ItemPriorities = {}, -- { { item_id = 12345, priority = "For healers", notes = "Better for shamans" }, ... }
 			BossDkpList = {}, -- { { bossName = "Four Horsemen", triggerName = "Sir Zeliek", dkpValue = 10 }, ... },
-			RavenLogsForApp = { dkpMoves = {}, auctions = {} },
+			RavenLogsForApp = { dkpTransactions = {}, auctions = {} },
 			--[[
-			{ dkpMoves = { {
+			{ dkpTransactions = { {
 				id = "20260201160343001", -->> Last 3 digits is to avoid collisions, first ones are timestamp
 				type = "manual", -->> "boss" | "auction" | "decay" | "manual" | "raid" (manual raid mvts)
-				player = "PlayerName",
-				dkpChange = 50, -->> can be negative
 				auctionId = "20260201160343001", -->> only for "auction" type
 				bossName= "Onyxia", -->> only for "boss" type
 				officer = "OfficerName",
+				dkpChanges = { { id = "20260201160343003", player = "PlayerName1", change = 20  },
+							   { id = "20260201160343004", player = "PlayerName2", change = -30 } } 
 			}, ... },
 			  auctions = { {
 			  	id = "20260201160343001", -->> Last 3 digits is to avoid collisions, first ones are timestamp

@@ -101,7 +101,8 @@ function module:SOTA_GUILDROSTER_UPDATED()
         local entry = toExec[n]
         SOTA:ApplyPlayerDKP(entry.player, entry.dkpChange)
         if ravenLogs then
-            ravenLogs:LogTransaction(entry.type, entry.player, entry.dkpChange)
+            local logId = ravenLogs:LogTransaction(entry.type)
+            ravenLogs:LogDkpChange(logId, entry.player, entry.dkpChange)
         end
 
         SOTA:Print(string.format("Executed entry %d/%d: Player=%s, DKP Change=%d, Type=%s",

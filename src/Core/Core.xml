@@ -4,7 +4,7 @@
 	<!-- SotA Window Frame template -->
 	<Frame name="SOTAFrame" parent="UIParent" toplevel="true" hidden="true" virtual="true">
 		<Size>
-			<AbsDimension x="384" y="512" />
+			<AbsDimension x="800" y="512" />
 		</Size>
 		<Anchors>
 			<Anchor point="TOPLEFT">
@@ -12,22 +12,8 @@
 			</Anchor>
 		</Anchors>
 		<Layers>
-			<Layer level="BACKGROUND">
-				<Texture file="Interface\Spellbook\Spellbook-Icon">
-					<Size>
-						<AbsDimension x="58" y="58" />
-					</Size>
-					<Anchors>
-						<Anchor point="TOPLEFT">
-							<Offset>
-								<AbsDimension x="10" y="-8" />
-							</Offset>
-						</Anchor>
-					</Anchors>
-				</Texture>
-			</Layer>
 			<Layer level="ARTWORK">
-				<Texture name="BarTopLeft" file="Interface\ClassTrainerFrame\UI-ClassTrainer-TopLeft">
+				<Texture name="BarTopLeft" file="Interface\HelpFrame\HelpFrame-TopLeft">
 					<Size>
 						<AbsDimension x="256" y="256" />
 					</Size>
@@ -35,7 +21,15 @@
 						<Anchor point="TOPLEFT" />
 					</Anchors>
 				</Texture>
-				<Texture file="Interface\ClassTrainerFrame\UI-ClassTrainer-TopRight">
+				<Texture file="Interface\HelpFrame\HelpFrame-Top">
+					<Size>
+						<AbsDimension x="416" y="256" />
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="BarTopLeft"/>
+					</Anchors>
+				</Texture>
+				<Texture file="Interface\HelpFrame\HelpFrame-TopRight">
 					<Size>
 						<AbsDimension x="128" y="256" />
 					</Size>
@@ -43,7 +37,7 @@
 						<Anchor point="TOPRIGHT" />
 					</Anchors>
 				</Texture>
-				<Texture file="Interface\ClassTrainerFrame\UI-ClassTrainer-BotLeft">
+				<Texture name="$parentBotLeft" file="Interface\HelpFrame\HelpFrame-BotLeft">
 					<Size>
 						<AbsDimension x="256" y="256" />
 					</Size>
@@ -51,7 +45,15 @@
 						<Anchor point="BOTTOMLEFT" />
 					</Anchors>
 				</Texture>
-				<Texture file="Interface\ClassTrainerFrame\UI-ClassTrainer-BotRight">
+				<Texture file="Interface\HelpFrame\HelpFrame-Bottom">
+					<Size>
+						<AbsDimension x="416" y="256" />
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentBotLeft"/>
+					</Anchors>
+				</Texture>
+				<Texture file="Interface\HelpFrame\HelpFrame-BotRight">
 					<Size>
 						<AbsDimension x="128" y="256" />
 					</Size>

@@ -193,7 +193,7 @@
 						<PushedTexture file="Interface\ICONS\INV_Misc_Note_03.blp" />
 						<Scripts>
 							<OnClick>
-								SOTA_OpenTransauctionUI();
+								SOTA_OpenTransactionsLogUI();
 							</OnClick>
 							<OnEnter>
 								SOTA_ShowDashboardToolTip(this, "Open Transaction Log");

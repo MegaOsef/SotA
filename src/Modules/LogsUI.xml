@@ -2,16 +2,16 @@
 	<Script file="LogsUI.lua" />
 
 	<!-- template for a Log entry in the Transaction UI -->
-	<Button name="SOTA_LogTemplate" hidden="true" virtual="true">
+	<Button name="SOTA_TransactionTemplate" hidden="true" virtual="true">
 		<Size>
-			<AbsDimension x="320" y="16"/>
+			<AbsDimension x="650" y="16"/>
 		</Size>
 		<Layers>
 			<Layer>
-				<!-- Timestamp -->
-				<FontString name="$parentTime" justifyH="LEFT" inherits="GameFontNormal">
+				<!-- ID -->
+				<FontString name="$parentId" justifyH="LEFT" inherits="GameFontNormal">
 					<Size>
-						<AbsDimension x="64" y="16"/>
+						<AbsDimension x="140" y="16"/>
 					</Size>
 					<Anchors>
 						<Anchor point="LEFT">
@@ -21,57 +21,40 @@
 						</Anchor>
 					</Anchors>
 				</FontString>
-				<!-- + / - icon -->
-				<Texture name="$parentIcon" file="">
+				<!-- Type -->
+				<FontString name="$parentType" justifyH="LEFT" inherits="GameFontNormal">
 					<Size>
-						<AbsDimension x="16" y="16"/>
+						<AbsDimension x="80" y="16"/>
 					</Size>
 					<Anchors>
-						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentTime"/>
-					</Anchors>
-				</Texture>
-				<!-- Transaction ID -->
-				<FontString name="$parentTID" justifyH="RIGHT" inherits="GameFontNormal">
-					<Size>
-						<AbsDimension x="20" y="16"/>
-					</Size>
-					<Anchors>
-						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentIcon"/>
+						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentId"/>
 					</Anchors>
 				</FontString>
-				<FontString name="$parentFiller1" justifyH="LEFT" inherits="GameFontNormal">
+				<!-- Auction ID -->
+				<FontString name="$parentAuctionId" justifyH="LEFT" inherits="GameFontNormal">
 					<Size>
-						<AbsDimension x="4" y="16"/>
+						<AbsDimension x="140" y="16"/>
 					</Size>
 					<Anchors>
-						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentTID"/>
+						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentType"/>
 					</Anchors>
 				</FontString>
-				<!-- Player name -->
-				<FontString name="$parentName" justifyH="LEFT" inherits="GameFontNormal">
+				<!-- Boss name -->
+				<FontString name="$parentBossName" justifyH="LEFT" inherits="GameFontNormal">
+					<Size>
+						<AbsDimension x="200" y="16"/>
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentAuctionId"/>
+					</Anchors>
+				</FontString>
+				<!-- Officer -->
+				<FontString name="$parentOfficer" justifyH="LEFT" inherits="GameFontNormal">
 					<Size>
 						<AbsDimension x="90" y="16"/>
 					</Size>
 					<Anchors>
-						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentFiller1"/>
-					</Anchors>
-				</FontString>
-				<!-- Command type value -->
-				<FontString name="$parentCommand" justifyH="LEFT" inherits="GameFontNormal">
-					<Size>
-						<AbsDimension x="70" y="16"/>
-					</Size>
-					<Anchors>
-						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentName"/>
-					</Anchors>
-				</FontString>
-				<!-- DKP value -->
-				<FontString name="$parentDKP" justifyH="RIGHT" inherits="GameFontNormal">
-					<Size>
-						<AbsDimension x="50" y="16"/>
-					</Size>
-					<Anchors>
-						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentCommand"/>
+						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentBossName"/>
 					</Anchors>
 				</FontString>
 			</Layer>
@@ -96,17 +79,16 @@
 		</NormalTexture>
 	</Button>
 
-	<!-- template for a DKP entry in the DKP History -->
-	<Button name="SOTA_DKPTemplate" hidden="true" virtual="true">
+	<Button name="SOTA_DkpChangeTemplate" hidden="true" virtual="true">
 		<Size>
-			<AbsDimension x="320" y="16"/>
+			<AbsDimension x="650" y="16"/>
 		</Size>
 		<Layers>
 			<Layer>
-				<!-- Timestamp -->
-				<FontString name="$parentTime" justifyH="LEFT" inherits="GameFontNormal">
+				<!-- ID -->
+				<FontString name="$parentId" justifyH="LEFT" inherits="GameFontNormal">
 					<Size>
-						<AbsDimension x="150" y="16"/>
+						<AbsDimension x="140" y="16"/>
 					</Size>
 					<Anchors>
 						<Anchor point="LEFT">
@@ -116,38 +98,22 @@
 						</Anchor>
 					</Anchors>
 				</FontString>
-				<!-- + / - icon -->
-				<Texture name="$parentIcon" file="">
+				<!-- Player -->
+				<FontString name="$parentPlayer" justifyH="LEFT" inherits="GameFontNormal">
 					<Size>
-						<AbsDimension x="16" y="16"/>
+						<AbsDimension x="90" y="16"/>
 					</Size>
 					<Anchors>
-						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentTime"/>
-					</Anchors>
-				</Texture>
-				<FontString name="$parentFiller1" justifyH="LEFT" inherits="GameFontNormal">
-					<Size>
-						<AbsDimension x="4" y="16"/>
-					</Size>
-					<Anchors>
-						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentIcon"/>
+						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentId"/>
 					</Anchors>
 				</FontString>
-				<!-- Player name -->
-				<FontString name="$parentName" justifyH="LEFT" inherits="GameFontNormal">
+				<!-- Dkp change -->
+				<FontString name="$parentChange" justifyH="RIGHT" inherits="GameFontNormal">
 					<Size>
-						<AbsDimension x="94" y="16"/>
+						<AbsDimension x="80" y="16"/>
 					</Size>
 					<Anchors>
-						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentFiller1"/>
-					</Anchors>
-				</FontString>
-				<FontString name="$parentDKP" justifyH="RIGHT" inherits="GameFontNormal">
-					<Size>
-						<AbsDimension x="50" y="16"/>
-					</Size>
-					<Anchors>
-						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentCommand"/>
+						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentPlayer"/>
 					</Anchors>
 				</FontString>
 			</Layer>
@@ -155,7 +121,6 @@
 		<Scripts>
 			<OnClick>
 				PlaySound("igMainMenuOptionCheckBoxOn")
-				SOTA_OnDKPHistoryClick(this)
 			</OnClick>
 			<OnEnter>
 				getglobal(this:GetName().."BG"):SetVertexColor(1, 1, 1, 1)
@@ -172,119 +137,16 @@
 		</NormalTexture>
 	</Button>
 
-	<!-- template for a Player entry in the Transaction UI (4 columns) -->
-	<Button name="SOTA_FourPlayerTemplate" hidden="true" virtual="true">
-		<Size>
-			<AbsDimension x="80" y="16"/>
-		</Size>
-		<Layers>
-			<Layer>
-				<!-- Player, 1 -->
-				<FontString name="$parentPlayer1" justifyH="LEFT" inherits="GameFontNormal">
-					<Size>
-						<AbsDimension x="80" y="16"/>
-					</Size>
-					<Anchors>
-						<Anchor point="LEFT">
-							<Offset>
-								<AbsDimension x="4" y="0"/>
-							</Offset>
-						</Anchor>
-					</Anchors>
-				</FontString>
-				<!-- Player, 2 -->
-				<FontString name="$parentPlayer2" justifyH="LEFT" inherits="GameFontNormal">
-					<Size>
-						<AbsDimension x="80" y="16"/>
-					</Size>
-					<Anchors>
-						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentPlayer1"/>
-					</Anchors>
-				</FontString>
-				<!-- Player, 3 -->
-				<FontString name="$parentPlayer3" justifyH="LEFT" inherits="GameFontNormal">
-					<Size>
-						<AbsDimension x="80" y="16"/>
-					</Size>
-					<Anchors>
-						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentPlayer2"/>
-					</Anchors>
-				</FontString>
-				<!-- Player, 4 -->
-				<FontString name="$parentPlayer4" justifyH="LEFT" inherits="GameFontNormal">
-					<Size>
-						<AbsDimension x="80" y="16"/>
-					</Size>
-					<Anchors>
-						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentPlayer3"/>
-					</Anchors>
-				</FontString>
-			</Layer>
-		</Layers>
-		<Scripts>
-			<OnClick>
-				PlaySound("igMainMenuOptionCheckBoxOn")
-				SOTA_OnTransactionLogDetailPlayer(this);
-			</OnClick>
-			<OnEnter>
-				getglobal(this:GetName().."BG"):SetVertexColor(1, 1, 1, 1)
-			</OnEnter>
-			<OnLeave>
-				getglobal(this:GetName().."BG"):SetVertexColor(0.7, 0.7, 0.7, 0.7)
-			</OnLeave>
-			<OnLoad>
-				this:GetScript("OnLeave")(this)
-			</OnLoad>
-		</Scripts>
-		<NormalTexture name="$parentBG">
-		</NormalTexture>
-	</Button>
-
-	<!-- template for a Player entry in the Transaction UI (1 column) -->
-	<Button name="SOTA_PlayerLogTemplate" hidden="true" virtual="true">
-		<Size>
-			<AbsDimension x="80" y="16"/>
-		</Size>
-		<Layers>
-			<Layer>
-				<!-- Player, 1 -->
-				<FontString name="$parentPlayerButton" justifyH="LEFT" inherits="GameFontNormal">
-					<Size>
-						<AbsDimension x="80" y="16"/>
-					</Size>
-				</FontString>
-			</Layer>
-		</Layers>
-		<Scripts>
-			<OnClick>
-				PlaySound("igMainMenuOptionCheckBoxOn")
-				SOTA_OnTransactionLogDetailPlayer(this);
-			</OnClick>
-			<OnEnter>
-				getglobal(this:GetName().."BG"):SetVertexColor(1, 1, 1, 1)
-			</OnEnter>
-			<OnLeave>
-				getglobal(this:GetName().."BG"):SetVertexColor(0.7, 0.7, 0.7, 0.7)
-			</OnLeave>
-			<OnLoad>
-				this:GetScript("OnLeave")(this)
-			</OnLoad>
-		</Scripts>
-		<NormalTexture name="$parentBG">
-		</NormalTexture>
-	</Button>
-
-	
 
 	<!-- Main Log Frame -->
-	<Frame name="TransactionUIFrame" inherits="SOTAFrame">
+	<Frame name="LogsUIFrame" inherits="SOTAFrame">
 		<Layers>
 			<Layer>
 				<FontString name="$parentTitle" inherits="GameFontNormal" text="SotA Transaction Log">
 					<Anchors>
 						<Anchor point="CENTER">
 							<Offset>
-								<AbsDimension x="-6" y="233" />
+								<AbsDimension x="0" y="233" />
 							</Offset>
 						</Anchor>
 					</Anchors>
@@ -293,27 +155,27 @@
 		</Layers>
 		<Frames>
 			<!-- Transaction Log frame -->
-			<Frame name="$parentTableList" hidden="true">
+			<Frame name="$parentTransactionsList" hidden="true">
 				<Size>
-					<AbsDimension x="320" y="322" />
+					<AbsDimension x="800" y="322" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
 						<Offset>
-							<AbsDimension x="16" y="-92" />
+							<AbsDimension x="16" y="-52" />
 						</Offset>
 					</Anchor>
 				</Anchors>
 			</Frame>
 			<!-- Log Details frame -->
-			<Frame name="$parentPlayerList" hidden="true">
+			<Frame name="$parentDkpChangesList" hidden="true">
 				<Size>
-					<AbsDimension x="324" y="318" />
+					<AbsDimension x="800" y="322" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
 						<Offset>
-							<AbsDimension x="18" y="-92" />
+							<AbsDimension x="16" y="-52" />
 						</Offset>
 					</Anchor>
 				</Anchors>
@@ -335,8 +197,8 @@
 			<!-- Top right corner close button -->
 			<Button name="$parentTopCloseButton" inherits="UIPanelCloseButton">
 				<Anchors>
-					<Anchor point="TOPLEFT">
-						<Offset x="322" y="-8" />
+					<Anchor point="TOPRIGHT">
+						<Offset x="-43" y="-3" />
 					</Anchor>
 				</Anchors>
 				<Scripts>
@@ -345,63 +207,15 @@
 					</OnClick>
 				</Scripts>
 			</Button>
-			<!-- Purge Transactions log button -->
-			<Button name="PurgeDKPHistoryButton" inherits="UIPanelButtonTemplate" text="Purge DKP History" hidden="true">
-				<Size>
-					<AbsDimension x="163" y="23" />
-				</Size>
-				<Anchors>
-					<Anchor point="TOPRIGHT">
-						<Offset x="-40" y="-50" />
-					</Anchor>
-				</Anchors>
-				<Scripts>
-					<OnClick>
-						SOTA_PurgeDKPHistory();
-					</OnClick>
-				</Scripts>
-			</Button>
-			<!-- Log frame buttons: Transaction log -->
-			<Button name="TransactionLogButton" inherits="UIPanelButtonTemplate" text="View Transaction Log" hidden="true">
-				<Size>
-					<AbsDimension x="163" y="23" />
-				</Size>
-				<Anchors>
-					<Anchor point="TOPLEFT">
-						<Offset x="19" y="-409" />
-					</Anchor>
-				</Anchors>
-				<Scripts>
-					<OnClick>
-						SOTA_ViewTransactionLog();
-					</OnClick>
-				</Scripts>
-			</Button>
-			<!-- Log frame buttons: DKP History -->
-			<Button name="DKPHistoryButton" inherits="UIPanelButtonTemplate" text="View DKP History">
-				<Size>
-					<AbsDimension x="163" y="23" />
-				</Size>
-				<Anchors>
-					<Anchor point="TOPLEFT">
-						<Offset x="19" y="-409" />
-					</Anchor>
-				</Anchors>
-				<Scripts>
-					<OnClick>
-						SOTA_ViewDKPHistory();
-					</OnClick>
-				</Scripts>
-			</Button>
 
 			<!-- Log frame buttons: PREVious button -->
-			<Button name="PrevTransactionPageButton" inherits="UIPanelButtonTemplate" text="&lt;&lt; Prev">
+			<Button name="BtnPrevPage" inherits="UIPanelButtonTemplate" text="Previous Page">
 				<Size>
-					<AbsDimension x="78" y="23" />
+					<AbsDimension x="100" y="23" />
 				</Size>
 				<Anchors>
-					<Anchor point="TOPLEFT">
-						<Offset x="183" y="-409" />
+					<Anchor point="BOTTOMLEFT">
+						<Offset x="15" y="20" />
 					</Anchor>
 				</Anchors>
 				<Scripts>
@@ -411,13 +225,13 @@
 				</Scripts>
 			</Button>
 			<!-- Log frame buttons: NEXT button -->
-			<Button name="NextTransactionPageButton" inherits="UIPanelButtonTemplate" text="Next &gt;&gt;">
+			<Button name="BtnNextPage" inherits="UIPanelButtonTemplate" text="Next Page">
 				<Size>
-					<AbsDimension x="78" y="23" />
+					<AbsDimension x="100" y="23" />
 				</Size>
 				<Anchors>
-					<Anchor point="TOPLEFT">
-						<Offset x="264" y="-409" />
+					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="BtnPrevPage" >
+						<Offset x="10" y="0" />
 					</Anchor>
 				</Anchors>
 				<Scripts>
@@ -427,34 +241,18 @@
 				</Scripts>
 			</Button>
 			<!-- Log Details frame buttons: Back button -->
-			<Button name="BackToTransactionLogButton" inherits="UIPanelButtonTemplate" text="&lt;&lt; Back">
+			<Button name="BtnBack" inherits="UIPanelButtonTemplate" text="Return to transactions">
 				<Size>
-					<AbsDimension x="78" y="23" />
+					<AbsDimension x="200" y="23" />
 				</Size>
 				<Anchors>
-					<Anchor point="TOPLEFT">
-						<Offset x="183" y="-409" />
+					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="BtnNextPage" >
+						<Offset x="10" y="0" />
 					</Anchor>
 				</Anchors>
 				<Scripts>
 					<OnClick>
 						SOTA_CloseTransactionDetails();
-					</OnClick>
-				</Scripts>
-			</Button>
-			<!-- Log Details frame buttons: Undo button -->
-			<Button name="UndoTransactionButton" inherits="UIPanelButtonTemplate" text="Undo">
-				<Size>
-					<AbsDimension x="78" y="23" />
-				</Size>
-				<Anchors>
-					<Anchor point="TOPLEFT">
-						<Offset x="264" y="-409" />
-					</Anchor>
-				</Anchors>
-				<Scripts>
-					<OnClick>
-						SOTA_RequestUndoTransaction();
 					</OnClick>
 				</Scripts>
 			</Button>

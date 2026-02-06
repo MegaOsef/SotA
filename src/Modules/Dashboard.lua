@@ -190,7 +190,7 @@ function SOTA_ExportRavenLogsButton_OnClick()
 end
 
 function SOTA_ClearRavenLogsButton_OnClick()
-	SOTA.db.realm.RavenLogsForApp = { dkpMoves = {}, auctions = {} }
+	SOTA.db.realm.RavenLogsForApp = { dkpTransactions = {}, auctions = {} }
 	SOTA:Print("Raven logs cleared.")
 	SOTA.db.realm.NeedsToExportRavenLogs = false
 end
