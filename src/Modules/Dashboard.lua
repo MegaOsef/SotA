@@ -189,8 +189,21 @@ function SOTA_ExportRavenLogsButton_OnClick()
 	SOTA.db.realm.NeedsToExportRavenLogs = false
 end
 
+
+StaticPopupDialogs["SOTA_CONFIRM_CLEARRAVENLOGS"] = {
+	text = "Do you really want to Raven Logs?",
+	button1 = "Yes",
+	button2 = "No",
+	timeout = 0,
+	whileDead = 1,
+	hideOnEscape = 1,
+	OnAccept = function()
+		SOTA.db.realm.RavenLogsForApp = { dkpTransactions = {}, auctions = {} }
+		SOTA:Print("Raven logs cleared.")
+		SOTA.db.realm.NeedsToExportRavenLogs = false
+	end,
+}
+
 function SOTA_ClearRavenLogsButton_OnClick()
-	SOTA.db.realm.RavenLogsForApp = { dkpTransactions = {}, auctions = {} }
-	SOTA:Print("Raven logs cleared.")
-	SOTA.db.realm.NeedsToExportRavenLogs = false
+	StaticPopup_Show("SOTA_CONFIRM_CLEARRAVENLOGS")
 end
