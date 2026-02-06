@@ -1,0 +1,213 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<Script file="PreviousAuctions.lua" />
+
+	<!-- template for a Log entry in the Transaction UI -->
+	<Frame name="SOTA_PreviousAuction_Template" hidden="true" virtual="true">
+		<Size>
+			<AbsDimension x="650" y="16" />
+		</Size>
+		<Layers>
+			<Layer>
+				<!-- ID -->
+				<FontString name="$parentId" justifyH="LEFT" inherits="GameFontNormal">
+					<Size>
+						<AbsDimension x="140" y="16" />
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT">
+							<Offset>
+								<AbsDimension x="4" y="0" />
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<!-- Item -->
+				<FontString name="$parentItem" justifyH="LEFT" inherits="GameFontNormal">
+					<Size>
+						<AbsDimension x="210" y="16" />
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentId" />
+					</Anchors>
+				</FontString>
+				<!-- Boss Name -->
+				<FontString name="$parentBossName" justifyH="LEFT" inherits="GameFontNormal">
+					<Size>
+						<AbsDimension x="160" y="16" />
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentItem" />
+					</Anchors>
+				</FontString>
+				<!-- Winner -->
+				<FontString name="$parentWinner" justifyH="LEFT" inherits="GameFontNormal">
+					<Size>
+						<AbsDimension x="90" y="16" />
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentBossName" />
+					</Anchors>
+				</FontString>
+				<!-- Final Bid -->
+				<FontString name="$parentFinalBid" justifyH="RIGHT" inherits="GameFontNormal">
+					<Size>
+						<AbsDimension x="56" y="16" />
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentWinner" />
+					</Anchors>
+				</FontString>
+				<!-- Bid Type -->
+				<FontString name="$parentBidType" justifyH="CENTER" inherits="GameFontNormal">
+					<Size>
+						<AbsDimension x="90" y="16" />
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentFinalBid" />
+					</Anchors>
+				</FontString>
+				<!-- Officer -->
+				<FontString name="$parentOfficer" justifyH="LEFT" inherits="GameFontNormal">
+					<Size>
+						<AbsDimension x="90" y="16" />
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentBidType" />
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Button name="$parentRollbackBtn" inherits="UIPanelButtonTemplate"
+				text="Rollback">
+				<Size>
+					<AbsDimension x="100" y="16" />
+				</Size>
+				<Anchors>
+					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentOfficer" />
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						SOTA_Rollback_PreviousAuction(this)
+					</OnClick>
+				</Scripts>
+			</Button>
+		</Frames>
+	</Frame>
+	
+
+	<Frame name="SOTA_PreviousAuctionsUI" parent="UIParent" toplevel="true" hidden="true">
+		<Size>
+			<AbsDimension x="1020" y="512" />
+		</Size>
+		<Anchors>
+			<Anchor point="TOPLEFT">
+				<Offset x="312" y="-124" />
+			</Anchor>
+		</Anchors>
+		<Layers>
+			<Layer level="ARTWORK">
+				<Texture name="$parentTopLeft" file="Interface\HelpFrame\HelpFrame-TopLeft">
+					<Size>
+						<AbsDimension x="256" y="256" />
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT" />
+					</Anchors>
+				</Texture>
+				<Texture file="Interface\HelpFrame\HelpFrame-Top">
+					<Size>
+						<AbsDimension x="636" y="256" />
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentTopLeft"/>
+					</Anchors>
+				</Texture>
+				<Texture file="Interface\HelpFrame\HelpFrame-TopRight">
+					<Size>
+						<AbsDimension x="128" y="256" />
+					</Size>
+					<Anchors>
+						<Anchor point="TOPRIGHT" />
+					</Anchors>
+				</Texture>
+				<Texture name="$parentBotLeft" file="Interface\HelpFrame\HelpFrame-BotLeft">
+					<Size>
+						<AbsDimension x="256" y="256" />
+					</Size>
+					<Anchors>
+						<Anchor point="BOTTOMLEFT" />
+					</Anchors>
+				</Texture>
+				<Texture file="Interface\HelpFrame\HelpFrame-Bottom">
+					<Size>
+						<AbsDimension x="636" y="256" />
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentBotLeft"/>
+					</Anchors>
+				</Texture>
+				<Texture file="Interface\HelpFrame\HelpFrame-BotRight">
+					<Size>
+						<AbsDimension x="128" y="256" />
+					</Size>
+					<Anchors>
+						<Anchor point="BOTTOMRIGHT" />
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer>
+				<FontString name="$parentTitle" inherits="GameFontNormal" text="Previous auctions">
+					<Anchors>
+						<Anchor point="CENTER">
+							<Offset>
+								<AbsDimension x="0" y="233" />
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnLoad>
+				this:SetMovable(true)
+				this:SetUserPlaced(true)
+				this:RegisterForDrag("LeftButton")
+			</OnLoad>
+			<OnDragStart>
+				this:StartMoving()
+			</OnDragStart>
+			<OnDragStop>
+				this:StopMovingOrSizing()
+			</OnDragStop>
+		</Scripts>
+		<Frames>
+			<!-- Transaction Log frame -->
+			<Frame name="$parentAuctionsList" hidden="true">
+				<Size>
+					<AbsDimension x="800" y="322" />
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset>
+							<AbsDimension x="16" y="-52" />
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Frame>
+			<!-- Top right corner close button -->
+			<Button name="$parentTopCloseButton" inherits="UIPanelCloseButton">
+				<Anchors>
+					<Anchor point="TOPRIGHT">
+						<Offset x="-43" y="-3" />
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						SOTA_ClosePreviousAuctionsUI();
+					</OnClick>
+				</Scripts>
+			</Button>
+		</Frames>
+	</Frame>
+</Ui>

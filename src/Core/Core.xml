@@ -13,7 +13,7 @@
 		</Anchors>
 		<Layers>
 			<Layer level="ARTWORK">
-				<Texture name="BarTopLeft" file="Interface\HelpFrame\HelpFrame-TopLeft">
+				<Texture name="$parentTopLeft" file="Interface\HelpFrame\HelpFrame-TopLeft">
 					<Size>
 						<AbsDimension x="256" y="256" />
 					</Size>
@@ -26,7 +26,7 @@
 						<AbsDimension x="416" y="256" />
 					</Size>
 					<Anchors>
-						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="BarTopLeft"/>
+						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentTopLeft"/>
 					</Anchors>
 				</Texture>
 				<Texture file="Interface\HelpFrame\HelpFrame-TopRight">

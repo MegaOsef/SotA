@@ -266,7 +266,7 @@
 						<Anchors>
 							<Anchor point="RIGHT">
 								<Offset>
-									<AbsDimension x="-4" y="0" />
+									<AbsDimension x="-23" y="0" />
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -278,6 +278,32 @@
 							</OnClick>
 							<OnEnter>
 								SOTA_ShowDashboardToolTip(this, "Clear Raven Logs (new session)");
+							</OnEnter>
+							<OnLeave>
+								SOTA_HideDashboardToolTip(this);
+							</OnLeave>
+						</Scripts>
+					</Button>
+					<Button name="$parentPreviousAuctionsButton" inherits="ActionButtonTemplate"
+						frameStrata="MEDIUM" hidden="false">
+						<Size>
+							<AbsDimension x="20" y="20" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPRIGHT">
+								<Offset>
+									<AbsDimension x="0" y="-20" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<NormalTexture file="Interface\ICONS\INV_Hammer_18.blp" />
+						<PushedTexture file="Interface\ICONS\INV_Hammer_20.blp" />
+						<Scripts>
+							<OnClick>
+								SOTA_OpenPreviousAuctionsUI();
+							</OnClick>
+							<OnEnter>
+								SOTA_ShowDashboardToolTip(this, "Previous auctions");
 							</OnEnter>
 							<OnLeave>
 								SOTA_HideDashboardToolTip(this);

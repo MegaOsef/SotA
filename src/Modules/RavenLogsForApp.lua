@@ -50,6 +50,15 @@ function module:FindTransactionFromId(id)
     return nil
 end
 
+function module:FindAuctionFromId(id)
+    for _, auction in ipairs(SOTA.db.realm.RavenLogsForApp.auctions) do
+        if auction.id == id then
+            return auction
+        end
+    end
+    return nil
+end
+
 function module:LogTransaction(transactionType, auctionId, bossName)
     local uniqueAuctionId = self:getUniqueId()
     local finalAuctionId = nil
@@ -101,6 +110,7 @@ function module:LogAuction(itemId, bossName, winner, finalBid, bidType)
         finalBid = finalBid,
         bidType = bidType,
         officer = UnitName("player"),
+        valid = true
     })
 
     self:TriggerEvent("SOTA_RAVENLOGS_UPDATED")

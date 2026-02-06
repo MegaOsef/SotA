@@ -79,6 +79,7 @@ function SOTA:OnEnable()
 				finalBid = 500, --> doesn't exist if no winner
 				bidType = "MS", --> "MS" | "OS" 
 				officer = "OfficerName",
+				valid = true, -- has to be taken by RavenWebapp or not
 			  }, ... },
 			]] --
 			NeedsToExportRavenLogs = false,
