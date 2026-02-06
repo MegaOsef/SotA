@@ -4,19 +4,19 @@
 	<!-- template for a Log entry in the Transaction UI -->
 	<Button name="SOTA_TransactionTemplate" hidden="true" virtual="true">
 		<Size>
-			<AbsDimension x="650" y="16"/>
+			<AbsDimension x="650" y="16" />
 		</Size>
 		<Layers>
 			<Layer>
 				<!-- ID -->
 				<FontString name="$parentId" justifyH="LEFT" inherits="GameFontNormal">
 					<Size>
-						<AbsDimension x="140" y="16"/>
+						<AbsDimension x="140" y="16" />
 					</Size>
 					<Anchors>
 						<Anchor point="LEFT">
 							<Offset>
-								<AbsDimension x="4" y="0"/>
+								<AbsDimension x="4" y="0" />
 							</Offset>
 						</Anchor>
 					</Anchors>
@@ -24,37 +24,37 @@
 				<!-- Type -->
 				<FontString name="$parentType" justifyH="LEFT" inherits="GameFontNormal">
 					<Size>
-						<AbsDimension x="80" y="16"/>
+						<AbsDimension x="80" y="16" />
 					</Size>
 					<Anchors>
-						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentId"/>
+						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentId" />
 					</Anchors>
 				</FontString>
 				<!-- Auction ID -->
 				<FontString name="$parentAuctionId" justifyH="LEFT" inherits="GameFontNormal">
 					<Size>
-						<AbsDimension x="140" y="16"/>
+						<AbsDimension x="140" y="16" />
 					</Size>
 					<Anchors>
-						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentType"/>
+						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentType" />
 					</Anchors>
 				</FontString>
 				<!-- Boss name -->
 				<FontString name="$parentBossName" justifyH="LEFT" inherits="GameFontNormal">
 					<Size>
-						<AbsDimension x="200" y="16"/>
+						<AbsDimension x="200" y="16" />
 					</Size>
 					<Anchors>
-						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentAuctionId"/>
+						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentAuctionId" />
 					</Anchors>
 				</FontString>
 				<!-- Officer -->
 				<FontString name="$parentOfficer" justifyH="LEFT" inherits="GameFontNormal">
 					<Size>
-						<AbsDimension x="90" y="16"/>
+						<AbsDimension x="90" y="16" />
 					</Size>
 					<Anchors>
-						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentBossName"/>
+						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentBossName" />
 					</Anchors>
 				</FontString>
 			</Layer>
@@ -75,25 +75,25 @@
 			</OnLoad>
 		</Scripts>
 		<NormalTexture name="$parentBG">
-			<Color r="0.0" g="0.0" b="0.0" a="0.0"/>
+			<Color r="0.0" g="0.0" b="0.0" a="0.0" />
 		</NormalTexture>
 	</Button>
 
 	<Button name="SOTA_DkpChangeTemplate" hidden="true" virtual="true">
 		<Size>
-			<AbsDimension x="650" y="16"/>
+			<AbsDimension x="650" y="16" />
 		</Size>
 		<Layers>
 			<Layer>
 				<!-- ID -->
 				<FontString name="$parentId" justifyH="LEFT" inherits="GameFontNormal">
 					<Size>
-						<AbsDimension x="140" y="16"/>
+						<AbsDimension x="140" y="16" />
 					</Size>
 					<Anchors>
 						<Anchor point="LEFT">
 							<Offset>
-								<AbsDimension x="4" y="0"/>
+								<AbsDimension x="4" y="0" />
 							</Offset>
 						</Anchor>
 					</Anchors>
@@ -101,19 +101,19 @@
 				<!-- Player -->
 				<FontString name="$parentPlayer" justifyH="LEFT" inherits="GameFontNormal">
 					<Size>
-						<AbsDimension x="90" y="16"/>
+						<AbsDimension x="90" y="16" />
 					</Size>
 					<Anchors>
-						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentId"/>
+						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentId" />
 					</Anchors>
 				</FontString>
 				<!-- Dkp change -->
 				<FontString name="$parentChange" justifyH="RIGHT" inherits="GameFontNormal">
 					<Size>
-						<AbsDimension x="80" y="16"/>
+						<AbsDimension x="80" y="16" />
 					</Size>
 					<Anchors>
-						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentPlayer"/>
+						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentPlayer" />
 					</Anchors>
 				</FontString>
 			</Layer>
@@ -133,14 +133,72 @@
 			</OnLoad>
 		</Scripts>
 		<NormalTexture name="$parentBG">
-			<Color r="0.0" g="0.0" b="0.0" a="0.0"/>
+			<Color r="0.0" g="0.0" b="0.0" a="0.0" />
 		</NormalTexture>
 	</Button>
 
 
 	<!-- Main Log Frame -->
-	<Frame name="LogsUIFrame" inherits="SOTAFrame">
+	<Frame name="LogsUIFrame" parent="UIParent" toplevel="true" hidden="true">
+		<Size>
+			<AbsDimension x="800" y="512" />
+		</Size>
+		<Anchors>
+			<Anchor point="TOPLEFT">
+				<Offset x="312" y="-124" />
+			</Anchor>
+		</Anchors>
 		<Layers>
+			<Layer level="ARTWORK">
+				<Texture name="$parentTopLeft" file="Interface\HelpFrame\HelpFrame-TopLeft">
+					<Size>
+						<AbsDimension x="256" y="256" />
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT" />
+					</Anchors>
+				</Texture>
+				<Texture file="Interface\HelpFrame\HelpFrame-Top">
+					<Size>
+						<AbsDimension x="416" y="256" />
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentTopLeft" />
+					</Anchors>
+				</Texture>
+				<Texture file="Interface\HelpFrame\HelpFrame-TopRight">
+					<Size>
+						<AbsDimension x="128" y="256" />
+					</Size>
+					<Anchors>
+						<Anchor point="TOPRIGHT" />
+					</Anchors>
+				</Texture>
+				<Texture name="$parentBotLeft" file="Interface\HelpFrame\HelpFrame-BotLeft">
+					<Size>
+						<AbsDimension x="256" y="256" />
+					</Size>
+					<Anchors>
+						<Anchor point="BOTTOMLEFT" />
+					</Anchors>
+				</Texture>
+				<Texture file="Interface\HelpFrame\HelpFrame-Bottom">
+					<Size>
+						<AbsDimension x="416" y="256" />
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentBotLeft" />
+					</Anchors>
+				</Texture>
+				<Texture file="Interface\HelpFrame\HelpFrame-BotRight">
+					<Size>
+						<AbsDimension x="128" y="256" />
+					</Size>
+					<Anchors>
+						<Anchor point="BOTTOMRIGHT" />
+					</Anchors>
+				</Texture>
+			</Layer>
 			<Layer>
 				<FontString name="$parentTitle" inherits="GameFontNormal" text="SotA Transaction Log">
 					<Anchors>
@@ -257,5 +315,18 @@
 				</Scripts>
 			</Button>
 		</Frames>
+		<Scripts>
+			<OnLoad>
+				this:SetMovable(true)
+				this:SetUserPlaced(true)
+				this:RegisterForDrag("LeftButton")
+			</OnLoad>
+			<OnDragStart>
+				this:StartMoving()
+			</OnDragStart>
+			<OnDragStop>
+				this:StopMovingOrSizing()
+			</OnDragStop>
+		</Scripts>
 	</Frame>
 </Ui>

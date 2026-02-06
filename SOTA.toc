@@ -14,7 +14,7 @@ Libs\AceEvent-2.0\AceEvent-2.0.lua
 Libs\AceModuleCore-2.0\AceModuleCore-2.0.lua
 Libs\AceDB-2.0\AceDB-2.0.lua
 
-src\Core\Core.xml
+src\Core\Core.lua
 src\Core\Json.lua
 src\Core\Jobs.lua
 src\Core\Tables.lua
