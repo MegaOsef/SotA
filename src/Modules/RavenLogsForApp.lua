@@ -23,7 +23,7 @@ end
 function module:SOTA_EXPORTRAVENLOGS_REQUEST()
     local exportObject = {
         auctions = SOTA.db.realm.RavenLogsForApp.auctions,
-        dkpTransactions = SOTA.db.realm.RavenLogsForApp.dkpTransactions,
+        -- dkpTransactions = SOTA.db.realm.RavenLogsForApp.dkpTransactions, -- For staging purposes.
     }
     local exportString = SOTA.json.encode(exportObject)
     self.exportModal.editBox:SetText(exportString)
