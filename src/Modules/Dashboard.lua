@@ -117,14 +117,10 @@ function module:SOTA_BOSS_KILLED(bossName, dkpValue)
 end
 
 function module:OnSecondTimer()
-	if SOTA:IsInRaid(true) then
-		if SOTA.db.realm.DisableDashboard == 0 then
-			SOTA_OpenDashboard();
-		end
+	if SOTA.db.realm.DisableDashboard == 0 then
+		SOTA_OpenDashboard();
 	else
-		if SOTA.db.realm.DisableDashboard == 0 then
-			SOTA_CloseDashboard();
-		end
+		SOTA_CloseDashboard();
 	end
 
 	if SOTA.db.realm.NeedsToExportRavenLogs then
