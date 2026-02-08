@@ -187,7 +187,7 @@ end
 
 
 StaticPopupDialogs["SOTA_CONFIRM_CLEARRAVENLOGS"] = {
-	text = "Do you really want to Raven Logs?",
+	text = "Do you really want to clear Raven Logs?",
 	button1 = "Yes",
 	button2 = "No",
 	timeout = 0,
