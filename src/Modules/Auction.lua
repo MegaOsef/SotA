@@ -131,7 +131,7 @@ local RAIDS_INFO                  = {
 			"Echo of Medivh",
 			"King (Chess fight)",
 			"Rupturan the Broken",
-			"Sanv Tasdal",
+			"Sanv Tas'dal",
 			"Kruul",
 			"Mephistroth",
 			"Trashs",

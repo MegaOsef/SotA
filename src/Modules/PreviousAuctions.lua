@@ -146,7 +146,7 @@ function module:RollbackPreviousAuction(index)
     local itemName = GetItemInfo(auction.itemId)
     if auction.winner then
         SOTA:Broadcast(SOTA.CHANNEL.RAID,
-            string.format("Auction for %s has be rollbacked. Buyer was %s for %i DKP (%s).",
+            string.format("Auction for %s has been rollbacked. Buyer was %s for %i DKP (%s).",
                 itemName,
                 auction.winner,
                 auction.finalBid,
