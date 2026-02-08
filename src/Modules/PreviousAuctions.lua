@@ -38,8 +38,26 @@ function module:OnEnable()
     self:RegisterEvent("SOTA_RAVENLOGS_UPDATED", "RefreshAuctionsList")
 end
 
+local function sortAuctionsDescending(sourcetable, index)
+    local doSort = true
+    while doSort do
+        doSort = false
+        for n = 1, table.getn(sourcetable) - 1, 1 do
+            local a = sourcetable[n]
+            local b = sourcetable[n + 1]
+            if (tonumber(a.id)) < (tonumber(b.id)) then
+                sourcetable[n] = b
+                sourcetable[n + 1] = a
+                doSort = true
+            end
+        end
+    end
+    return sourcetable;
+end
+
 function module:RefreshAuctionsList()
-    local auctions = SOTA.db.realm.RavenLogsForApp.auctions
+    local auctions = SOTA:CloneTable(SOTA.db.realm.RavenLogsForApp.auctions)
+    sortAuctionsDescending(auctions)
 
     local id, item, bossName, winner, finalBid, bidType, officer
     for n = 0, MAX_AUCTIONS, 1 do
