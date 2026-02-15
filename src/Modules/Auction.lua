@@ -312,12 +312,14 @@ function module:CHAT_MSG_RAID(message, sender)
 		return;
 	end
 	
-	-- Parse RavenDKP bid messages: [RavenDKP] |c<color>spec dkp|r
-	local a,_,bidtype,dkp = string.find(message, "%[RavenDKP%] |c%x%x%x%x%x%x%x%x(%a+) (%d+)|r")
-	if bidtype and dkp then
-		local bidMessage = string.lower(bidtype) .. " " .. dkp;
-		SOTA:Debug("Received bid message from "..sender..": "..bidMessage)
-		self:HandlePlayerBid(sender, bidMessage);
+	if SOTA:IsMasterLoot() then
+		-- Parse RavenDKP bid messages: [RavenDKP] |c<color>spec dkp|r
+		local a,_,bidtype,dkp = string.find(message, "%[RavenDKP%] |c%x%x%x%x%x%x%x%x(%a+) (%d+)|r")
+		if bidtype and dkp then
+			local bidMessage = string.lower(bidtype) .. " " .. dkp;
+			SOTA:Debug("Received bid message from "..sender..": "..bidMessage)
+			self:HandlePlayerBid(sender, bidMessage);
+		end
 	end
 end
 
