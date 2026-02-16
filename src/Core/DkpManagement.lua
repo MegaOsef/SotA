@@ -377,8 +377,9 @@ function SOTA:DecayDKP(percent, silentmode)
     local name, publicNote, officerNote
     local memberCount = GetNumGuildMembers();
     local ravenLogs = self:GetModule("RavenLogsForApp", true)
+    local logId = 0
     if ravenLogs then
-        local logId = ravenLogs:LogTransaction(SOTA.LOGTYPE.DECAY)
+        logId = ravenLogs:LogTransaction(SOTA.LOGTYPE.DECAY)
     end
     for n = 1, memberCount, 1 do
         name, _, _, _, _, _, publicNote, officerNote = GetGuildRosterInfo(n);
@@ -436,7 +437,7 @@ function SOTA:ApplyPlayerDKP(playername, dkpValue, silentmode)
 
     local memberCount = GetNumGuildMembers()
     for n = 1, memberCount, 1 do
-        name, _, _, _, _, _, publicNote, officerNote = GetGuildRosterInfo(n);
+        local name, _, _, _, _, _, publicNote, officerNote = GetGuildRosterInfo(n);
         if name == playername then
             local note = officerNote;
             if SOTA.db.realm.UseGuildNotes == SOTA_GUILDNOTE.USEPUBLIC then
@@ -474,19 +475,12 @@ end
 --	Update local stored DKP
 --	Input: receiver, dkpadded
 ]]
-function SOTA:UpdateLocalDKP(receiver, dkpAdded)
+function SOTA:UpdateLocalDKP(receiver, dkp)
     local raidRoster = self:GetRaidRoster(); --{ Name, DKP, Class, Rank, Online }
     for n = 1, table.getn(raidRoster), 1 do
         local player = raidRoster[n];
         local name = player[RT_COL.PNAME]
-        local dkp = player[RT_COL.DKP_AMNT]
         if receiver == name then
-            if dkp then
-                dkp = dkp + dkpAdded;
-            else
-                dkp = dkpAdded;
-            end
-
             raidRoster[n][RT_COL.DKP_AMNT] = dkp
             return;
         end

@@ -229,8 +229,8 @@ function SOTA:HandleSOTACommand(msg)
 	--	Command: +
 	--	Syntax: "+<%d> <playername>"
 	if sign == "+" then
-		local playerName = string.sub(cmd, 2);
-		return self:Async_AddPlayerDKP(arg, playerName, SOTA.LOGTYPE.MANUAL, nil);
+		local dkpChange = string.sub(cmd, 2);
+		return self:Async_AddPlayerDKP(arg, dkpChange, SOTA.LOGTYPE.MANUAL, nil);
 	end
 
 

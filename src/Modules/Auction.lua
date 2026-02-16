@@ -857,9 +857,7 @@ function module:PauseAuction()
 	if state == AUCTION_STATE.RUNNING then
 		self:SetAuctionState(AUCTION_STATE.PAUSED, 0);
 		SOTA:Broadcast(SOTA.CHANNEL.RAID, MSG.ONPAUSE)
-	end
-	
-	if state == AUCTION_STATE.PAUSED then
+	elseif state == AUCTION_STATE.PAUSED then
 		self:SetAuctionState(AUCTION_STATE.RUNNING, AUCTION_EXTENSION_TIME);
 		SOTA:Broadcast(SOTA.CHANNEL.RAID, MSG.ONRESUME)
 	end
