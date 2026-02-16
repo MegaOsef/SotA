@@ -93,7 +93,7 @@ function SOTA:OnEnable()
 
 	self:RequestUpdateGuildRoster()
 
-	self:ScheduleRepeatingEvent("SOTA_RequestUpdateGuildRoster", self.RequestUpdateGuildRoster, 5, self)
+	self:ScheduleRepeatingEvent("SOTA_RefreshGuildRoster", GuildRoster, 5)
 end
 
 --[[

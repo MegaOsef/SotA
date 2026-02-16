@@ -14,10 +14,13 @@ RT_COL     = {
 --
 --	Guild Roster Functions
 --
+local showOfflineForced = false
+
 function SOTA:RequestUpdateGuildRoster()
-    if GetGuildRosterShowOffline() then
+    if GetGuildRosterShowOffline() == 1 then
         GuildRoster();
     else
+        showOfflineForced = true
         -- Wow does an update of the guild roster in this function.
         SetGuildRosterShowOffline(1);
     end
@@ -25,6 +28,9 @@ end
 
 function SOTA:GUILD_ROSTER_UPDATE()
     self:RefreshGuildRoster();
+    if self:IsInRaid(true) then
+        self:RefreshRaidRoster()
+    end
 
     if self:CanReadNotes() then
         if not JobIsRunning then
@@ -36,12 +42,14 @@ function SOTA:GUILD_ROSTER_UPDATE()
                 job = self:GetNextJob()
             end
 
-            if self:IsInRaid(true) then
-                self:RefreshRaidRoster()
-            end
-
             JobIsRunning = false
         end
+    end
+
+    -- Restore the user's original show offline setting
+    if showOfflineForced then
+        SetGuildRosterShowOffline(0);
+        showOfflineForced = false
     end
 end
 

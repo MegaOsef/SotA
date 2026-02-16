@@ -119,7 +119,6 @@ end
 function SOTA:Async_AddPlayerDKP(playername, dkp, transactionType)
     if self:CanDoDKP() then
         self:AddJob(function(job) self:AddPlayerDKP(job[2], job[3], job[4]) end, playername, dkp, transactionType)
-        self:RequestUpdateGuildRoster();
     end
 end
 
@@ -143,7 +142,6 @@ end
 function SOTA:Async_SubtractPlayerDKP(playername, dkp, transactionType, auctionId)
     if self:CanDoDKP() and tonumber(dkp) then
         self:AddJob(function(job) self:SubtractPlayerDKP(job[2], job[3], job[4], job[5]) end, playername, dkp, transactionType, auctionId)
-        self:RequestUpdateGuildRoster();
     end
 end
 
@@ -168,7 +166,6 @@ function SOTA:Async_AddRaidDKP(dkp, transactionType, bossName)
     SOTA:Debug("Async_AddRaidDKP called with dkp:", dkp, "transactionType:", transactionType, "bossName:", tostring(bossName))
     if self:IsInRaid(true) then
         self:AddJob(function(job) self:AddRaidDKP(job[2], "_", job[3], job[4]) end, dkp, transactionType, bossName)
-        self:RequestUpdateGuildRoster();
     end
 end
 
@@ -219,7 +216,6 @@ end
 function SOTA:Async_SubtractRaidDKP(dkp)
     if self:IsInRaid(true) then
         self:AddJob(function(job) self:SubtractRaidDKP(job[2]) end, dkp, "_")
-        self:RequestUpdateGuildRoster();
     end
 end
 
@@ -274,7 +270,6 @@ end
 --]]
 function SOTA:Async_Decaytest(percent)
     self:AddJob(function(job) self:Decaytest(job[2]) end, percent, "_")
-    self:RequestUpdateGuildRoster();
 end
 
 function SOTA:Decaytest(percent, silentmode)
@@ -337,7 +332,6 @@ end
 --]]
 function SOTA:Async_DecayDKP(percent)
     self:AddJob(function(job) self:DecayDKP(job[2]) end, percent, "_")
-    self:RequestUpdateGuildRoster();
 end
 
 function SOTA:DecayDKP(percent, silentmode)
