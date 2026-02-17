@@ -56,6 +56,7 @@ function SOTA:OnEnable()
 	SOTA:RegisterDefaults("realm",
 		{
 			DisableDashboard = 0,
+			MinimapButtonAngle = 225,
 			UseGuildNotes = SOTA_GUILDNOTE.USEOFFICER,
 			HistoryDkp = {},
 			ItemPriorities = {}, -- { { item_id = 12345, priority = "For healers", notes = "Better for shamans" }, ... }

@@ -1,0 +1,45 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<Script file="MinimapButton.lua" />
+
+	<Button name="SOTAMinimapButton" parent="Minimap" movable="true" frameStrata="MEDIUM" frameLevel="8">
+		<Size>
+			<AbsDimension x="31" y="31" />
+		</Size>
+		<Layers>
+			<Layer level="OVERLAY">
+				<Texture name="SOTAMinimapButtonBorder" file="Interface\Minimap\MiniMap-TrackingBorder">
+					<Size>
+						<AbsDimension x="56" y="56" />
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT" />
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+		<NormalTexture name="SOTAMinimapButtonIcon" file="Interface\Icons\Ability_Hunter_Pet_Vulture">
+			<Size>
+				<AbsDimension x="20" y="20" />
+			</Size>
+			<Anchors>
+				<Anchor point="CENTER" />
+			</Anchors>
+		</NormalTexture>
+		<PushedTexture file="Interface\CHARACTERFRAME\TemporaryPortrait-Female-Troll">
+			<Size>
+				<AbsDimension x="20" y="20" />
+			</Size>
+			<Anchors>
+				<Anchor point="CENTER" />
+			</Anchors>
+		</PushedTexture>
+		<HighlightTexture file="Interface\Minimap\UI-Minimap-ZoomButton-Highlight" alphaMode="ADD" />
+		<Scripts>
+			<OnClick>SOTAMinimapButton_OnClick()</OnClick>
+			<OnDragStart>SOTAMinimapButton_OnDragStart()</OnDragStart>
+			<OnDragStop>SOTAMinimapButton_OnDragStop()</OnDragStop>
+			<OnEnter>SOTAMinimapButton_OnEnter()</OnEnter>
+			<OnLeave>GameTooltip:Hide()</OnLeave>
+		</Scripts>
+	</Button>
+</Ui>
