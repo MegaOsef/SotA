@@ -44,11 +44,14 @@ function module:LOOT_CLOSED()
 end
 
 function module:RefreshLootsList()
+	SOTA:Debug("RefreshLootsList: start, existing frames=" .. table.getn(self.lootsFrames) .. ", numLootItems=" .. GetNumLootItems())
+
 	-- Hide all existing lootsFrames
 	for i = 1, table.getn(self.lootsFrames), 1 do
 		local frame = self.lootsFrames[i]
 		if frame then
 			frame:Hide()
+			SOTA:Debug("RefreshLootsList: hiding frame #" .. i)
 		end
 	end
 
@@ -63,9 +66,11 @@ function module:RefreshLootsList()
 			end
 			local itemName, itemSoftLink, itemRarity, _, _, _, _, _, itemTexture = GetItemInfo(itemId)
 			local itemColor = SOTA:GetQualityColor(itemRarity)
+			SOTA:Debug("Loot #" .. lootSlot .. ": itemName=" .. tostring(itemName) .. ", itemRarity=" .. tostring(itemRarity) .. ", itemTexture=" .. tostring(itemTexture) .. ", itemSoftLink=" .. tostring(itemSoftLink))
 
 			-- Do we need to create a new loot frame?
 			if table.getn(self.lootsFrames) < lootSlot then
+				SOTA:Debug("Loot #" .. lootSlot .. ": creating new frame (table.getn=" .. table.getn(self.lootsFrames) .. ")")
 				local entry = CreateFrame("Button", "$parentEntry" .. lootSlot, DashboardUIFrameLootsList,
 					"SOTA_LootTemplate");
 				if lootSlot == 1 then
@@ -73,6 +78,7 @@ function module:RefreshLootsList()
 				else
 					entry:SetPoint("TOP", "$parentEntry" .. (lootSlot - 1), "BOTTOM");
 				end
+				SOTA:Debug("Loot #" .. lootSlot .. ": frame created, name=" .. tostring(entry:GetName()) .. ", parent=" .. tostring(entry:GetParent():GetName()))
 				self.lootsFrames[lootSlot] = entry
 				self.lootsFrames[lootSlot].itemName = getglobal(self.lootsFrames[lootSlot]:GetName() .. "ItemName");
 				self.lootsFrames[lootSlot].itemTexture = getglobal(self.lootsFrames[lootSlot]:GetName() .. "ItemTexture");
@@ -81,6 +87,9 @@ function module:RefreshLootsList()
 				"ItemSoftLink");
 				self.lootsFrames[lootSlot].itemPrio = getglobal(self.lootsFrames[lootSlot]:GetName() .. "ItemPrio");
 				self.lootsFrames[lootSlot].itemNotes = getglobal(self.lootsFrames[lootSlot]:GetName() .. "ItemNotes");
+				SOTA:Debug("Loot #" .. lootSlot .. ": refs - itemName=" .. tostring(self.lootsFrames[lootSlot].itemName) .. ", itemTexture=" .. tostring(self.lootsFrames[lootSlot].itemTexture) .. ", itemSoftLink=" .. tostring(self.lootsFrames[lootSlot].itemSoftLink))
+			else
+				SOTA:Debug("Loot #" .. lootSlot .. ": reusing existing frame, name=" .. tostring(self.lootsFrames[lootSlot]:GetName()))
 			end
 
 			self.lootsFrames[lootSlot]:Show()
@@ -92,6 +101,8 @@ function module:RefreshLootsList()
 			self.lootsFrames[lootSlot].itemLink:SetText(itemLink)
 			self.lootsFrames[lootSlot].itemSoftLink:SetText(itemSoftLink)
 
+			-- Debug: verify what was actually set on the frame
+			SOTA:Debug("Loot #" .. lootSlot .. ": after SetText - visible=" .. tostring(self.lootsFrames[lootSlot]:IsVisible()) .. ", nameText=" .. tostring(self.lootsFrames[lootSlot].itemName:GetText()) .. ", textureFile=" .. tostring(self.lootsFrames[lootSlot].itemTexture:GetTexture()) .. ", color=(" .. tostring(itemColor[1]) .. "," .. tostring(itemColor[2]) .. "," .. tostring(itemColor[3]) .. ")")
 
 			self.lootsFrames[lootSlot].itemPrio:SetText("")
 			self.lootsFrames[lootSlot].itemNotes:SetText("")
@@ -106,6 +117,7 @@ function module:RefreshLootsList()
 			end
 		end
 	end
+	SOTA:Debug("RefreshLootsList: done, total frames=" .. table.getn(self.lootsFrames))
 end
 
 function module:SOTA_BOSS_KILLED(bossName, dkpValue)
