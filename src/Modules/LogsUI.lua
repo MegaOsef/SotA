@@ -417,8 +417,8 @@ function module:OnTransactionLogClick(object)
 		return;
 	end
 
-	self:RefreshTransactionDetails();
 	self:OpenTransactionDetails();
+	self:RefreshTransactionDetails();
 end
 
 function module:OnTransactionLogDetailPlayer(object)
