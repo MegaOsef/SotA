@@ -405,6 +405,33 @@
 							<Color r="0.0" g="0.0" b="0.2" a="1" />
 						</NormalTexture>
 					</Button>
+					<!-- Cancel Boss DKP button -->
+					<Button name="$parentCancelBossDkp" hidden="false">
+						<Size>
+							<AbsDimension x="20" y="20" />
+						</Size>
+						<Anchors>
+							<Anchor point="RIGHT" relativeTo="$parentShareBossDkp" relativePoint="RIGHT">
+								<Offset>
+									<AbsDimension x="-3" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<NormalTexture file="Interface\Buttons\UI-Panel-MinimizeButton-Up" />
+						<PushedTexture file="Interface\Buttons\UI-Panel-MinimizeButton-Down" />
+						<HighlightTexture file="Interface\Buttons\UI-Panel-MinimizeButton-Highlight" alphaMode="ADD" />
+						<Scripts>
+							<OnClick>
+								SOTA_OnCancelBossDkp();
+							</OnClick>
+							<OnEnter>
+								SOTA_ShowDashboardToolTip(this, "Cancel boss DKP");
+							</OnEnter>
+							<OnLeave>
+								SOTA_HideDashboardToolTip();
+							</OnLeave>
+						</Scripts>
+					</Button>
 				</Frames>
 				<Layers>
 					<Layer level="ARTWORK">

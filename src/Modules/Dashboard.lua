@@ -27,6 +27,8 @@ function module:OnEnable()
 
 	self.bossDkpFrame.texture:SetTexture("Interface\\Icons\\INV_Misc_Coin_02")
 	self.bossDkpFrame:Hide()
+	self.cancelBossDkpButton = getglobal("DashboardUIFrameItemCancelBossDkp")
+	self.cancelBossDkpButton:Hide()
 end
 
 function module:SOTA_RAVENLOGS_UPDATED()
@@ -125,6 +127,7 @@ function module:SOTA_BOSS_KILLED(bossName, dkpValue)
 	self.bossDkpFrame.dkpValue:SetText("Dkp Value: " .. tostring(dkpValue))
 	self.bossDkpFrame.numericDkpValue = dkpValue
 	self.bossDkpFrame:Show()
+	self.cancelBossDkpButton:Show()
 	PlaySound("AuctionWindowClose")
 end
 
@@ -188,7 +191,14 @@ function SOTA_OnEarnBossDkp()
 
 	SOTA:Async_AddRaidDKP(module.bossDkpFrame.numericDkpValue, SOTA.LOGTYPE.BOSS, module.bossDkpFrame.name:GetText());
 	module.bossDkpFrame:Hide()
+	module.cancelBossDkpButton:Hide()
 	PlaySound("igBackPackCoinSelect")
+end
+
+function SOTA_OnCancelBossDkp()
+	module.bossDkpFrame:Hide()
+	module.cancelBossDkpButton:Hide()
+	module.bossDkpFrame.numericDkpValue = 0
 end
 
 
