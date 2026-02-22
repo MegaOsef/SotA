@@ -57,6 +57,7 @@ function module:OnEnable()
 	self.selectedTransactionID    = nil;
 
 	self.currentTransactionPage   = 1; -- Current page shown (1=first page)
+	self.currentDetailsPage       = 1; -- Current page for transaction details view
 	self.isTransactionUIOpen      = false;
 	self.isTransactionDetailsOpen = false;
 
@@ -107,9 +108,12 @@ end;
 function module:OpenTransactionDetails()
 	self.isTransactionUIOpen = false;
 	self.isTransactionDetailsOpen = true;
-	
+	self.currentDetailsPage = 1;
+
 	self.frameTrans:Hide()
 	self.frameDkpChg:Show()
+	self.btns.prev:Show();
+	self.btns.next:Show();
 	self:UpdatePageControls();
 end
 
@@ -275,6 +279,14 @@ function module:UpdatePageControls()
 end;
 
 function module:PreviousTransactionUIPage()
+	if self.isTransactionDetailsOpen then
+		if self.currentDetailsPage > 1 then
+			self.currentDetailsPage = self.currentDetailsPage - 1;
+		end
+		self:RefreshTransactionDetails();
+		return;
+	end
+
 	if self.currentTransactionPage > 1 then
 		self.currentTransactionPage = self.currentTransactionPage - 1;
 	end
@@ -282,9 +294,23 @@ function module:PreviousTransactionUIPage()
 end
 
 function module:NextTransactionUIPage()
+	if self.isTransactionDetailsOpen then
+		local ravenLogs = SOTA:GetModule("RavenLogsForApp", true)
+		if not ravenLogs then return end
+		local transaction = ravenLogs:FindTransactionFromId(self.selectedTransactionID)
+		if not transaction then return end
+		local numChanges = table.getn(transaction.dkpChanges)
+		local numPages = ceil(numChanges / MAX_TRANSACTIONS_DISPLAYED);
+		if numPages > self.currentDetailsPage then
+			self.currentDetailsPage = self.currentDetailsPage + 1;
+		end
+		self:RefreshTransactionDetails();
+		return;
+	end
+
 	local numTransactions= table.getn(SOTA.db.realm.RavenLogsForApp.dkpTransactions)
 	local numPages = ceil(numTransactions / MAX_TRANSACTIONS_DISPLAYED);
-	
+
 	if numPages > self.currentTransactionPage then
 		self.currentTransactionPage = self.currentTransactionPage + 1;
 	end
@@ -313,7 +339,7 @@ function module:RefreshTransactionDetails()
 			player = "Player"
 			change = "Change"
 		else
-			local index = n + ((self.currentTransactionPage - 1) * MAX_TRANSACTIONS_DISPLAYED);
+			local index = n + ((self.currentDetailsPage - 1) * MAX_TRANSACTIONS_DISPLAYED);
 			id = ""
 			player = ""
 			change = ""
