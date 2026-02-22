@@ -325,7 +325,7 @@
 				</Size>
 				<Anchors>
 					<Anchor point="BOTTOMRIGHT">
-						<Offset x="-15" y="20" />
+						<Offset x="-55" y="20" />
 					</Anchor>
 				</Anchors>
 				<Scripts>
