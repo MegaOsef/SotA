@@ -128,7 +128,9 @@ function module:SOTA_BOSS_KILLED(bossName, dkpValue)
 	self.bossDkpFrame.numericDkpValue = dkpValue
 	self.bossDkpFrame:Show()
 	self.cancelBossDkpButton:Show()
-	PlaySound("AuctionWindowClose")
+	if SOTA:IsMasterLoot() then
+		PlaySound("AuctionWindowClose")
+	end
 end
 
 function module:OnSecondTimer()
