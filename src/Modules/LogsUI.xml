@@ -298,14 +298,34 @@
 					</OnClick>
 				</Scripts>
 			</Button>
+			<!-- Page indicator label -->
+			<Frame name="PageIndicatorFrame">
+				<Size>
+					<AbsDimension x="200" y="23" />
+				</Size>
+				<Anchors>
+					<Anchor point="BOTTOM">
+						<Offset x="0" y="23" />
+					</Anchor>
+				</Anchors>
+				<Layers>
+					<Layer>
+						<FontString name="PageIndicatorLabel" inherits="GameFontNormal" text="">
+							<Anchors>
+								<Anchor point="CENTER" />
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+			</Frame>
 			<!-- Log Details frame buttons: Back button -->
 			<Button name="BtnBack" inherits="UIPanelButtonTemplate" text="Return to transactions">
 				<Size>
 					<AbsDimension x="200" y="23" />
 				</Size>
 				<Anchors>
-					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="BtnNextPage" >
-						<Offset x="10" y="0" />
+					<Anchor point="BOTTOMRIGHT">
+						<Offset x="-15" y="20" />
 					</Anchor>
 				</Anchors>
 				<Scripts>

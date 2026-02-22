@@ -16,7 +16,7 @@ local SOTA_COLOUR_CHAT				= "|c8040A0F8"
 
 
 ---- Max # of transaction logs shown in UI (excluding Header)
-local MAX_TRANSACTIONS_DISPLAYED	= 18;
+local MAX_TRANSACTIONS_DISPLAYED	= 24;
 
 
 local TRANSACTION_STATE            = {
@@ -26,7 +26,7 @@ local TRANSACTION_STATE            = {
 
 --	Setting for transaction details screen:
 local TRANSACTION_DETAILS = {
-	ROWS    = 18,
+	ROWS    = 24,
 	COLUMNS = 4,
 }
 
@@ -46,6 +46,7 @@ function module:OnEnable()
 	self.btns = {}
 	self.btns.prev = getglobal("BtnPrevPage")
 	self.btns.next = getglobal("BtnNextPage")
+	self.pageIndicator = getglobal("PageIndicatorLabel")
 
 	--  Transaction log: Contains a list of { timestamp, tid, author, description, state, { names, dkp } }
 	--	Transaction state: 0=Rolled back, 1=Active (default),
@@ -214,6 +215,7 @@ function module:RefreshTransactionElements()
 	end
 
 	self:UpdatePageControls();
+	self:UpdatePageIndicator();
 end
 
 
@@ -277,6 +279,30 @@ function module:UpdatePageControls()
 --
 --	end
 end;
+
+function module:UpdatePageIndicator()
+	local currentPage, numItems
+	if self.isTransactionDetailsOpen then
+		currentPage = self.currentDetailsPage
+		local ravenLogs = SOTA:GetModule("RavenLogsForApp", true)
+		if ravenLogs then
+			local transaction = ravenLogs:FindTransactionFromId(self.selectedTransactionID)
+			if transaction then
+				numItems = table.getn(transaction.dkpChanges)
+			end
+		end
+	else
+		currentPage = self.currentTransactionPage
+		numItems = table.getn(SOTA.db.realm.RavenLogsForApp.dkpTransactions)
+	end
+
+	if numItems and numItems > 0 then
+		local numPages = ceil(numItems / MAX_TRANSACTIONS_DISPLAYED)
+		self.pageIndicator:SetText("Page " .. currentPage .. " / " .. numPages)
+	else
+		self.pageIndicator:SetText("")
+	end
+end
 
 function module:PreviousTransactionUIPage()
 	if self.isTransactionDetailsOpen then
@@ -360,6 +386,8 @@ function module:RefreshTransactionDetails()
 		frame.change:SetText(change)
 		frame:Show()
 	end
+
+	self:UpdatePageIndicator();
 end
 
 
