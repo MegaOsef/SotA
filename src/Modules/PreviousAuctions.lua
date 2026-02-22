@@ -62,6 +62,8 @@ function module:RefreshAuctionsList()
     local id, item, bossName, winner, finalBid, bidType, officer
     for n = 0, MAX_AUCTIONS, 1 do
         self.rows[n].rollbackBtn:Hide()
+        self.rows[n].itemLink = nil
+        self.rows[n].itemSoftLink = nil
         if n == 0 then
             id = "ID"
             item = "Item"
@@ -70,6 +72,7 @@ function module:RefreshAuctionsList()
             finalBid = "Final Bid"
             bidType = "Bid Type"
             officer = "Officer"
+            getglobal(self.rows[n].item:GetName() .. "Text"):SetTextColor(1, 0.82, 0)
         else
             local index = n
 
@@ -85,7 +88,20 @@ function module:RefreshAuctionsList()
                 local auc = auctions[index]
 
                 id = auc.id
-                item = GetItemInfo(auc.itemId)
+                local itemName, itemSoftLink, itemRarity = GetItemInfo(auc.itemId)
+                item = itemName
+                if itemSoftLink and itemName then
+                    self.rows[n].itemSoftLink = itemSoftLink
+                    local c = itemRarity and ITEM_QUALITY_COLORS and ITEM_QUALITY_COLORS[itemRarity]
+                    local colorHex = c and string.format("%02x%02x%02x", c.r * 255, c.g * 255, c.b * 255) or "ffffff"
+                    self.rows[n].itemLink = "|cff" .. colorHex .. "|H" .. itemSoftLink .. "|h[" .. itemName .. "]|h|r"
+                end
+                if itemRarity and ITEM_QUALITY_COLORS and ITEM_QUALITY_COLORS[itemRarity] then
+                    local c = ITEM_QUALITY_COLORS[itemRarity]
+                    getglobal(self.rows[n].item:GetName() .. "Text"):SetTextColor(c.r, c.g, c.b)
+                else
+                    getglobal(self.rows[n].item:GetName() .. "Text"):SetTextColor(1, 1, 1)
+                end
                 bossName = auc.bossName
                 if auc.winner then
                     winner = auc.winner
@@ -110,6 +126,8 @@ function module:RefreshAuctionsList()
                 else
                     self.rows[n].rollbackBtn:Disable()
                 end
+            else
+                getglobal(self.rows[n].item:GetName() .. "Text"):SetTextColor(1, 0.82, 0)
             end
         end
 
@@ -187,6 +205,27 @@ StaticPopupDialogs["SOTA_CONFIRM_AUCTIONROLLBACK"] = {
         module:RollbackPreviousAuction(module.rollbackAuctionInValidation)
     end,
 }
+
+function SOTA_PreviousAuction_ItemOnEnter(button)
+    local row = button:GetParent()
+    local itemSoftLink = row.itemSoftLink
+    if itemSoftLink then
+        GameTooltip:SetOwner(button, "ANCHOR_RIGHT")
+        GameTooltip:SetHyperlink(itemSoftLink)
+        GameTooltip:Show()
+    end
+end
+
+function SOTA_PreviousAuction_ItemOnClick(button, mouseButton)
+    local row = button:GetParent()
+    local itemLink = row.itemLink
+    if not itemLink then
+        return
+    end
+    if IsShiftKeyDown() and ChatFrameEditBox:IsVisible() then
+        ChatFrameEditBox:Insert(itemLink)
+    end
+end
 
 function SOTA_Rollback_PreviousAuction(object)
     module.rollbackAuctionInValidation = object:GetID()

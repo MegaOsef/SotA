@@ -21,22 +21,17 @@
 						</Anchor>
 					</Anchors>
 				</FontString>
-				<!-- Item -->
-				<FontString name="$parentItem" justifyH="LEFT" inherits="GameFontNormal">
-					<Size>
-						<AbsDimension x="210" y="16" />
-					</Size>
-					<Anchors>
-						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentId" />
-					</Anchors>
-				</FontString>
 				<!-- Boss Name -->
 				<FontString name="$parentBossName" justifyH="LEFT" inherits="GameFontNormal">
 					<Size>
 						<AbsDimension x="160" y="16" />
 					</Size>
 					<Anchors>
-						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentItem" />
+						<Anchor point="LEFT">
+							<Offset>
+								<AbsDimension x="354" y="0" />
+							</Offset>
+						</Anchor>
 					</Anchors>
 				</FontString>
 				<!-- Winner -->
@@ -78,6 +73,32 @@
 			</Layer>
 		</Layers>
 		<Frames>
+			<!-- Item (Button for tooltip + chat linking) -->
+			<Button name="$parentItem">
+				<Size>
+					<AbsDimension x="210" y="16" />
+				</Size>
+				<Anchors>
+					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentId" />
+				</Anchors>
+				<ButtonText name="$parentText" justifyH="LEFT">
+					<Anchors>
+						<Anchor point="LEFT" />
+					</Anchors>
+				</ButtonText>
+				<NormalFont inherits="GameFontNormal" />
+				<Scripts>
+					<OnEnter>
+						SOTA_PreviousAuction_ItemOnEnter(this)
+					</OnEnter>
+					<OnLeave>
+						GameTooltip:Hide()
+					</OnLeave>
+					<OnClick>
+						SOTA_PreviousAuction_ItemOnClick(this, arg1)
+					</OnClick>
+				</Scripts>
+			</Button>
 			<Button name="$parentRollbackBtn" inherits="UIPanelButtonTemplate"
 				text="Rollback">
 				<Size>
