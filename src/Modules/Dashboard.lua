@@ -28,6 +28,7 @@ function module:OnEnable()
 	self.bossDkpFrame.texture:SetTexture("Interface\\Icons\\INV_Misc_Coin_02")
 	self.bossDkpFrame:Hide()
 	self.cancelBossDkpButton = getglobal("DashboardUIFrameItemCancelBossDkp")
+	self.cancelBossDkpButton:SetFrameLevel(self.bossDkpFrame:GetFrameLevel() + 1)
 	self.cancelBossDkpButton:Hide()
 end
 

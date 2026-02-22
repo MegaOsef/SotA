@@ -312,7 +312,7 @@
 					</Button>
 					<Button name="$parentShareBossDkp" hidden="false">
 						<Size>
-							<AbsDimension x="296" y="26" />
+							<AbsDimension x="270" y="26" />
 						</Size>
 						<Anchors>
 							<Anchor point="TOPLEFT">
@@ -408,18 +408,24 @@
 					<!-- Cancel Boss DKP button -->
 					<Button name="$parentCancelBossDkp" hidden="false">
 						<Size>
-							<AbsDimension x="20" y="20" />
+							<AbsDimension x="26" y="26" />
 						</Size>
 						<Anchors>
-							<Anchor point="RIGHT" relativeTo="$parentShareBossDkp" relativePoint="RIGHT">
+							<Anchor point="LEFT" relativeTo="$parentShareBossDkp" relativePoint="RIGHT">
 								<Offset>
-									<AbsDimension x="-3" y="0" />
+									<AbsDimension x="0" y="0" />
 								</Offset>
 							</Anchor>
 						</Anchors>
 						<NormalTexture file="Interface\Buttons\UI-Panel-MinimizeButton-Up" />
 						<PushedTexture file="Interface\Buttons\UI-Panel-MinimizeButton-Down" />
 						<HighlightTexture file="Interface\Buttons\UI-Panel-MinimizeButton-Highlight" alphaMode="ADD" />
+						<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" tile="true">
+							<BackgroundInsets>
+								<AbsInset left="0" right="0" top="0" bottom="0" />
+							</BackgroundInsets>
+						</Backdrop>
+						<BackdropColor r="0.5" g="0.0" b="0.0" a="1" />
 						<Scripts>
 							<OnClick>
 								SOTA_OnCancelBossDkp();
