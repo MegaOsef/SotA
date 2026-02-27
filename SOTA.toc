@@ -23,6 +23,7 @@ src\Core\Rights.lua
 src\Core\DkpManagement.lua
 src\Core\Misc.lua
 src\Core\Dropdown.xml
+src\Core\TextModal.xml
 src\Core\Tests.lua
 src\Core\LocalRosters.lua
 
@@ -32,7 +33,7 @@ src\Modules\Dashboard.xml
 src\Modules\MinimapButton.xml
 src\Modules\BossKillTracker.lua
 src\Modules\Options.xml
-src\Modules\RavenLogsForApp.xml
-src\Modules\GuildExtract.xml
-src\Modules\ImportToExec.xml
+src\Modules\RavenLogsForApp.lua
+src\Modules\GuildExtract.lua
+src\Modules\ImportToExec.lua
 src\Modules\PreviousAuctions.xml

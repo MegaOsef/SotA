@@ -30,7 +30,7 @@ end
 function SOTA_HandleCheckbox(checkbox)
 	local checkboxname = checkbox:GetName();
 
-	--	Disable Dashboard:		
+	--	Disable Dashboard:
 	if checkboxname == "FrameConfigBiddingDisableDashboard" then
 		if checkbox:GetChecked() then
 			SOTA.db.realm.DisableDashboard = 1;
@@ -41,8 +41,8 @@ function SOTA_HandleCheckbox(checkbox)
 		return;
 	end
 
-	
-	--	Store DKP in Public Notes:		
+
+	--	Store DKP in Public Notes:
 	if checkboxname == "FrameConfigBiddingEnableDebug" then
 		if checkbox:GetChecked() then
 			SOTA:SetDebugging(true)
@@ -56,51 +56,32 @@ end
 -------------------------------
 --- Boss DKP List Import/Export
 
-function SOTA_Conf_ImportBossDkpList_close()
-	getglobal("SOTA_ConfigurationImportBossDkpList"):Hide()
-end
-
 function SOTA_Conf_ImportBossDkpList_open()
-	getglobal("SOTA_ConfigurationImportBossDkpList"):Show()
-end
-
-function SOTA_Conf_ImportBossDkpList_import()
-	local jsonstr = getglobal("SOTA_ConfigurationImportBossDkpListScrollFrameMessage"):GetText()
-	local bossDkpList, err = SOTA.json.decode(jsonstr)
-	if not bossDkpList then
-		SOTA:Print("Error while trying to parse json:", err)
-		return
-	end
-	SOTA:Print("Imported boss dkp list with", table.getn(bossDkpList), "entries.")
-
-	SOTA.db.realm.BossDkpList = bossDkpList
-	module:RefreshStrings()
-
-	getglobal("SOTA_ConfigurationImportBossDkpList"):Hide()
+	SOTA:OpenTextModal(function(jsonstr)
+		local bossDkpList, err = SOTA.json.decode(jsonstr)
+		if not bossDkpList then
+			SOTA:Print("Error while trying to parse json:", err)
+			return
+		end
+		SOTA:Print("Imported boss dkp list with", table.getn(bossDkpList), "entries.")
+		SOTA.db.realm.BossDkpList = bossDkpList
+		module:RefreshStrings()
+	end)
 end
 
 -------------------------------
 --- Item Priorities Import/Export
 
-function SOTA_Conf_ImportItemPriorities_close()
-	getglobal("SOTA_ConfigurationImportItemPriorities"):Hide()
-end
-
 function SOTA_Conf_ImportItemPriorities_open()
-	getglobal("SOTA_ConfigurationImportItemPriorities"):Show()
-end
-
-function SOTA_Conf_ImportItemPriorities_import()
-	local jsonstr = getglobal("SOTA_ConfigurationImportItemPrioritiesScrollFrameMessage"):GetText()
-	local itemPriorities, err = SOTA.json.decode(jsonstr)
-	if not itemPriorities then
-		SOTA:Print("Error while trying to parse json:", err)
-		return
-	end
-
-	SOTA.db.realm.ItemPriorities = itemPriorities.items
-	module:RefreshStrings()
-	getglobal("SOTA_ConfigurationImportItemPriorities"):Hide()
+	SOTA:OpenTextModal(function(jsonstr)
+		local itemPriorities, err = SOTA.json.decode(jsonstr)
+		if not itemPriorities then
+			SOTA:Print("Error while trying to parse json:", err)
+			return
+		end
+		SOTA.db.realm.ItemPriorities = itemPriorities.items
+		module:RefreshStrings()
+	end)
 end
 
 

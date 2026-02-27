@@ -1,8 +1,7 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<Script file="RavenLogsForApp.lua" />
+	<Script file="TextModal.lua" />
 
-	<Frame name="SOTA_ExportRavenLogsModal" parent="UIParent" toplevel="true"
-		hidden="true">
+	<Frame name="SOTA_TextModal" parent="UIParent" toplevel="true" hidden="true">
 		<Size>
 			<AbsDimension x="565" y="300" />
 		</Size>
@@ -34,7 +33,6 @@
 					</Anchor>
 				</Anchors>
 				<Frames>
-					<!-- Message input field -->
 					<EditBox name="$parentMessage" multiLine="true">
 						<Size>
 							<AbsDimension x="543" y="280" />
@@ -54,6 +52,21 @@
 							</OnEscapePressed>
 						</Scripts>
 					</EditBox>
+					<Button name="$parentValidate" inherits="UIPanelButtonTemplate" text="Import" hidden="true">
+						<Size>
+							<AbsDimension x="120" y="23" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOP">
+								<Offset x="0" y="30" />
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnClick>
+								SOTA_TextModal_validate();
+							</OnClick>
+						</Scripts>
+					</Button>
 					<Button name="$parentClose" inherits="UIPanelCloseButton">
 						<Anchors>
 							<Anchor point="TOPRIGHT">
@@ -62,7 +75,7 @@
 						</Anchors>
 						<Scripts>
 							<OnClick>
-								SOTA_ExportRavenLogs_close();
+								SOTA_TextModal_close();
 							</OnClick>
 						</Scripts>
 					</Button>

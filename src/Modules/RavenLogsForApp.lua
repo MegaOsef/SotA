@@ -14,9 +14,6 @@ function module:OnEnable()
     self.TsId = 0
     self.LastTs = 0
 
-    self.exportModal = getglobal("SOTA_ExportRavenLogsModal")
-    self.exportModal.editBox = getglobal("SOTA_ExportRavenLogsModalScrollFrameMessage")
-
     self:RegisterEvent("SOTA_EXPORTRAVENLOGS_REQUEST")
 end
 
@@ -26,8 +23,7 @@ function module:SOTA_EXPORTRAVENLOGS_REQUEST()
         -- dkpTransactions = SOTA.db.realm.RavenLogsForApp.dkpTransactions, -- For staging purposes.
     }
     local exportString = SOTA.json.encode(exportObject)
-    self.exportModal.editBox:SetText(exportString)
-    self.exportModal:Show()
+    SOTA:OpenTextModalReadOnly(exportString)
 end
 
 function module:getUniqueId()
@@ -116,8 +112,4 @@ function module:LogAuction(itemId, bossName, winner, finalBid, bidType)
     self:TriggerEvent("SOTA_RAVENLOGS_UPDATED")
 
     return uniqueAuctionId
-end
-
-function SOTA_ExportRavenLogs_close()
-    module.exportModal:Hide()
 end

@@ -5,9 +5,6 @@ local module = SOTA:NewModule("GuildExtract", "AceEvent-2.0")
 function module:OnEnable()
     self.extractRequested = false
 
-    self.modal = getglobal("SOTA_GuildExtractModal")
-    self.modal.message = getglobal(self.modal:GetName() .. "ScrollFrameMessage")
-
     self:RegisterEvent("SOTA_GUILDROSTER_UPDATED")
     self:RegisterEvent("SOTA_GUILDEXTRACT_REQUEST")
 end
@@ -46,8 +43,7 @@ function module:SOTA_GUILDROSTER_UPDATED()
         end
     end
 
-    self.modal.message:SetText(result)
-    self.modal:Show()
+    SOTA:OpenTextModalReadOnly(result)
 end
 
 function module:SOTA_GUILDEXTRACT_REQUEST()
@@ -55,10 +51,6 @@ function module:SOTA_GUILDEXTRACT_REQUEST()
 
     self.extractRequested = true
     SOTA:Print("Guild Extract job added, waiting for guild roster update...")
-end
-
-function SOTA_GuildExtract_close()
-    module.modal:Hide()
 end
 
 function module:GetLastOnline(guildIndex)

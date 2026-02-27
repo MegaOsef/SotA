@@ -6,9 +6,6 @@ function module:OnEnable()
     self.importRequested = false
     self.importStr = ""
 
-    self.modal = getglobal("SOTA_ImportToExecModal")
-    self.modal.message = getglobal(self.modal:GetName() .. "ScrollFrameMessage")
-
     self:RegisterEvent("SOTA_IMPORTTOEXEC_REQUEST")
     self:RegisterEvent("SOTA_GUILDROSTER_UPDATED")
 end
@@ -115,19 +112,10 @@ function module:SOTA_GUILDROSTER_UPDATED()
 end
 
 function module:SOTA_IMPORTTOEXEC_REQUEST()
-    module.modal:Show()
-    module.modal.message:SetText("")
-end
-
-function SOTA_ImportToExec_close()
-    module.modal:Hide()
-end
-
-function SOTA_ImportToExec_validate()
-    module.importRequested = true
-    module.importStr = module.modal.message:GetText()
-    module.modal:Hide()
-
-    SOTA:RequestUpdateGuildRoster()
-    SOTA:Print("Job added, waiting for guild roster update...")
+    SOTA:OpenTextModal(function(text)
+        module.importRequested = true
+        module.importStr = text
+        SOTA:RequestUpdateGuildRoster()
+        SOTA:Print("Job added, waiting for guild roster update...")
+    end)
 end
