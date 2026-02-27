@@ -61,6 +61,7 @@ function SOTA:OnEnable()
 			HistoryDkp = {},
 			ItemPriorities = {}, -- { { item_id = 12345, priority = "For healers", notes = "Better for shamans" }, ... }
 			BossDkpList = {}, -- { { bossName = "Four Horsemen", triggerName = "Sir Zeliek", dkpValue = 10 }, ... },
+			GuildRosterRoles = {}, -- { { name = "Akishunda", priority = "Healers" }, ... }
 			RavenLogsForApp = { dkpTransactions = {}, auctions = {} },
 			--[[
 			{ dkpTransactions = { {

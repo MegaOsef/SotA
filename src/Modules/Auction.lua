@@ -617,6 +617,7 @@ function module:AuctionUIInit()
 		self.bidsFrames[n].bidtype    = getglobal(self.bidsFrames[n]:GetName() .. "Bidtype");
 		self.bidsFrames[n].bid        = getglobal(self.bidsFrames[n]:GetName() .. "Bid");
 		self.bidsFrames[n].remaining  = getglobal(self.bidsFrames[n]:GetName() .. "Remaining");
+		self.bidsFrames[n].role       = getglobal(self.bidsFrames[n]:GetName() .. "Role");
 		self.bidsFrames[n].bg         = getglobal(self.bidsFrames[n]:GetName() .. "BG");
 		self.bidsFrames[n]:Show();
 
@@ -732,6 +733,20 @@ function module:RefreshGUIBidsList()
 		self.bidsFrames[n].bidtype:SetText(bidtype);
 		self.bidsFrames[n].bid:SetText(bid);
 		self.bidsFrames[n].remaining:SetText(remaining);
+
+		-- Priority from guild roster roles config
+		local roleText = ""
+		if bidder ~= "" then
+			local config = SOTA:GetPlayerGuildRosterRole(bidder)
+			if config then
+				roleText = config.priority
+				self.bidsFrames[n].role:SetTextColor(1, 0.82, 0)
+			else
+				roleText = "Unknown"
+				self.bidsFrames[n].role:SetTextColor(0.6, 0.6, 0.6)
+			end
+		end
+		self.bidsFrames[n].role:SetText(roleText);
 
 		-- MS/OS background color differentiation
 		if bidtypeVal == BIDTYPE.OS then

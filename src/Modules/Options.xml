@@ -104,7 +104,7 @@
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
-						<Offset x="134" y="-402" />
+						<Offset x="134" y="-432" />
 					</Anchor>
 				</Anchors>
 				<Scripts>
@@ -247,6 +247,21 @@
 					</OnClick>
 				</Scripts>
 			</Button>
+			<Button name="$parentConfigImportGuildRosterRolesBtn" inherits="UIPanelButtonTemplate" text="Import Guild Roster Roles">
+				<Size>
+					<AbsDimension x="155" y="25" />
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset x="32" y="-172" />
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						SOTA_Conf_ImportGuildRosterRoles_open();
+					</OnClick>
+				</Scripts>
+			</Button>
 			<!-- Section 2: Guild Management -->
 			<Button name="$parentConfigExportPlayersDkpBtn" inherits="UIPanelButtonTemplate" text="Export Players DKP">
 				<Size>
@@ -254,7 +269,7 @@
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
-						<Offset x="32" y="-202" />
+						<Offset x="32" y="-232" />
 					</Anchor>
 				</Anchors>
 				<Scripts>
@@ -270,7 +285,7 @@
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
-						<Offset x="32" y="-232" />
+						<Offset x="32" y="-262" />
 					</Anchor>
 				</Anchors>
 				<Scripts>
@@ -283,7 +298,7 @@
 			<CheckButton name="$parentEnableDebug" inherits="OptionsCheckButtonTemplate">
 				<Anchors>
 					<Anchor point="TOPLEFT">
-						<Offset x="32" y="-294"/>
+						<Offset x="32" y="-324"/>
 					</Anchor>
 				</Anchors>
 				<Scripts>
@@ -298,7 +313,7 @@
 			<CheckButton name="$parentDisableDashboard" inherits="OptionsCheckButtonTemplate">
 				<Anchors>
 					<Anchor point="TOPLEFT">
-						<Offset x="32" y="-324"/>
+						<Offset x="32" y="-354"/>
 					</Anchor>
 				</Anchors>
 				<Scripts>
@@ -357,6 +372,22 @@
 						</Anchor>
 					</Anchors>
 				</FontString>
+				<!-- Status text for Import Guild Roster Roles -->
+				<FontString name="$parentGuildRosterRolesLoadedStr" justifyH="LEFT"
+					inherits="GameFontNormal"
+					font="Fonts\FRIZQT__.TTF" text="">
+					<FontHeight val="12" />
+					<Size>
+						<AbsDimension x="200" y="15" />
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="187" y="-177" />
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
 				<!-- Section 2 header: Guild Management -->
 				<FontString justifyH="LEFT" inherits="GameFontNormal" text="Guild Management">
 					<FontHeight val="13" />
@@ -364,7 +395,7 @@
 					<Anchors>
 						<Anchor point="TOPLEFT">
 							<Offset>
-								<AbsDimension x="32" y="-180" />
+								<AbsDimension x="32" y="-210" />
 							</Offset>
 						</Anchor>
 					</Anchors>
@@ -376,7 +407,7 @@
 					<Anchors>
 						<Anchor point="TOPLEFT">
 							<Offset>
-								<AbsDimension x="32" y="-272" />
+								<AbsDimension x="32" y="-302" />
 							</Offset>
 						</Anchor>
 					</Anchors>

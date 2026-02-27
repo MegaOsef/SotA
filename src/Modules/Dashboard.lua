@@ -8,12 +8,14 @@ function module:OnEnable()
 	self.warnNotRL = getglobal("SOTA_DashWarn_NotRL")
 	self.warnNotML = getglobal("SOTA_DashWarn_NotML")
 	self.currentLootedMobName = nil
+	self.warnedPlayers = {}
 
 	self:RegisterEvent("SOTA_RAVENLOGS_UPDATED")
 	self:RegisterEvent("SOTA_BOSS_KILLED")
 	self:RegisterEvent("LOOT_OPENED")
 	self:RegisterEvent("LOOT_SLOT_CLEARED", "RefreshLootsList")
 	self:RegisterEvent("LOOT_CLOSED")
+	self:RegisterEvent("RAID_ROSTER_UPDATE", "OnRaidRosterUpdate")
 	self:ScheduleRepeatingEvent("SOTA_OnSecondTimer", self.OnSecondTimer, 1, self)
 
 	self:OnSecondTimer()
@@ -227,4 +229,99 @@ StaticPopupDialogs["SOTA_CONFIRM_CLEARRAVENLOGS"] = {
 
 function SOTA_ClearRavenLogsButton_OnClick()
 	StaticPopup_Show("SOTA_CONFIRM_CLEARRAVENLOGS")
+end
+
+-------------------------------
+--- Guild Roster Roles Validation
+
+function module:OnRaidRosterUpdate()
+	self:CheckRaidAgainstConfig()
+end
+
+function module:CheckRaidAgainstConfig()
+	local config = SOTA.db.realm.GuildRosterRoles
+	if table.getn(config) == 0 then
+		return
+	end
+
+	local playerCount = GetNumRaidMembers()
+	if not playerCount or playerCount == 0 then
+		return
+	end
+
+	for n = 1, playerCount, 1 do
+		local playerName, _, _, _, class = GetRaidRosterInfo(n)
+		if playerName and playerName ~= "" and not self.warnedPlayers[playerName] then
+			local found = SOTA:GetPlayerGuildRosterRole(playerName)
+			if not found then
+				SOTA:Print("Warning: " .. playerName .. " is not in the guild roster roles.")
+				self.warnedPlayers[playerName] = true
+			end
+		end
+	end
+end
+
+-------------------------------
+--- Dashboard Tooltip (Guild Roster Roles Status)
+
+function SOTA_OnDashboardEnter(frame)
+	local config = SOTA.db.realm.GuildRosterRoles
+	GameTooltip:SetOwner(frame, "ANCHOR_RIGHT")
+	GameTooltip:AddLine("Guild Roster Roles Status", 1, 0.82, 0)
+
+	if table.getn(config) == 0 then
+		GameTooltip:AddLine("No guild roster roles imported", 0.7, 0.7, 0.7)
+		GameTooltip:Show()
+		return
+	end
+
+	local playerCount = GetNumRaidMembers()
+	if not playerCount or playerCount == 0 then
+		GameTooltip:AddLine("Not in a raid", 0.7, 0.7, 0.7)
+		GameTooltip:Show()
+		return
+	end
+
+	local notInGuild = {}
+	local notInConfig = {}
+	for n = 1, playerCount, 1 do
+		local playerName, _, _, _, class = GetRaidRosterInfo(n)
+		if playerName and playerName ~= "" then
+			local guildInfo = SOTA:GetGuildPlayerInfo(playerName)
+			if not guildInfo then
+				notInGuild[table.getn(notInGuild) + 1] = { name = playerName, class = class }
+			else
+				local found = SOTA:GetPlayerGuildRosterRole(playerName)
+				if not found then
+					notInConfig[table.getn(notInConfig) + 1] = { name = playerName, class = class }
+				end
+			end
+		end
+	end
+
+	if table.getn(notInGuild) == 0 and table.getn(notInConfig) == 0 then
+		GameTooltip:AddLine("All raid members are in config", 0.5, 1, 0.5)
+	end
+
+	if table.getn(notInGuild) > 0 then
+		GameTooltip:AddLine("Not in guild:", 1, 0.3, 0.3)
+		for n = 1, table.getn(notInGuild), 1 do
+			local color = SOTA:GetClassColorCodes(notInGuild[n].class)
+			GameTooltip:AddLine("  " .. notInGuild[n].name, color[1] / 255, color[2] / 255, color[3] / 255)
+		end
+	end
+
+	if table.getn(notInConfig) > 0 then
+		GameTooltip:AddLine("Not in config:", 1, 0.5, 0.2)
+		for n = 1, table.getn(notInConfig), 1 do
+			local color = SOTA:GetClassColorCodes(notInConfig[n].class)
+			GameTooltip:AddLine("  " .. notInConfig[n].name, color[1] / 255, color[2] / 255, color[3] / 255)
+		end
+	end
+
+	GameTooltip:Show()
+end
+
+function SOTA_OnDashboardLeave()
+	GameTooltip:Hide()
 end

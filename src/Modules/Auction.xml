@@ -61,15 +61,28 @@
 						</Anchor>
 					</Anchors>
 				</FontString>
+				<!-- Priority from guild roster config -->
+				<FontString name="$parentRole" justifyH="LEFT" inherits="GameFontNormalSmall">
+					<Size>
+						<AbsDimension x="70" y="12" />
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT">
+							<Offset>
+								<AbsDimension x="174" y="0" />
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
 				<!-- Remaining DKP after bid -->
 				<FontString name="$parentRemaining" justifyH="RIGHT" inherits="GameFontNormalSmall">
 					<Size>
 						<AbsDimension x="60" y="12" />
 					</Size>
 					<Anchors>
-						<Anchor point="LEFT">
+						<Anchor point="RIGHT">
 							<Offset>
-								<AbsDimension x="166" y="0" />
+								<AbsDimension x="-20" y="0" />
 							</Offset>
 						</Anchor>
 					</Anchors>
@@ -266,12 +279,29 @@
 							</Anchors>
 							<Color r="0.7" g="0.7" b="0.7" />
 						</FontString>
+						<FontString name="$parentHeaderRole" justifyH="LEFT" inherits="GameFontNormalSmall" text="Priority">
+							<Size>
+								<AbsDimension x="70" y="14" />
+							</Size>
+							<Anchors>
+								<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentHeaderBid">
+									<Offset>
+										<AbsDimension x="8" y="0" />
+									</Offset>
+								</Anchor>
+							</Anchors>
+							<Color r="0.7" g="0.7" b="0.7" />
+						</FontString>
 						<FontString name="$parentHeaderRemaining" justifyH="RIGHT" inherits="GameFontNormalSmall" text="Remaining">
 							<Size>
 								<AbsDimension x="60" y="14" />
 							</Size>
 							<Anchors>
-								<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentHeaderBid" />
+								<Anchor point="TOPRIGHT">
+									<Offset>
+										<AbsDimension x="-20" y="-4" />
+									</Offset>
+								</Anchor>
 							</Anchors>
 							<Color r="0.7" g="0.7" b="0.7" />
 						</FontString>

@@ -8,6 +8,7 @@ function module:OnEnable()
 	getglobal("FrameConfigBiddingDisableDashboard"):SetChecked(SOTA.db.realm.DisableDashboard);
 	self.prioLoadedStr = getglobal("FrameConfigBiddingPrioLoadedStr");
 	self.bossDkpLoadedStr = getglobal("FrameConfigBiddingBossDkpLoadedStr");
+	self.guildRosterRolesLoadedStr = getglobal("FrameConfigBiddingGuildRosterRolesLoadedStr");
 
 	getglobal("FrameConfigBiddingEnableDebug"):SetChecked(SOTA:IsDebugging());
 
@@ -17,6 +18,7 @@ end
 function module:RefreshStrings()
 	self.prioLoadedStr:SetText("Loaded: " .. table.getn(SOTA.db.realm.ItemPriorities) .. " items")
 	self.bossDkpLoadedStr:SetText("Loaded: " .. table.getn(SOTA.db.realm.BossDkpList) .. " bosses")
+	self.guildRosterRolesLoadedStr:SetText("Loaded: " .. table.getn(SOTA.db.realm.GuildRosterRoles) .. " players")
 end
 
 function SOTA_OpenConfigurationUI()
@@ -84,6 +86,42 @@ function SOTA_Conf_ImportItemPriorities_open()
 	end)
 end
 
+
+-------------------------------
+--- Guild Roster Roles Import
+
+function SOTA_Conf_ImportGuildRosterRoles_open()
+	SOTA:OpenTextModal(function(jsonstr)
+		local guildRosterRoles, err = SOTA.json.decode(jsonstr)
+		if not guildRosterRoles then
+			SOTA:Print("Error while trying to parse json:", err)
+			return
+		end
+		for n = 1, table.getn(guildRosterRoles), 1 do
+			guildRosterRoles[n].name = SOTA:UCFirst(guildRosterRoles[n].name)
+		end
+		SOTA:Print("Imported guild roster roles with", table.getn(guildRosterRoles), "entries.")
+		SOTA.db.realm.GuildRosterRoles = guildRosterRoles
+		module:RefreshStrings()
+
+		-- Reset and re-check raid against new config
+		local dashboard = SOTA:GetModule("Dashboard", true)
+		if dashboard then
+			dashboard.warnedPlayers = {}
+			dashboard:CheckRaidAgainstConfig()
+		end
+	end)
+end
+
+function SOTA:GetPlayerGuildRosterRole(playerName)
+	playerName = SOTA:UCFirst(playerName)
+	for n = 1, table.getn(SOTA.db.realm.GuildRosterRoles), 1 do
+		if SOTA.db.realm.GuildRosterRoles[n].name == playerName then
+			return SOTA.db.realm.GuildRosterRoles[n]
+		end
+	end
+	return nil
+end
 
 -------------------------------
 --- Guild Extract Module
