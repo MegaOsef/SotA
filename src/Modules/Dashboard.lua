@@ -232,6 +232,73 @@ function SOTA_ClearRavenLogsButton_OnClick()
 end
 
 -------------------------------
+--- Report Raid DKP to Officer Chat
+
+function module:GetSessionRaidDkp()
+	local transactions = SOTA.db.realm.RavenLogsForApp.dkpTransactions
+	local totalDkp = 0
+	for n = 1, table.getn(transactions), 1 do
+		local tr = transactions[n]
+		if tr.type == SOTA.LOGTYPE.BOSS or tr.type == SOTA.LOGTYPE.RAID then
+			if table.getn(tr.dkpChanges) > 0 then
+				totalDkp = totalDkp + tr.dkpChanges[1].change
+			end
+		end
+	end
+	return totalDkp
+end
+
+StaticPopupDialogs["SOTA_CONFIRM_BROADCAST_RAID_DKP"] = {
+	text = "Broadcast raid DKP report to officer chat?",
+	button1 = "Yes",
+	button2 = "No",
+	timeout = 0,
+	whileDead = 1,
+	hideOnEscape = 1,
+	OnAccept = function()
+		module:BroadcastRaidDkpReport()
+	end,
+}
+
+function SOTA_ReportRaidDkpButton_OnClick()
+	StaticPopup_Show("SOTA_CONFIRM_BROADCAST_RAID_DKP")
+end
+
+function module:BroadcastRaidDkpReport()
+	local totalDkp = self:GetSessionRaidDkp()
+	local playerCount = GetNumRaidMembers()
+
+	SOTA:Broadcast(SOTA.CHANNEL.OFFICER, string.format("DKP earned this session: %d per member.", totalDkp))
+
+	if playerCount and playerCount > 0 then
+		local notInGuildNames = {}
+		local notInConfigNames = {}
+		for n = 1, playerCount, 1 do
+			local playerName, _, _, _, class = GetRaidRosterInfo(n)
+			if playerName and playerName ~= "" then
+				local guildInfo = SOTA:GetGuildPlayerInfo(playerName)
+				if not guildInfo then
+					table.insert(notInGuildNames, playerName)
+				else
+					local found = SOTA:GetPlayerGuildRosterRole(playerName)
+					if not found then
+						table.insert(notInConfigNames, playerName)
+					end
+				end
+			end
+		end
+
+		if table.getn(notInGuildNames) > 0 then
+			SOTA:Broadcast(SOTA.CHANNEL.OFFICER, "Not in guild: " .. table.concat(notInGuildNames, ", ") .. ".")
+		end
+
+		if table.getn(notInConfigNames) > 0 then
+			SOTA:Broadcast(SOTA.CHANNEL.OFFICER, "Not in config: " .. table.concat(notInConfigNames, ", ") .. ".")
+		end
+	end
+end
+
+-------------------------------
 --- Guild Roster Roles Validation
 
 function module:OnRaidRosterUpdate()
@@ -267,7 +334,11 @@ end
 function SOTA_OnDashboardEnter(frame)
 	local config = SOTA.db.realm.GuildRosterRoles
 	GameTooltip:SetOwner(frame, "ANCHOR_RIGHT")
-	GameTooltip:AddLine("Guild Roster Roles Status", 1, 0.82, 0)
+	GameTooltip:AddLine("Raid Session Status", 1, 0.82, 0)
+
+	local totalDkp = module:GetSessionRaidDkp()
+	GameTooltip:AddLine(string.format("DKP earned this session: %d per member", totalDkp), 1, 1, 1)
+	GameTooltip:AddLine(" ", 1, 1, 1)
 
 	if table.getn(config) == 0 then
 		GameTooltip:AddLine("No guild roster roles imported", 0.7, 0.7, 0.7)

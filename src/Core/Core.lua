@@ -41,6 +41,7 @@ function SOTA:OnInitialize()
 		YELL = "YELL",
 		SAY = "SAY",
 		GUILD = "GUILD",
+		OFFICER = "OFFICER",
 		WHISPER = "WHISPER",
 	}
 

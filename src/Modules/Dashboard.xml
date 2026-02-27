@@ -211,6 +211,33 @@
 							</OnLeave>
 						</Scripts>
 					</Button>
+					<!-- Report Raid DKP to Officer Chat -->
+					<Button name="$parentReportRaidDkpButton" inherits="ActionButtonTemplate"
+						frameStrata="MEDIUM" hidden="false">
+						<Size>
+							<AbsDimension x="20" y="20" />
+						</Size>
+						<Anchors>
+							<Anchor point="TOPRIGHT">
+								<Offset>
+									<AbsDimension x="0" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<NormalTexture file="Interface\ICONS\Ability_Warrior_RallyingCry.blp" />
+						<PushedTexture file="Interface\ICONS\Ability_Warrior_BattleShout.blp" />
+						<Scripts>
+							<OnClick>
+								SOTA_ReportRaidDkpButton_OnClick();
+							</OnClick>
+							<OnEnter>
+								SOTA_ShowDashboardToolTip(this, "Report raid DKP to officer chat");
+							</OnEnter>
+							<OnLeave>
+								SOTA_HideDashboardToolTip(this);
+							</OnLeave>
+						</Scripts>
+					</Button>
 					<!-- Button 3A: Configuration ("Gear") -->
 					<Button name="$parentConfigurationButton" inherits="ActionButtonTemplate"
 						frameStrata="MEDIUM" hidden="false">
