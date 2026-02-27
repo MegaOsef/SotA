@@ -214,16 +214,16 @@
 
 
 	<!-- Configuration Frame 1.1: Bidding options -->
-	<!-- Auction Timer, nominal time -->
 	<Frame name="FrameConfigBidding" parent="UIParent" toplevel="true" hidden="true" inherits="SOTA_ConfigurationFrameTemplate">
 		<Frames>
+			<!-- Section 1: Import Config from RavenApp -->
 			<Button name="$parentConfigImportItemPriosBtn" inherits="UIPanelButtonTemplate" text="Import Item Priorities">
 				<Size>
 					<AbsDimension x="155" y="25" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
-						<Offset x="32" y="-120" />
+						<Offset x="32" y="-112" />
 					</Anchor>
 				</Anchors>
 				<Scripts>
@@ -238,7 +238,7 @@
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
-						<Offset x="32" y="-150" />
+						<Offset x="32" y="-142" />
 					</Anchor>
 				</Anchors>
 				<Scripts>
@@ -247,13 +247,14 @@
 					</OnClick>
 				</Scripts>
 			</Button>
-			<Button name="$parentConfigImportBossDkpBtn" inherits="UIPanelButtonTemplate" text="Export Players DKP">
+			<!-- Section 2: Guild Management -->
+			<Button name="$parentConfigExportPlayersDkpBtn" inherits="UIPanelButtonTemplate" text="Export Players DKP">
 				<Size>
 					<AbsDimension x="155" y="25" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
-						<Offset x="32" y="-180" />
+						<Offset x="32" y="-202" />
 					</Anchor>
 				</Anchors>
 				<Scripts>
@@ -269,7 +270,7 @@
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
-						<Offset x="32" y="-210" />
+						<Offset x="32" y="-232" />
 					</Anchor>
 				</Anchors>
 				<Scripts>
@@ -278,10 +279,11 @@
 					</OnClick>
 				</Scripts>
 			</Button>
+			<!-- Section 3: Addon Settings -->
 			<CheckButton name="$parentEnableDebug" inherits="OptionsCheckButtonTemplate">
 				<Anchors>
 					<Anchor point="TOPLEFT">
-						<Offset x="32" y="-272"/>
+						<Offset x="32" y="-294"/>
 					</Anchor>
 				</Anchors>
 				<Scripts>
@@ -293,11 +295,10 @@
 					</OnClick>
 				</Scripts>
 			</CheckButton>
-			<!-- Disable Dashboard ? -->
 			<CheckButton name="$parentDisableDashboard" inherits="OptionsCheckButtonTemplate">
 				<Anchors>
 					<Anchor point="TOPLEFT">
-						<Offset x="32" y="-302"/>
+						<Offset x="32" y="-324"/>
 					</Anchor>
 				</Anchors>
 				<Scripts>
@@ -312,6 +313,19 @@
 		</Frames>
 		<Layers>
 			<Layer>
+				<!-- Section 1 header: Import Config from RavenApp -->
+				<FontString justifyH="LEFT" inherits="GameFontNormal" text="Import Config from RavenApp">
+					<FontHeight val="13" />
+					<Color r="1" g="0.82" b="0" />
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="32" y="-90" />
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<!-- Status text for Import Item Priorities -->
 				<FontString name="$parentPrioLoadedStr" justifyH="LEFT"
 					inherits="GameFontNormal"
 					font="Fonts\FRIZQT__.TTF" text="">
@@ -322,11 +336,12 @@
 					<Anchors>
 						<Anchor point="TOPLEFT">
 							<Offset>
-								<AbsDimension x="187" y="-125" />
+								<AbsDimension x="187" y="-117" />
 							</Offset>
 						</Anchor>
 					</Anchors>
 				</FontString>
+				<!-- Status text for Import Boss DKP List -->
 				<FontString name="$parentBossDkpLoadedStr" justifyH="LEFT"
 					inherits="GameFontNormal"
 					font="Fonts\FRIZQT__.TTF" text="">
@@ -337,7 +352,31 @@
 					<Anchors>
 						<Anchor point="TOPLEFT">
 							<Offset>
-								<AbsDimension x="187" y="-155" />
+								<AbsDimension x="187" y="-147" />
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<!-- Section 2 header: Guild Management -->
+				<FontString justifyH="LEFT" inherits="GameFontNormal" text="Guild Management">
+					<FontHeight val="13" />
+					<Color r="1" g="0.82" b="0" />
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="32" y="-180" />
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<!-- Section 3 header: Addon Settings -->
+				<FontString justifyH="LEFT" inherits="GameFontNormal" text="Addon Settings">
+					<FontHeight val="13" />
+					<Color r="1" g="0.82" b="0" />
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="32" y="-272" />
 							</Offset>
 						</Anchor>
 					</Anchors>
