@@ -662,16 +662,8 @@ function module:AuctionUIInit()
 		end)
 		self.bidsFrames[n].closeBtn = closeBtn
 	end
-	self.selectedBidFrame            = getglobal("AuctionUIFrameSelected");
-	self.selectedBidFrame.star       = getglobal(self.selectedBidFrame:GetName() .. "Star")
-	self.selectedBidFrame.bidder     = getglobal(self.selectedBidFrame:GetName() .. "Bidder")
-	self.selectedBidFrame.bid        = getglobal(self.selectedBidFrame:GetName() .. "Bid")
-	self.selectedBidFrame.bidtype    = getglobal(self.selectedBidFrame:GetName() .. "Bidtype")
-	self.selectedBidFrame.remaining  = getglobal(self.selectedBidFrame:GetName() .. "Remaining")
-
 	self.btns = {}
 	self.btns.declareWinner       = getglobal("DeclareWinnerButton")
-	self.btns.removeSelectedBid   = getglobal("CancelBidButton")
 	self.btns.cancelAuction       = getglobal("CancelAuctionButton")
 	self.btns.restartAuction      = getglobal("RestartAuctionButton")
 	self.btns.finishAuction       = getglobal("FinishAuctionButton")
@@ -780,17 +772,7 @@ end
 
 
 function module:GetSelectedBid()
-	local selectedBid = nil;
-	
-	local bidder      = self.selectedBidFrame.bidder:GetText();
-	local bid         = self.selectedBidFrame.bid:GetText();
-	local bidtype     = self.selectedBidFrame.bidtype:GetText();
-
-	if bidder and bid and bidtype then
-		selectedBid = { bidder, bid, bidtype };
-	end
-
-	return selectedBid;
+	return self.selectedBidData
 end
 
 
@@ -808,10 +790,8 @@ function module:RefreshButtonsState()
 	end	
 
 	if isBidderSelected then
-		self.btns.removeSelectedBid:Enable()
 		self.btns.declareWinner:SetText("Declare Winner")
 	else
-		self.btns.removeSelectedBid:Disable()
 		self.btns.declareWinner:SetText("Declare no Winner")
 	end
 	
@@ -864,47 +844,6 @@ function module:DeclareAuctionWinner()
 	end
 
 	self:EndAuctionTransaction()
-end
-
-
---[[
---	Cancel a player bid
---	Since 0.0.3
---]]
-function module:RemoveSelectedBid()
-	local currentState = self:GetAuctionState()
-	if currentState ~= AUCTION_STATE.COMPLETE then
-		SOTA:Print("Error: You can cancel a bid only when an auction is finished.")
-		return;
-	end
-
-	local selectedBid = self:GetSelectedBid();
-	if not selectedBid then
-		return;
-	end
-	
-	self:UnregisterBid(
-		selectedBid[SELBID_COLS.PNAME],
-		selectedBid[SELBID_COLS.BID_AMNT],
-		BidTypeStrToValue(selectedBid[SELBID_COLS.BID_TP])
-	);
-	
-	local highestBid = self:GetHighestBid();
-
-	if highestBid then
-		SOTA:Broadcast(SOTA.CHANNEL.RAID, string.format(MSG.ONCANCELBID_WITHWIN,
-			selectedBid[SELBID_COLS.PNAME], selectedBid[SELBID_COLS.BID_AMNT], selectedBid[SELBID_COLS.BID_TP],
-			highestBid[BIDSTABLE_COLS.PNAME], highestBid[BIDSTABLE_COLS.BID_AMNT],
-			BidTypeToText(highestBid[BIDSTABLE_COLS.BID_TP])
-		))
-	else
-		SOTA:Broadcast(SOTA.CHANNEL.RAID, string.format(MSG.ONCANCELBID_WITHOUTWIN,
-			selectedBid[SELBID_COLS.PNAME], selectedBid[SELBID_COLS.BID_AMNT], selectedBid[SELBID_COLS.BID_TP]
-		))
-	end
-
-	self:ClearSelectedPlayer()
-	self:RefreshButtonsState()
 end
 
 
@@ -993,64 +932,29 @@ function module:EndAuctionTransaction()
 end
 
 
---[[
---	Show the selected (clicked) bidder information in AuctionUI.
---	Since 0.0.2
---]]
 function module:SelectBid(playername, bid, bidtype)
-	local bidInfo = nil
 	if playername and bid and bidtype then
-		bidInfo = self:GetBidInfo(playername, bid, bidtype)
-	end
-
-	local bidder, bidtype, bidtext, playerclass, remaining;
-	if not bidInfo then
-		bidder = "";
-		bidtext = "";
-		bidtype = "";
-		playerclass = "";
-		remaining = "";
-	else
-		bidder = bidInfo[BIDSTABLE_COLS.PNAME];
-		bidtype = BidTypeToText(bidInfo[BIDSTABLE_COLS.BID_TP])
-		bidtext = string.format("%d", bidInfo[BIDSTABLE_COLS.BID_AMNT]);
-		playerclass = bidInfo[BIDSTABLE_COLS.CLASS];
-		local rem = self:GetRemainingDKP(bidder, bidInfo[BIDSTABLE_COLS.BID_AMNT])
-		if rem then
-			remaining = string.format("%d", rem)
+		local bidInfo = self:GetBidInfo(playername, bid, bidtype)
+		if bidInfo then
+			self.selectedBidData = {
+				bidInfo[BIDSTABLE_COLS.PNAME],
+				string.format("%d", bidInfo[BIDSTABLE_COLS.BID_AMNT]),
+				BidTypeToText(bidInfo[BIDSTABLE_COLS.BID_TP])
+			}
 		else
-			remaining = ""
+			self.selectedBidData = nil
 		end
-	end
-
-	local color = SOTA:GetClassColorCodes(playerclass);
-
-	if bidder ~= "" then
-		self.selectedBidFrame.star:Show()
 	else
-		self.selectedBidFrame.star:Hide()
+		self.selectedBidData = nil
 	end
-	self.selectedBidFrame.bidder:SetText(bidder);
-	self.selectedBidFrame.bidder:SetTextColor((color[1] / 255), (color[2] / 255), (color[3] / 255), 255);
-	self.selectedBidFrame.bidtype:SetText(bidtype);
-	self.selectedBidFrame.bid:SetText(bidtext);
-	self.selectedBidFrame.remaining:SetText(remaining);
 
-	-- Refresh bid list to update star indicators
-	self:RefreshGUIBidsList();
-
-	self:RefreshButtonsState();
+	self:RefreshGUIBidsList()
+	self:RefreshButtonsState()
 end
 
 function module:ClearSelectedPlayer()
-	self.selectedBidFrame.star:Hide();
-	self.selectedBidFrame.bidder:SetText("");
-	self.selectedBidFrame.bid:SetText("");
-	self.selectedBidFrame.bidtype:SetText("");
-	self.selectedBidFrame.remaining:SetText("");
-
-	-- Refresh bid list to clear star indicators
-	self:RefreshGUIBidsList();
+	self.selectedBidData = nil
+	self:RefreshGUIBidsList()
 end
 
 
@@ -1272,10 +1176,6 @@ function SOTA_OnRowRemoveBidClick(closeBtn)
 end
 
 -- UI Events
-function SOTA_OnRemoveSelectedBidClick(object)
-	module:RemoveSelectedBid();
-end
-
 function SOTA_OnPauseAuctionClick(object)
 	module:PauseAuction();
 end
