@@ -4,50 +4,76 @@
 	<!-- template for Bid entries -->
 	<Button name="SOTA_BidTemplate" hidden="true" virtual="true">
 		<Size>
-			<AbsDimension x="420" y="16" />
+			<AbsDimension x="420" y="12" />
 		</Size>
 		<Layers>
 			<Layer>
-				<!-- Player name -->
-				<FontString name="$parentBidder" justifyH="LEFT" inherits="GameFontNormal">
+				<!-- Selected star indicator -->
+				<Texture name="$parentStar" hidden="true" file="Interface\AddOns\RollFor\assets\star-gold.tga">
 					<Size>
-						<AbsDimension x="100" y="16" />
+						<AbsDimension x="13" y="12" />
 					</Size>
 					<Anchors>
 						<Anchor point="LEFT">
 							<Offset>
-								<AbsDimension x="4" y="0" />
+								<AbsDimension x="2" y="0" />
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+				<!-- Player name -->
+				<FontString name="$parentBidder" justifyH="LEFT" inherits="GameFontNormalSmall">
+					<Size>
+						<AbsDimension x="80" y="12" />
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT">
+							<Offset>
+								<AbsDimension x="16" y="0" />
 							</Offset>
 						</Anchor>
 					</Anchors>
 					<Color r="1" g="1" b="1" />
 				</FontString>
 				<!-- Player bidtype -->
-				<FontString name="$parentBidtype" justifyH="LEFT" inherits="GameFontNormal">
+				<FontString name="$parentBidtype" justifyH="CENTER" inherits="GameFontNormalSmall">
 					<Size>
-						<AbsDimension x="25" y="16" />
+						<AbsDimension x="35" y="12" />
 					</Size>
 					<Anchors>
-						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentBidder" />
+						<Anchor point="LEFT">
+							<Offset>
+								<AbsDimension x="96" y="0" />
+							</Offset>
+						</Anchor>
 					</Anchors>
 				</FontString>
 				<!-- Player bid -->
-				<FontString name="$parentBid" justifyH="RIGHT" inherits="GameFontNormal">
+				<FontString name="$parentBid" justifyH="RIGHT" inherits="GameFontNormalSmall">
 					<Size>
-						<AbsDimension x="45" y="16" />
+						<AbsDimension x="35" y="12" />
 					</Size>
 					<Anchors>
-						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentBidtype" />
+						<Anchor point="LEFT">
+							<Offset>
+								<AbsDimension x="131" y="0" />
+							</Offset>
+						</Anchor>
 					</Anchors>
 				</FontString>
-				<!-- Player infos -->
-				<FontString name="$parentInfos" justifyH="CENTER" inherits="GameFontNormal">
+				<!-- Remaining DKP after bid -->
+				<FontString name="$parentRemaining" justifyH="RIGHT" inherits="GameFontNormalSmall">
 					<Size>
-						<AbsDimension x="195" y="16" />
+						<AbsDimension x="60" y="12" />
 					</Size>
 					<Anchors>
-						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentBid" />
+						<Anchor point="LEFT">
+							<Offset>
+								<AbsDimension x="166" y="0" />
+							</Offset>
+						</Anchor>
 					</Anchors>
+					<Color r="0.5" g="0.5" b="0.5" />
 				</FontString>
 			</Layer>
 		</Layers>
@@ -57,14 +83,19 @@
 				SOTA_OnBidClick(this)
 			</OnClick>
 			<OnEnter>
-				getglobal(this:GetName().."BG"):SetVertexColor(1, 1, 1, 1)
+				local bg = getglobal(this:GetName().."BG")
+				local r, g, b = bg:GetVertexColor()
+				this.bgR = r
+				this.bgG = g
+				this.bgB = b
+				bg:SetVertexColor(r * 1.5, g * 1.5, b * 1.5, 0.8)
 			</OnEnter>
 			<OnLeave>
-				getglobal(this:GetName().."BG"):SetVertexColor(0.7, 0.7, 0.7, 0.7)
+				local bg = getglobal(this:GetName().."BG")
+				if this.bgR then
+					bg:SetVertexColor(this.bgR, this.bgG, this.bgB, 0.5)
+				end
 			</OnLeave>
-			<OnLoad>
-				this:GetScript("OnLeave")(this)
-			</OnLoad>
 		</Scripts>
 		<NormalTexture name="$parentBG">
 			<Color r="0.0" g="0.0" b="0.5" a="0.5" />
@@ -155,7 +186,7 @@
 	<!-- Auction UI Frame -->
 	<Frame name="AuctionUIFrame" parent="UIParent" toplevel="true" hidden="true">
 		<Size>
-			<AbsDimension x="760" y="495" />
+			<AbsDimension x="760" y="471" />
 		</Size>
 		<Anchors>
 			<Anchor point="TOPLEFT">
@@ -262,7 +293,7 @@
 			<!-- Bid list frame -->
 			<Frame name="$parentTableList">
 				<Size>
-					<AbsDimension x="430" y="170" />
+					<AbsDimension x="430" y="146" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
@@ -279,6 +310,51 @@
 						<AbsValue val="16" />
 					</TileSize>
 				</Backdrop>
+				<Layers>
+					<Layer level="ARTWORK">
+						<!-- Column headers -->
+						<FontString name="$parentHeaderBidder" justifyH="LEFT" inherits="GameFontNormalSmall" text="Bidder">
+							<Size>
+								<AbsDimension x="80" y="14" />
+							</Size>
+							<Anchors>
+								<Anchor point="TOPLEFT">
+									<Offset>
+										<AbsDimension x="20" y="-4" />
+									</Offset>
+								</Anchor>
+							</Anchors>
+							<Color r="0.7" g="0.7" b="0.7" />
+						</FontString>
+						<FontString name="$parentHeaderBidtype" justifyH="CENTER" inherits="GameFontNormalSmall" text="Type">
+							<Size>
+								<AbsDimension x="35" y="14" />
+							</Size>
+							<Anchors>
+								<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentHeaderBidder" />
+							</Anchors>
+							<Color r="0.7" g="0.7" b="0.7" />
+						</FontString>
+						<FontString name="$parentHeaderBid" justifyH="RIGHT" inherits="GameFontNormalSmall" text="DKP">
+							<Size>
+								<AbsDimension x="35" y="14" />
+							</Size>
+							<Anchors>
+								<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentHeaderBidtype" />
+							</Anchors>
+							<Color r="0.7" g="0.7" b="0.7" />
+						</FontString>
+						<FontString name="$parentHeaderRemaining" justifyH="RIGHT" inherits="GameFontNormalSmall" text="Remaining">
+							<Size>
+								<AbsDimension x="60" y="14" />
+							</Size>
+							<Anchors>
+								<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentHeaderBid" />
+							</Anchors>
+							<Color r="0.7" g="0.7" b="0.7" />
+						</FontString>
+					</Layer>
+				</Layers>
 			</Frame>
 			<!-- Selected Bid frame -->
 			<Frame name="$parentSelected">
@@ -288,7 +364,7 @@
 				<Anchors>
 					<Anchor point="TOPLEFT">
 						<Offset>
-							<AbsDimension x="16" y="-340" />
+							<AbsDimension x="16" y="-316" />
 						</Offset>
 					</Anchor>
 				</Anchors>
@@ -302,46 +378,72 @@
 				</Backdrop>
 				<Layers>
 					<Layer level="ARTWORK">
-						<!-- Selected player -->
-						<FontString name="$parentBidder" justifyH="LEFT" inherits="GameFontNormal" text="">
+						<!-- Selected star -->
+						<Texture name="$parentStar" hidden="true" file="Interface\AddOns\RollFor\assets\star-gold.tga">
 							<Size>
-								<AbsDimension x="100" y="16" />
+								<AbsDimension x="13" y="12" />
 							</Size>
 							<Anchors>
 								<Anchor point="LEFT">
 									<Offset>
-										<AbsDimension x="8" y="0" />
+										<AbsDimension x="6" y="0" />
+									</Offset>
+								</Anchor>
+							</Anchors>
+						</Texture>
+						<!-- Selected player -->
+						<FontString name="$parentBidder" justifyH="LEFT" inherits="GameFontNormalSmall" text="">
+							<Size>
+								<AbsDimension x="80" y="16" />
+							</Size>
+							<Anchors>
+								<Anchor point="LEFT">
+									<Offset>
+										<AbsDimension x="20" y="0" />
 									</Offset>
 								</Anchor>
 							</Anchors>
 							<Color r="1" g="1" b="1" />
 						</FontString>
 						<!-- Selected bidtype -->
-						<FontString name="$parentBidtype" justifyH="LEFT" inherits="GameFontNormal" text="">
+						<FontString name="$parentBidtype" justifyH="CENTER" inherits="GameFontNormalSmall" text="">
 							<Size>
-								<AbsDimension x="25" y="16" />
+								<AbsDimension x="35" y="16" />
 							</Size>
 							<Anchors>
-								<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentBidder" />
+								<Anchor point="LEFT">
+									<Offset>
+										<AbsDimension x="100" y="0" />
+									</Offset>
+								</Anchor>
 							</Anchors>
 						</FontString>
 						<!-- Selected bid -->
-						<FontString name="$parentBid" justifyH="RIGHT" inherits="GameFontNormal" text="">
+						<FontString name="$parentBid" justifyH="RIGHT" inherits="GameFontNormalSmall" text="">
 							<Size>
-								<AbsDimension x="45" y="16" />
+								<AbsDimension x="35" y="16" />
 							</Size>
 							<Anchors>
-								<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentBidtype" />
+								<Anchor point="LEFT">
+									<Offset>
+										<AbsDimension x="135" y="0" />
+									</Offset>
+								</Anchor>
 							</Anchors>
 						</FontString>
-						<!-- Selected infos -->
-						<FontString name="$parentInfos" justifyH="CENTER" inherits="GameFontNormal" text="">
+						<!-- Selected remaining DKP -->
+						<FontString name="$parentRemaining" justifyH="RIGHT" inherits="GameFontNormalSmall" text="">
 							<Size>
-								<AbsDimension x="195" y="16" />
+								<AbsDimension x="60" y="16" />
 							</Size>
 							<Anchors>
-								<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentBid" />
+								<Anchor point="LEFT">
+									<Offset>
+										<AbsDimension x="170" y="0" />
+									</Offset>
+								</Anchor>
 							</Anchors>
+							<Color r="0.5" g="0.5" b="0.5" />
 						</FontString>
 					</Layer>
 				</Layers>
@@ -350,7 +452,7 @@
 			<Button name="CancelBidButton" inherits="UIPanelCloseButton">
 				<Anchors>
 					<Anchor point="TOPLEFT">
-						<Offset x="416" y="-338" />
+						<Offset x="416" y="-314" />
 					</Anchor>
 				</Anchors>
 				<Scripts>
@@ -366,7 +468,7 @@
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
-						<Offset x="40" y="-390" />
+						<Offset x="40" y="-366" />
 					</Anchor>
 				</Anchors>
 				<Scripts>
@@ -379,7 +481,7 @@
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
-						<Offset x="170" y="-390" />
+						<Offset x="170" y="-366" />
 					</Anchor>
 				</Anchors>
 				<Scripts>
@@ -392,7 +494,7 @@
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
-						<Offset x="300" y="-390" />
+						<Offset x="300" y="-366" />
 					</Anchor>
 				</Anchors>
 				<Scripts>
@@ -406,7 +508,7 @@
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
-						<Offset x="40" y="-420" />
+						<Offset x="40" y="-396" />
 					</Anchor>
 				</Anchors>
 				<Scripts>
@@ -419,7 +521,7 @@
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
-						<Offset x="300" y="-420" />
+						<Offset x="300" y="-396" />
 					</Anchor>
 				</Anchors>
 				<Scripts>
@@ -448,7 +550,7 @@
 			</Frame>
 			<Frame name="$parentBossesList">
 				<Size>
-					<AbsDimension x="298" y="328" />
+					<AbsDimension x="298" y="304" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">

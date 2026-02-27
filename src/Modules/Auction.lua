@@ -599,7 +599,7 @@ function module:AuctionUIInit()
 		local entry = CreateFrame("Button", "$parentEntry"..n, AuctionUIFrameTableList, "SOTA_BidTemplate");
 		entry:SetID(n);
 		if n == 1 then
-			entry:SetPoint("TOPLEFT", 4, -4);
+			entry:SetPoint("TOPLEFT", 4, -20);
 		else
 			entry:SetPoint("TOP", "$parentEntry"..(n-1), "BOTTOM");
 		end
@@ -636,18 +636,21 @@ function module:AuctionUIInit()
 
 	self.bidsFrames = {}
 	for n=1, MAX_BIDS, 1 do
-		self.bidsFrames[n]         = getglobal("AuctionUIFrameTableListEntry" .. n);
-		self.bidsFrames[n].bidder  = getglobal(self.bidsFrames[n]:GetName() .. "Bidder");
-		self.bidsFrames[n].bidtype = getglobal(self.bidsFrames[n]:GetName() .. "Bidtype");
-		self.bidsFrames[n].bid     = getglobal(self.bidsFrames[n]:GetName() .. "Bid");
-		self.bidsFrames[n].infos   = getglobal(self.bidsFrames[n]:GetName() .. "Infos");
+		self.bidsFrames[n]            = getglobal("AuctionUIFrameTableListEntry" .. n);
+		self.bidsFrames[n].star       = getglobal(self.bidsFrames[n]:GetName() .. "Star");
+		self.bidsFrames[n].bidder     = getglobal(self.bidsFrames[n]:GetName() .. "Bidder");
+		self.bidsFrames[n].bidtype    = getglobal(self.bidsFrames[n]:GetName() .. "Bidtype");
+		self.bidsFrames[n].bid        = getglobal(self.bidsFrames[n]:GetName() .. "Bid");
+		self.bidsFrames[n].remaining  = getglobal(self.bidsFrames[n]:GetName() .. "Remaining");
+		self.bidsFrames[n].bg         = getglobal(self.bidsFrames[n]:GetName() .. "BG");
 		self.bidsFrames[n]:Show();
 	end
-	self.selectedBidFrame         = getglobal("AuctionUIFrameSelected");
-	self.selectedBidFrame.bidder  = getglobal(self.selectedBidFrame:GetName() .. "Bidder")
-	self.selectedBidFrame.bid     = getglobal(self.selectedBidFrame:GetName() .. "Bid")
-	self.selectedBidFrame.bidtype = getglobal(self.selectedBidFrame:GetName() .. "Bidtype")
-	self.selectedBidFrame.infos   = getglobal(self.selectedBidFrame:GetName() .. "Infos")
+	self.selectedBidFrame            = getglobal("AuctionUIFrameSelected");
+	self.selectedBidFrame.star       = getglobal(self.selectedBidFrame:GetName() .. "Star")
+	self.selectedBidFrame.bidder     = getglobal(self.selectedBidFrame:GetName() .. "Bidder")
+	self.selectedBidFrame.bid        = getglobal(self.selectedBidFrame:GetName() .. "Bid")
+	self.selectedBidFrame.bidtype    = getglobal(self.selectedBidFrame:GetName() .. "Bidtype")
+	self.selectedBidFrame.remaining  = getglobal(self.selectedBidFrame:GetName() .. "Remaining")
 
 	self.btns = {}
 	self.btns.declareWinner       = getglobal("DeclareWinnerButton")
@@ -679,41 +682,75 @@ function module:AuctionUIInit()
 	end
 end;
 
-function module:FormatBidsListItemInfos(grank, class)
-	return string.format("%s, %s", grank, class)
+--[[
+--	Get player's remaining DKP after their bid.
+--	Returns remaining DKP as a number, or nil if player info is not available.
+--]]
+function module:GetRemainingDKP(playername, bidamount)
+	local playerInfo = SOTA:GetGuildPlayerInfo(playername)
+	if playerInfo then
+		return 1 * (playerInfo[RT_COL.DKP_AMNT]) - bidamount
+	end
+	return nil
 end
 
 --[[
 --	Show top <n> in bid window
 --]]
 function module:RefreshGUIBidsList()
-	local bidder, bid, bidtype, playerclass, infos;
+	local selectedBid = self:GetSelectedBid()
+	local selectedName = selectedBid and selectedBid[SELBID_COLS.PNAME] or ""
+	local selectedAmount = selectedBid and selectedBid[SELBID_COLS.BID_AMNT] or ""
+
+	local bidder, bid, bidtypeVal, bidtype, playerclass, remaining;
 	for n=1, MAX_BIDS, 1 do
 		if table.getn(self.incomingBidsTable) < n then
 			bidder = "";
 			bidtype = "";
 			bid = "";
+			bidtypeVal = nil;
 			playerclass = "";
-			infos = "";
+			remaining = "";
 		else
 			local cbid = self.incomingBidsTable[n];
 			bidder = cbid[BIDSTABLE_COLS.PNAME];
-			bidtype = BidTypeToText(cbid[BIDSTABLE_COLS.BID_TP])
+			bidtypeVal = cbid[BIDSTABLE_COLS.BID_TP];
+			bidtype = BidTypeToText(bidtypeVal)
 			bid = string.format("%d", cbid[BIDSTABLE_COLS.BID_AMNT]);
 			playerclass = cbid[BIDSTABLE_COLS.CLASS];
-			infos = string.format("%s, %s", cbid[BIDSTABLE_COLS.GRANK], cbid[BIDSTABLE_COLS.CLASS])
+			local rem = self:GetRemainingDKP(bidder, cbid[BIDSTABLE_COLS.BID_AMNT])
+			if rem then
+				remaining = string.format("%d", rem)
+			else
+				remaining = ""
+			end
 		end
 
 		local color = SOTA:GetClassColorCodes(playerclass);
+
+		-- Star indicator for selected bid
+		local isSelected = (bidder ~= "" and bidder == selectedName and bid == selectedAmount)
+		if isSelected then
+			self.bidsFrames[n].star:Show()
+		else
+			self.bidsFrames[n].star:Hide()
+		end
 
 		self.bidsFrames[n].bidder:SetText(bidder);
 		self.bidsFrames[n].bidder:SetTextColor((color[1] / 255), (color[2] / 255), (color[3] / 255), 255);
 		self.bidsFrames[n].bidtype:SetText(bidtype);
 		self.bidsFrames[n].bid:SetText(bid);
-		self.bidsFrames[n].infos:SetText(infos);
+		self.bidsFrames[n].remaining:SetText(remaining);
 
-		self:RefreshButtonsState();
+		-- MS/OS background color differentiation
+		if bidtypeVal == BIDTYPE.OS then
+			self.bidsFrames[n].bg:SetVertexColor(0.3, 0, 0.4, 0.5)
+		else
+			self.bidsFrames[n].bg:SetVertexColor(0, 0, 0.5, 0.5)
+		end
 	end
+
+	self:RefreshButtonsState();
 end
 
 
@@ -940,38 +977,55 @@ function module:SelectBid(playername, bid, bidtype)
 	if playername and bid and bidtype then
 		bidInfo = self:GetBidInfo(playername, bid, bidtype)
 	end
-	
-	local bidder, bidtype, bidtext, playerclass, infos;
+
+	local bidder, bidtype, bidtext, playerclass, remaining;
 	if not bidInfo then
 		bidder = "";
 		bidtext = "";
 		bidtype = "";
 		playerclass = "";
-		infos = "";
+		remaining = "";
 	else
 		bidder = bidInfo[BIDSTABLE_COLS.PNAME];
 		bidtype = BidTypeToText(bidInfo[BIDSTABLE_COLS.BID_TP])
 		bidtext = string.format("%d", bidInfo[BIDSTABLE_COLS.BID_AMNT]);
 		playerclass = bidInfo[BIDSTABLE_COLS.CLASS];
-		infos = self:FormatBidsListItemInfos(bidInfo[BIDSTABLE_COLS.GRANK], bidInfo[BIDSTABLE_COLS.CLASS])
+		local rem = self:GetRemainingDKP(bidder, bidInfo[BIDSTABLE_COLS.BID_AMNT])
+		if rem then
+			remaining = string.format("%d", rem)
+		else
+			remaining = ""
+		end
 	end
-	
+
 	local color = SOTA:GetClassColorCodes(playerclass);
 
+	if bidder ~= "" then
+		self.selectedBidFrame.star:Show()
+	else
+		self.selectedBidFrame.star:Hide()
+	end
 	self.selectedBidFrame.bidder:SetText(bidder);
 	self.selectedBidFrame.bidder:SetTextColor((color[1] / 255), (color[2] / 255), (color[3] / 255), 255);
 	self.selectedBidFrame.bidtype:SetText(bidtype);
 	self.selectedBidFrame.bid:SetText(bidtext);
-	self.selectedBidFrame.infos:SetText(infos);
+	self.selectedBidFrame.remaining:SetText(remaining);
+
+	-- Refresh bid list to update star indicators
+	self:RefreshGUIBidsList();
 
 	self:RefreshButtonsState();
 end
 
 function module:ClearSelectedPlayer()
+	self.selectedBidFrame.star:Hide();
 	self.selectedBidFrame.bidder:SetText("");
 	self.selectedBidFrame.bid:SetText("");
 	self.selectedBidFrame.bidtype:SetText("");
-	self.selectedBidFrame.infos:SetText("");
+	self.selectedBidFrame.remaining:SetText("");
+
+	-- Refresh bid list to clear star indicators
+	self:RefreshGUIBidsList();
 end
 
 
