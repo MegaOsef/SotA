@@ -644,6 +644,23 @@ function module:AuctionUIInit()
 		self.bidsFrames[n].remaining  = getglobal(self.bidsFrames[n]:GetName() .. "Remaining");
 		self.bidsFrames[n].bg         = getglobal(self.bidsFrames[n]:GetName() .. "BG");
 		self.bidsFrames[n]:Show();
+
+		-- Close button per row (visible on hover)
+		local closeBtn = CreateFrame("Button", self.bidsFrames[n]:GetName().."Close", self.bidsFrames[n], "UIPanelCloseButton")
+		closeBtn:SetWidth(16)
+		closeBtn:SetHeight(16)
+		closeBtn:SetPoint("RIGHT", self.bidsFrames[n], "RIGHT", -2, 0)
+		closeBtn:Hide()
+		closeBtn:SetScript("OnClick", function()
+			SOTA_OnRowRemoveBidClick(this)
+		end)
+		closeBtn:SetScript("OnEnter", function()
+			this:Show()
+		end)
+		closeBtn:SetScript("OnLeave", function()
+			this:Hide()
+		end)
+		self.bidsFrames[n].closeBtn = closeBtn
 	end
 	self.selectedBidFrame            = getglobal("AuctionUIFrameSelected");
 	self.selectedBidFrame.star       = getglobal(self.selectedBidFrame:GetName() .. "Star")
@@ -701,6 +718,7 @@ function module:RefreshGUIBidsList()
 	local selectedBid = self:GetSelectedBid()
 	local selectedName = selectedBid and selectedBid[SELBID_COLS.PNAME] or ""
 	local selectedAmount = selectedBid and selectedBid[SELBID_COLS.BID_AMNT] or ""
+	local selectedBidtype = selectedBid and selectedBid[SELBID_COLS.BID_TP] or ""
 
 	local bidder, bid, bidtypeVal, bidtype, playerclass, remaining;
 	for n=1, MAX_BIDS, 1 do
@@ -711,6 +729,10 @@ function module:RefreshGUIBidsList()
 			bidtypeVal = nil;
 			playerclass = "";
 			remaining = "";
+			if self.bidsFrames[n].closeBtn then
+				self.bidsFrames[n].closeBtn:Hide()
+				self.bidsFrames[n].closeBtn.hasBid = false
+			end
 		else
 			local cbid = self.incomingBidsTable[n];
 			bidder = cbid[BIDSTABLE_COLS.PNAME];
@@ -724,12 +746,15 @@ function module:RefreshGUIBidsList()
 			else
 				remaining = ""
 			end
+			if self.bidsFrames[n].closeBtn then
+				self.bidsFrames[n].closeBtn.hasBid = true
+			end
 		end
 
 		local color = SOTA:GetClassColorCodes(playerclass);
 
 		-- Star indicator for selected bid
-		local isSelected = (bidder ~= "" and bidder == selectedName and bid == selectedAmount)
+		local isSelected = (bidder ~= "" and bidder == selectedName and bid == selectedAmount and bidtype == selectedBidtype)
 		if isSelected then
 			self.bidsFrames[n].star:Show()
 		else
@@ -1163,6 +1188,88 @@ function SOTA_GetMinimumBid(bidtype) -- Exposes globally
 	return module:GetMinimumBid(bidtype)
 end
 
+
+-- Confirmation popup for removing a bid from a row close button
+StaticPopupDialogs["SOTA_CONFIRM_REMOVEBID"] = {
+	text = "Remove bid of %s for %s?",
+	button1 = "Yes",
+	button2 = "No",
+	timeout = 0,
+	whileDead = 1,
+	hideOnEscape = 1,
+	OnAccept = function()
+		module:RemoveBidByInfo(module.removeBidPending)
+	end,
+}
+
+function module:RemoveBidByInfo(bidInfo)
+	if not bidInfo then
+		return
+	end
+
+	local name = bidInfo[BIDSTABLE_COLS.PNAME]
+	local bid = bidInfo[BIDSTABLE_COLS.BID_AMNT]
+	local bidtype = bidInfo[BIDSTABLE_COLS.BID_TP]
+
+	self:UnregisterBid(name, bid, bidtype)
+
+	local highestBid = self:GetHighestBid()
+
+	if highestBid then
+		SOTA:Broadcast(SOTA.CHANNEL.RAID, string.format(MSG.ONCANCELBID_WITHWIN,
+			name, bid, BidTypeToText(bidtype),
+			highestBid[BIDSTABLE_COLS.PNAME], highestBid[BIDSTABLE_COLS.BID_AMNT],
+			BidTypeToText(highestBid[BIDSTABLE_COLS.BID_TP])
+		))
+	else
+		SOTA:Broadcast(SOTA.CHANNEL.RAID, string.format(MSG.ONCANCELBID_WITHOUTWIN,
+			name, bid, BidTypeToText(bidtype)
+		))
+	end
+
+	self:ClearSelectedPlayer()
+	self:RefreshButtonsState()
+end
+
+-- Show/hide close button on bid row hover
+function SOTA_OnBidRowEnter(row)
+	if row.closeBtn and row.closeBtn.hasBid then
+		row.closeBtn:Show()
+	end
+end
+
+function SOTA_OnBidRowLeave(row)
+	if row.closeBtn then
+		row.closeBtn:Hide()
+	end
+end
+
+-- Close button click on a bid row
+function SOTA_OnRowRemoveBidClick(closeBtn)
+	local row = closeBtn:GetParent()
+	local bidder = getglobal(row:GetName().."Bidder"):GetText()
+	if not bidder or bidder == "" then
+		return
+	end
+
+	local currentState = module:GetAuctionState()
+	if currentState ~= AUCTION_STATE.COMPLETE then
+		SOTA:Print("Error: You can cancel a bid only when an auction is finished.")
+		return
+	end
+
+	local bid = 1 * (getglobal(row:GetName().."Bid"):GetText())
+	local bidtypeStr = getglobal(row:GetName().."Bidtype"):GetText()
+	local bidtype = BidTypeStrToValue(bidtypeStr)
+
+	local bidInfo = module:GetBidInfo(bidder, bid, bidtype)
+	if not bidInfo then
+		return
+	end
+
+	module.removeBidPending = bidInfo
+	StaticPopup_Show("SOTA_CONFIRM_REMOVEBID", bidder, string.format("%d DKP (%s)", bid, bidtypeStr))
+end
 
 -- UI Events
 function SOTA_OnRemoveSelectedBidClick(object)

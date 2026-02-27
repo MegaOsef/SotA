@@ -89,12 +89,14 @@
 				this.bgG = g
 				this.bgB = b
 				bg:SetVertexColor(r * 1.5, g * 1.5, b * 1.5, 0.8)
+				SOTA_OnBidRowEnter(this)
 			</OnEnter>
 			<OnLeave>
 				local bg = getglobal(this:GetName().."BG")
 				if this.bgR then
 					bg:SetVertexColor(this.bgR, this.bgG, this.bgB, 0.5)
 				end
+				SOTA_OnBidRowLeave(this)
 			</OnLeave>
 		</Scripts>
 		<NormalTexture name="$parentBG">
