@@ -62,8 +62,6 @@ local MSG                    = {
 	ONCANCELBID_WITHWIN    = "Bid of %s for %i DKP (%s) has been removed. Current winner is %s for %i DKP (%s).",
 }
 
-local DEFAULT_TEXT_FONT = GameFontNormal
-
 local RAIDS_INFO                  = {
 	{
 		name = "Blackwing Lair",
@@ -165,8 +163,6 @@ end
 
 -- Max # of bids shown in the AuctionUI
 local MAX_BIDS  = 10
-local MAX_RAIDS = 6
-local MAX_BOSSES = 20
 
 function module:OnEnable()
 	self.auctionState = AUCTION_STATE.NONE
@@ -605,26 +601,6 @@ function module:AuctionUIInit()
 		end
 	end
 
-	for n=1, MAX_RAIDS, 1 do
-		local entry = CreateFrame("Button", "$parentEntry"..n, AuctionUIFrameRaidList, "SOTA_RaidTemplate");
-		entry:SetID(n);
-		if n == 1 then
-			entry:SetPoint("TOPLEFT", 4, -4);
-		else
-			entry:SetPoint("TOP", "$parentEntry"..(n-1), "BOTTOM");
-		end
-	end
-
-	for n=1, MAX_BOSSES, 1 do
-		local entry = CreateFrame("Button", "$parentEntry"..n, AuctionUIFrameBossesList, "SOTA_BossTemplate");
-		entry:SetID(n);
-		if n == 1 then
-			entry:SetPoint("TOPLEFT", 4, -4);
-		else
-			entry:SetPoint("TOP", "$parentEntry"..(n-1), "BOTTOM");
-		end
-	end
-
 	-- Save frames in self, it's faster than getglobal().
 	self.auctionFrame = AuctionUIFrame
 	self.itemFrame = getglobal("AuctionUIFrameItem")
@@ -632,7 +608,6 @@ function module:AuctionUIInit()
 	self.itemFrame.texture = getglobal(self.itemFrame:GetName().."ItemTexture");
 	self.itemFrame.prio = getglobal(self.itemFrame:GetName().."ItemPriority");
 	self.itemFrame.notes = getglobal(self.itemFrame:GetName().."ItemNotes");
-
 
 	self.bidsFrames = {}
 	for n=1, MAX_BIDS, 1 do
@@ -669,26 +644,25 @@ function module:AuctionUIInit()
 	self.btns.finishAuction       = getglobal("FinishAuctionButton")
 	self.btns.pauseAuction        = getglobal("PauseAuctionButton")
 
-	self.raidsFrames = {}
-	for n=1, MAX_RAIDS, 1 do
-		self.raidsFrames[n] = getglobal("AuctionUIFrameRaidListEntry" .. n);
-		self.raidsFrames[n].name = getglobal(self.raidsFrames[n]:GetName() .. "Name");
-
-		local raidInfo = RAIDS_INFO[n];
-		if raidInfo then
-			self.raidsFrames[n].name:SetText(RAIDS_INFO[n].name)
-			self.raidsFrames[n]:Show();
-		else
-			self.raidsFrames[n]:Hide();
-		end
+	-- Raid dropdown (custom styled widget)
+	self.raidDropdown = SOTA:CreateDropdown("SOTARaidDropdown", self.auctionFrame, 430, "Select Raid")
+	self.raidDropdown:GetFrame():SetPoint("TOPLEFT", self.auctionFrame, "TOPLEFT", 16, -152)
+	local raidOptions = {}
+	for n=1, table.getn(RAIDS_INFO), 1 do
+		raidOptions[n] = { text = RAIDS_INFO[n].name, value = n }
 	end
+	self.raidDropdown:SetOptions(raidOptions)
+	self.raidDropdown:SetOnChange(function(value, text)
+		module:SelectRaid(value)
+	end)
 
-	self.bossesFrames = {}
-	for n=1, MAX_BOSSES, 1 do
-		self.bossesFrames[n] = getglobal("AuctionUIFrameBossesListEntry" .. n);
-		self.bossesFrames[n].name = getglobal(self.bossesFrames[n]:GetName() .. "Name");
-		self.bossesFrames[n]:Hide();
-	end
+	-- Boss dropdown (custom styled widget, initially disabled)
+	self.bossDropdown = SOTA:CreateDropdown("SOTABossDropdown", self.auctionFrame, 430, "Select Boss")
+	self.bossDropdown:GetFrame():SetPoint("TOPLEFT", self.raidDropdown:GetFrame(), "BOTTOMLEFT", 0, -4)
+	self.bossDropdown:SetEnabled(false)
+	self.bossDropdown:SetOnChange(function(value, text)
+		module:SelectBoss(value)
+	end)
 end;
 
 --[[
@@ -1006,57 +980,37 @@ function module:FindBossByName(bossName)
 end
 
 function module:SelectRaid(raidId)
-	if raidId == self.selectedRaid then
-		return;
-	end
-	for n = 1, table.getn(module.bossesFrames), 1 do
-		module.bossesFrames[n].name:SetTextColor(1, 1, 1, 1)
-	end
-
-
 	self.selectedRaid = raidId;
-	-- Erase all bosses first
-	for n=1, MAX_BOSSES, 1 do
-		self.bossesFrames[n].name:SetText("");
-		self.bossesFrames[n]:Hide();
+	self.selectedBoss = 0;
+
+	if self.raidDropdown then
+		self.raidDropdown:SetSelectedValue(raidId)
 	end
 
-	for n = 1, table.getn(module.raidsFrames), 1 do
-		module.raidsFrames[n].name:SetTextColor(1, 1, 1, 1)
+	-- Reset and rebuild boss dropdown
+	if self.bossDropdown then
+		self.bossDropdown:SetSelectedValue(0)
+		if raidId >= 1 and raidId <= table.getn(RAIDS_INFO) then
+			local bosses = RAIDS_INFO[raidId].bosses
+			local bossOptions = {}
+			for n=1, table.getn(bosses), 1 do
+				bossOptions[n] = { text = bosses[n], value = n }
+			end
+			self.bossDropdown:SetOptions(bossOptions)
+			self.bossDropdown:SetEnabled(true)
+		else
+			self.bossDropdown:SetOptions({})
+			self.bossDropdown:SetEnabled(false)
+		end
 	end
-	if self.selectedRaid < 1 or self.selectedRaid > table.getn(RAIDS_INFO) then
-		return;
-	end
-
-	-- Fill bosses with selected raid's bosses
-	local raidInfo = RAIDS_INFO[self.selectedRaid];
-	if not raidInfo then
-		return;
-	end
-	for n=1, table.getn(raidInfo.bosses), 1 do
-		self.bossesFrames[n].name:SetText(raidInfo.bosses[n]);
-		self.bossesFrames[n]:Show();
-	end
-	--
-
-	self:SelectBoss(0);
-
-	module.raidsFrames[self.selectedRaid].name:SetTextColor(DEFAULT_TEXT_FONT:GetTextColor())
 end
 
 function module:SelectBoss(bossId)
-	if self.selectedBoss == bossId then
-		return;
-	end
 	self.selectedBoss = bossId;
-	for n = 1, table.getn(module.bossesFrames), 1 do
-		module.bossesFrames[n].name:SetTextColor(1, 1, 1, 1)
-	end
 
-	if self.selectedBoss < 1 or self.selectedBoss > table.getn(RAIDS_INFO[self.selectedRaid].bosses) then
-		return;
+	if self.bossDropdown then
+		self.bossDropdown:SetSelectedValue(bossId)
 	end
-	module.bossesFrames[self.selectedBoss].name:SetTextColor(DEFAULT_TEXT_FONT:GetTextColor())
 end
 
 
@@ -1209,12 +1163,3 @@ function SOTA_OnBidClick(object)
 	module:SelectBid(bidder, bid, BidTypeStrToValue(bidtype))
 end
 
-function SOTA_OnRaidClick(object)
-	local raidID = object:GetID();
-	module:SelectRaid(raidID);
-end
-
-function SOTA_OnBossClick(object)
-	local bossID = object:GetID();
-	module:SelectBoss(bossID);
-end

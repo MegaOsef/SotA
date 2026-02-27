@@ -103,92 +103,12 @@
 			<Color r="0.0" g="0.0" b="0.5" a="0.5" />
 		</NormalTexture>
 	</Button>
-	<Button name="SOTA_RaidTemplate" hidden="true" virtual="true">
-		<Size>
-			<AbsDimension x="290" y="16" />
-		</Size>
-		<Layers>
-			<Layer>
-				<FontString name="$parentName" justifyH="LEFT" inherits="GameFontNormal">
-					<Size>
-						<AbsDimension x="294" y="16" />
-					</Size>
-					<Anchors>
-						<Anchor point="LEFT">
-							<Offset>
-								<AbsDimension x="4" y="0" />
-							</Offset>
-						</Anchor>
-					</Anchors>
-					<Color r="1" g="1" b="1" />
-				</FontString>
-			</Layer>
-		</Layers>
-		<Scripts>
-			<OnClick>
-				PlaySound("igMainMenuOptionCheckBoxOn")
-				SOTA_OnRaidClick(this)
-			</OnClick>
-			<OnEnter>
-				getglobal(this:GetName().."BG"):SetVertexColor(1, 1, 1, 1)
-			</OnEnter>
-			<OnLeave>
-				getglobal(this:GetName().."BG"):SetVertexColor(0.7, 0.7, 0.7, 0.7)
-			</OnLeave>
-			<OnLoad>
-				this:GetScript("OnLeave")(this)
-			</OnLoad>
-		</Scripts>
-		<NormalTexture name="$parentBG">
-			<Color r="0.0" g="0.0" b="0.5" a="0.5" />
-		</NormalTexture>
-	</Button>
-	<Button name="SOTA_BossTemplate" hidden="true" virtual="true">
-		<Size>
-			<AbsDimension x="290" y="16" />
-		</Size>
-		<Layers>
-			<Layer>
-				<FontString name="$parentName" justifyH="LEFT" inherits="GameFontNormal">
-					<Size>
-						<AbsDimension x="294" y="16" />
-					</Size>
-					<Anchors>
-						<Anchor point="LEFT">
-							<Offset>
-								<AbsDimension x="4" y="0" />
-							</Offset>
-						</Anchor>
-					</Anchors>
-					<Color r="1" g="1" b="1" />
-				</FontString>
-			</Layer>
-		</Layers>
-		<Scripts>
-			<OnClick>
-				PlaySound("igMainMenuOptionCheckBoxOn")
-				SOTA_OnBossClick(this)
-			</OnClick>
-			<OnEnter>
-				getglobal(this:GetName().."BG"):SetVertexColor(1, 1, 1, 1)
-			</OnEnter>
-			<OnLeave>
-				getglobal(this:GetName().."BG"):SetVertexColor(0.7, 0.7, 0.7, 0.7)
-			</OnLeave>
-			<OnLoad>
-				this:GetScript("OnLeave")(this)
-			</OnLoad>
-		</Scripts>
-		<NormalTexture name="$parentBG">
-			<Color r="0.0" g="0.0" b="0.5" a="0.5" />
-		</NormalTexture>
-	</Button>
 
 
 	<!-- Auction UI Frame -->
 	<Frame name="AuctionUIFrame" parent="UIParent" toplevel="true" hidden="true">
 		<Size>
-			<AbsDimension x="760" y="471" />
+			<AbsDimension x="460" y="430" />
 		</Size>
 		<Anchors>
 			<Anchor point="TOPLEFT">
@@ -208,7 +128,7 @@
 		</Backdrop>
 		<Frames>
 			<!-- Current item frame -->
-			<Frame name="$parentItem">			
+			<Frame name="$parentItem">
 				<Size>
 					<AbsDimension x="430" y="104" />
 				</Size>
@@ -300,7 +220,7 @@
 				<Anchors>
 					<Anchor point="TOPLEFT">
 						<Offset>
-							<AbsDimension x="16" y="-148" />
+							<AbsDimension x="16" y="-208" />
 						</Offset>
 					</Anchor>
 				</Anchors>
@@ -365,7 +285,7 @@
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
-						<Offset x="40" y="-366" />
+						<Offset x="40" y="-358" />
 					</Anchor>
 				</Anchors>
 				<Scripts>
@@ -378,7 +298,7 @@
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
-						<Offset x="170" y="-366" />
+						<Offset x="170" y="-358" />
 					</Anchor>
 				</Anchors>
 				<Scripts>
@@ -391,7 +311,7 @@
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
-						<Offset x="300" y="-366" />
+						<Offset x="300" y="-358" />
 					</Anchor>
 				</Anchors>
 				<Scripts>
@@ -405,7 +325,7 @@
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
-						<Offset x="40" y="-396" />
+						<Offset x="40" y="-385" />
 					</Anchor>
 				</Anchors>
 				<Scripts>
@@ -418,53 +338,13 @@
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
-						<Offset x="300" y="-396" />
+						<Offset x="300" y="-385" />
 					</Anchor>
 				</Anchors>
 				<Scripts>
 					<OnClick>SOTA_OnCancelAuctionClick();</OnClick>
 				</Scripts>
 			</Button>
-			<Frame name="$parentRaidList">
-				<Size>
-					<AbsDimension x="298" y="104" />
-				</Size>
-				<Anchors>
-					<Anchor point="TOPLEFT">
-						<Offset>
-							<AbsDimension x="446" y="-44" />
-						</Offset>
-					</Anchor>
-				</Anchors>
-				<Backdrop edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
-					<EdgeSize>
-						<AbsValue val="16" />
-					</EdgeSize>
-					<TileSize>
-						<AbsValue val="16" />
-					</TileSize>
-				</Backdrop>
-			</Frame>
-			<Frame name="$parentBossesList">
-				<Size>
-					<AbsDimension x="298" y="304" />
-				</Size>
-				<Anchors>
-					<Anchor point="TOPLEFT">
-						<Offset>
-							<AbsDimension x="446" y="-148" />
-						</Offset>
-					</Anchor>
-				</Anchors>
-				<Backdrop edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
-					<EdgeSize>
-						<AbsValue val="16" />
-					</EdgeSize>
-					<TileSize>
-						<AbsValue val="16" />
-					</TileSize>
-				</Backdrop>
-			</Frame>
 		</Frames>
 		<Layers>
 			<Layer level="ARTWORK">
@@ -488,19 +368,6 @@
 							</Offset>
 						</Anchor>
 					</Anchors>
-				</FontString>
-				<FontString inherits="GameFontNormal" text="Select Raid and Boss">
-					<Size>
-						<AbsDimension x="298" y="16" />
-					</Size>
-					<Anchors>
-						<Anchor point="TOPLEFT">
-							<Offset>
-								<AbsDimension x="446" y="-24" />
-							</Offset>
-						</Anchor>
-					</Anchors>
-					<Color r="1" g="1" b="1" />
 				</FontString>
 			</Layer>
 		</Layers>

@@ -1,0 +1,143 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<Script file="Dropdown.lua" />
+
+	<!-- Dropdown header: clickable bar with colored BG, text, and arrow -->
+	<Frame name="SOTA_DropdownTemplate" virtual="true" enableMouse="true">
+		<Size>
+			<AbsDimension x="1" y="24" />
+		</Size>
+		<Backdrop edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
+			<EdgeSize>
+				<AbsValue val="16" />
+			</EdgeSize>
+			<TileSize>
+				<AbsValue val="16" />
+			</TileSize>
+		</Backdrop>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture name="$parentBG">
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset><AbsDimension x="4" y="-4" /></Offset>
+						</Anchor>
+						<Anchor point="BOTTOMRIGHT">
+							<Offset><AbsDimension x="-4" y="4" /></Offset>
+						</Anchor>
+					</Anchors>
+					<Color r="0.0" g="0.0" b="0.5" a="1.0" />
+				</Texture>
+			</Layer>
+			<Layer level="OVERLAY">
+				<FontString name="$parentText" inherits="GameFontNormalSmall" justifyH="LEFT" text="">
+					<Anchors>
+						<Anchor point="LEFT">
+							<Offset><AbsDimension x="10" y="0" /></Offset>
+						</Anchor>
+						<Anchor point="RIGHT">
+							<Offset><AbsDimension x="-24" y="0" /></Offset>
+						</Anchor>
+					</Anchors>
+					<Color r="0.7" g="0.7" b="0.7" />
+				</FontString>
+				<Texture name="$parentArrow" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Up">
+					<Size>
+						<AbsDimension x="18" y="18" />
+					</Size>
+					<Anchors>
+						<Anchor point="RIGHT">
+							<Offset><AbsDimension x="-8" y="0" /></Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnMouseUp>
+				PlaySound("igMainMenuOptionCheckBoxOn")
+				if this.dropdown then this.dropdown:Toggle() end
+			</OnMouseUp>
+			<OnEnter>
+				if this.dropdown and this.dropdown.enabled then
+					local bg = getglobal(this:GetName().."BG")
+					bg:SetVertexColor(0, 0, 0.75, 1)
+				end
+			</OnEnter>
+			<OnLeave>
+				if this.dropdown then
+					local bg = getglobal(this:GetName().."BG")
+					if this.dropdown.enabled then
+						bg:SetVertexColor(0, 0, 0.5, 1)
+					else
+						bg:SetVertexColor(0.2, 0.2, 0.2, 1)
+					end
+				end
+			</OnLeave>
+		</Scripts>
+	</Frame>
+
+	<!-- Dropdown option row: clickable item in the options list -->
+	<Button name="SOTA_DropdownOptionTemplate" hidden="true" virtual="true">
+		<Size>
+			<AbsDimension x="1" y="18" />
+		</Size>
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString name="$parentText" inherits="GameFontNormalSmall" justifyH="LEFT" text="">
+					<Anchors>
+						<Anchor point="LEFT">
+							<Offset><AbsDimension x="6" y="0" /></Offset>
+						</Anchor>
+						<Anchor point="RIGHT">
+							<Offset><AbsDimension x="-6" y="0" /></Offset>
+						</Anchor>
+					</Anchors>
+					<Color r="1" g="1" b="1" />
+				</FontString>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnEnter>
+				local bg = getglobal(this:GetName().."BG")
+				bg:SetVertexColor(0, 0, 0.75, 0.7)
+			</OnEnter>
+			<OnLeave>
+				local bg = getglobal(this:GetName().."BG")
+				bg:SetVertexColor(0, 0, 0, 0)
+			</OnLeave>
+		</Scripts>
+		<NormalTexture name="$parentBG">
+			<Color r="0" g="0" b="0" a="0" />
+		</NormalTexture>
+		<HighlightTexture alphaMode="ADD">
+			<Color r="0.3" g="0.3" b="0.8" a="0.4" />
+		</HighlightTexture>
+	</Button>
+
+	<!-- Dropdown options list container -->
+	<Frame name="SOTA_DropdownListTemplate" virtual="true" hidden="true">
+		<Backdrop edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
+			<EdgeSize>
+				<AbsValue val="16" />
+			</EdgeSize>
+			<TileSize>
+				<AbsValue val="16" />
+			</TileSize>
+		</Backdrop>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture name="$parentBG">
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset><AbsDimension x="4" y="-4" /></Offset>
+						</Anchor>
+						<Anchor point="BOTTOMRIGHT">
+							<Offset><AbsDimension x="-4" y="4" /></Offset>
+						</Anchor>
+					</Anchors>
+					<Color r="0.0" g="0.0" b="0.2" a="1.0" />
+				</Texture>
+			</Layer>
+		</Layers>
+	</Frame>
+</Ui>
