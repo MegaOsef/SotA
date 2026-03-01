@@ -121,7 +121,7 @@
 	<!-- Auction UI Frame -->
 	<Frame name="AuctionUIFrame" parent="UIParent" toplevel="true" hidden="true">
 		<Size>
-			<AbsDimension x="460" y="430" />
+			<AbsDimension x="460" y="402" />
 		</Size>
 		<Anchors>
 			<Anchor point="TOPLEFT">
@@ -233,7 +233,7 @@
 				<Anchors>
 					<Anchor point="TOPLEFT">
 						<Offset>
-							<AbsDimension x="16" y="-208" />
+							<AbsDimension x="16" y="-180" />
 						</Offset>
 					</Anchor>
 				</Anchors>
@@ -315,7 +315,7 @@
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
-						<Offset x="40" y="-358" />
+						<Offset x="40" y="-330" />
 					</Anchor>
 				</Anchors>
 				<Scripts>
@@ -328,7 +328,7 @@
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
-						<Offset x="170" y="-358" />
+						<Offset x="170" y="-330" />
 					</Anchor>
 				</Anchors>
 				<Scripts>
@@ -341,7 +341,7 @@
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
-						<Offset x="300" y="-358" />
+						<Offset x="300" y="-330" />
 					</Anchor>
 				</Anchors>
 				<Scripts>
@@ -355,7 +355,7 @@
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
-						<Offset x="40" y="-385" />
+						<Offset x="40" y="-357" />
 					</Anchor>
 				</Anchors>
 				<Scripts>
@@ -368,7 +368,7 @@
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
-						<Offset x="300" y="-385" />
+						<Offset x="300" y="-357" />
 					</Anchor>
 				</Anchors>
 				<Scripts>

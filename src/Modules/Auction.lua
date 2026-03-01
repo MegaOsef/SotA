@@ -646,7 +646,7 @@ function module:AuctionUIInit()
 	self.btns.pauseAuction        = getglobal("PauseAuctionButton")
 
 	-- Raid dropdown (custom styled widget)
-	self.raidDropdown = SOTA:CreateDropdown("SOTARaidDropdown", self.auctionFrame, 430, "Select Raid")
+	self.raidDropdown = SOTA:CreateDropdown("SOTARaidDropdown", self.auctionFrame, 212, "Select Raid")
 	self.raidDropdown:GetFrame():SetPoint("TOPLEFT", self.auctionFrame, "TOPLEFT", 16, -152)
 	local raidOptions = {}
 	for n=1, table.getn(RAIDS_INFO), 1 do
@@ -658,8 +658,8 @@ function module:AuctionUIInit()
 	end)
 
 	-- Boss dropdown (custom styled widget, initially disabled)
-	self.bossDropdown = SOTA:CreateDropdown("SOTABossDropdown", self.auctionFrame, 430, "Select Boss")
-	self.bossDropdown:GetFrame():SetPoint("TOPLEFT", self.raidDropdown:GetFrame(), "BOTTOMLEFT", 0, -4)
+	self.bossDropdown = SOTA:CreateDropdown("SOTABossDropdown", self.auctionFrame, 212, "Select Boss")
+	self.bossDropdown:GetFrame():SetPoint("TOPLEFT", self.raidDropdown:GetFrame(), "TOPRIGHT", 6, 0)
 	self.bossDropdown:SetEnabled(false)
 	self.bossDropdown:SetOnChange(function(value, text)
 		module:SelectBoss(value)
