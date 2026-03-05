@@ -173,24 +173,18 @@ function module:RenderPage()
 end
 
 function module:UpdatePageControls(numPages)
-    if numPages <= 1 then
-        self.btnPrev:Hide()
-        self.btnNext:Hide()
-        self.pageIndicator:SetText("")
+    self.btnPrev:Show()
+    self.btnNext:Show()
+    self.pageIndicator:SetText("Page " .. self.currentPage .. " / " .. numPages)
+    if self.currentPage > 1 then
+        self.btnPrev:Enable()
     else
-        self.btnPrev:Show()
-        self.btnNext:Show()
-        self.pageIndicator:SetText("Page " .. self.currentPage .. " / " .. numPages)
-        if self.currentPage > 1 then
-            self.btnPrev:Enable()
-        else
-            self.btnPrev:Disable()
-        end
-        if self.currentPage < numPages then
-            self.btnNext:Enable()
-        else
-            self.btnNext:Disable()
-        end
+        self.btnPrev:Disable()
+    end
+    if self.currentPage < numPages then
+        self.btnNext:Enable()
+    else
+        self.btnNext:Disable()
     end
 end
 
