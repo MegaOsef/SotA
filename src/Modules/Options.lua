@@ -16,9 +16,9 @@ function module:OnEnable()
 end
 
 function module:RefreshStrings()
-	self.prioLoadedStr:SetText("Loaded: " .. table.getn(SOTA.db.realm.ItemPriorities) .. " items")
-	self.bossDkpLoadedStr:SetText("Loaded: " .. table.getn(SOTA.db.realm.BossDkpList) .. " bosses")
-	self.guildRosterRolesLoadedStr:SetText("Loaded: " .. table.getn(SOTA.db.realm.GuildRosterRoles) .. " players")
+	self.bossDkpLoadedStr:SetText(table.getn(SOTA.db.realm.BossDkpList) .. " bosses")
+	self.prioLoadedStr:SetText(table.getn(SOTA.db.realm.ItemPriorities) .. " items")
+	self.guildRosterRolesLoadedStr:SetText(table.getn(SOTA.db.realm.GuildRosterRoles) .. " players")
 end
 
 function SOTA_OpenConfigurationUI()

@@ -217,9 +217,9 @@
 	<Frame name="FrameConfigBidding" parent="UIParent" toplevel="true" hidden="true" inherits="SOTA_ConfigurationFrameTemplate">
 		<Frames>
 			<!-- Section 1: Import Config from RavenApp -->
-			<Button name="$parentConfigImportItemPriosBtn" inherits="UIPanelButtonTemplate" text="Import Item Priorities">
+			<Button name="$parentConfigImportBossDkpBtn" inherits="UIPanelButtonTemplate" text="Import Boss DKP List">
 				<Size>
-					<AbsDimension x="155" y="25" />
+					<AbsDimension x="185" y="25" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
@@ -228,13 +228,13 @@
 				</Anchors>
 				<Scripts>
 					<OnClick>
-						SOTA_Conf_ImportItemPriorities_open();
+						SOTA_Conf_ImportBossDkpList_open();
 					</OnClick>
 				</Scripts>
 			</Button>
-			<Button name="$parentConfigImportBossDkpBtn" inherits="UIPanelButtonTemplate" text="Import Boss DKP List">
+			<Button name="$parentConfigImportItemPriosBtn" inherits="UIPanelButtonTemplate" text="Import Item Priorities">
 				<Size>
-					<AbsDimension x="155" y="25" />
+					<AbsDimension x="185" y="25" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
@@ -243,13 +243,13 @@
 				</Anchors>
 				<Scripts>
 					<OnClick>
-						SOTA_Conf_ImportBossDkpList_open();
+						SOTA_Conf_ImportItemPriorities_open();
 					</OnClick>
 				</Scripts>
 			</Button>
 			<Button name="$parentConfigImportGuildRosterRolesBtn" inherits="UIPanelButtonTemplate" text="Import Guild Roster Roles">
 				<Size>
-					<AbsDimension x="155" y="25" />
+					<AbsDimension x="185" y="25" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
@@ -265,7 +265,7 @@
 			<!-- Section 2: Guild Management -->
 			<Button name="$parentConfigExportPlayersDkpBtn" inherits="UIPanelButtonTemplate" text="Export Players DKP">
 				<Size>
-					<AbsDimension x="155" y="25" />
+					<AbsDimension x="185" y="25" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
@@ -279,9 +279,9 @@
 				</Scripts>
 			</Button>
 			<Button name="$parentTransactionImportBtn" inherits="UIPanelButtonTemplate"
-				text="Import to execute">
+				text="Execute DKP Import">
 				<Size>
-					<AbsDimension x="155" y="25" />
+					<AbsDimension x="185" y="25" />
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
@@ -340,50 +340,84 @@
 						</Anchor>
 					</Anchors>
 				</FontString>
-				<!-- Status text for Import Item Priorities -->
-				<FontString name="$parentPrioLoadedStr" justifyH="LEFT"
-					inherits="GameFontNormal"
-					font="Fonts\FRIZQT__.TTF" text="">
+				<!-- Column header for loaded status -->
+				<FontString justifyH="CENTER" inherits="GameFontNormal" text="Loaded">
 					<FontHeight val="12" />
+					<Color r="0.6" g="0.6" b="0.6" />
 					<Size>
-						<AbsDimension x="200" y="15" />
+						<AbsDimension x="120" y="15" />
 					</Size>
 					<Anchors>
 						<Anchor point="TOPLEFT">
 							<Offset>
-								<AbsDimension x="187" y="-117" />
+								<AbsDimension x="217" y="-97" />
 							</Offset>
 						</Anchor>
 					</Anchors>
 				</FontString>
 				<!-- Status text for Import Boss DKP List -->
-				<FontString name="$parentBossDkpLoadedStr" justifyH="LEFT"
+				<FontString name="$parentBossDkpLoadedStr" justifyH="CENTER"
 					inherits="GameFontNormal"
 					font="Fonts\FRIZQT__.TTF" text="">
 					<FontHeight val="12" />
+					<Color r="0.6" g="0.6" b="0.6" />
 					<Size>
-						<AbsDimension x="200" y="15" />
+						<AbsDimension x="120" y="15" />
 					</Size>
 					<Anchors>
 						<Anchor point="TOPLEFT">
 							<Offset>
-								<AbsDimension x="187" y="-147" />
+								<AbsDimension x="217" y="-117" />
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<!-- Status text for Import Item Priorities -->
+				<FontString name="$parentPrioLoadedStr" justifyH="CENTER"
+					inherits="GameFontNormal"
+					font="Fonts\FRIZQT__.TTF" text="">
+					<FontHeight val="12" />
+					<Color r="0.6" g="0.6" b="0.6" />
+					<Size>
+						<AbsDimension x="120" y="15" />
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="217" y="-147" />
 							</Offset>
 						</Anchor>
 					</Anchors>
 				</FontString>
 				<!-- Status text for Import Guild Roster Roles -->
-				<FontString name="$parentGuildRosterRolesLoadedStr" justifyH="LEFT"
+				<FontString name="$parentGuildRosterRolesLoadedStr" justifyH="CENTER"
 					inherits="GameFontNormal"
 					font="Fonts\FRIZQT__.TTF" text="">
 					<FontHeight val="12" />
+					<Color r="0.6" g="0.6" b="0.6" />
 					<Size>
-						<AbsDimension x="200" y="15" />
+						<AbsDimension x="120" y="15" />
 					</Size>
 					<Anchors>
 						<Anchor point="TOPLEFT">
 							<Offset>
-								<AbsDimension x="187" y="-177" />
+								<AbsDimension x="217" y="-177" />
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<!-- Hint for Execute DKP Import button -->
+				<FontString justifyH="LEFT" inherits="GameFontNormal"
+					font="Fonts\ARIALN.TTF" text="&lt;= Import bench&#10;players DKP here">
+					<FontHeight val="11" />
+					<Color r="1" g="1" b="1" />
+					<Size>
+						<AbsDimension x="130" y="30" />
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="225" y="-262" />
 							</Offset>
 						</Anchor>
 					</Anchors>
