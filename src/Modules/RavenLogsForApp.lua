@@ -95,12 +95,13 @@ function module:LogDkpChange(transactionId, playerName, dkpChange)
     return dkpChangeId
 end
 
-function module:LogAuction(itemId, bossName, winner, finalBid, bidType)
+function module:LogAuction(itemId, raidName, bossName, winner, finalBid, bidType)
     local uniqueAuctionId = self:getUniqueId()
 
     table.insert(SOTA.db.realm.RavenLogsForApp.auctions, {
         id = uniqueAuctionId,
         itemId = itemId,
+        raidName = raidName,
         bossName = bossName,
         winner = winner,
         finalBid = finalBid,

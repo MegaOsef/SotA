@@ -26,6 +26,7 @@ src\Core\Dropdown.xml
 src\Core\TextModal.xml
 src\Core\Tests.lua
 src\Core\LocalRosters.lua
+src\Core\Constants.lua
 
 src\Modules\Auction.xml
 src\Modules\LogsUI.xml
