@@ -253,7 +253,7 @@
 				</Anchors>
 			</Frame>
 			<!-- Pagination controls -->
-			<Button name="$parentBtnPrevPage" inherits="UIPanelButtonTemplate" text="< Prev">
+			<Button name="$parentBtnPrevPage" inherits="UIPanelButtonTemplate" text="Prev">
 				<Size>
 					<AbsDimension x="80" y="22" />
 				</Size>
@@ -270,7 +270,7 @@
 					</OnClick>
 				</Scripts>
 			</Button>
-			<Button name="$parentBtnNextPage" inherits="UIPanelButtonTemplate" text="Next >">
+			<Button name="$parentBtnNextPage" inherits="UIPanelButtonTemplate" text="Next">
 				<Size>
 					<AbsDimension x="80" y="22" />
 				</Size>
