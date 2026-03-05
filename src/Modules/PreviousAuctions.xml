@@ -214,6 +214,15 @@
 						</Anchor>
 					</Anchors>
 				</FontString>
+				<FontString name="$parentPageIndicator" inherits="GameFontNormal">
+					<Anchors>
+						<Anchor point="BOTTOM">
+							<Offset>
+								<AbsDimension x="0" y="46" />
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
 			</Layer>
 		</Layers>
 		<Scripts>
@@ -243,6 +252,41 @@
 					</Anchor>
 				</Anchors>
 			</Frame>
+			<!-- Pagination controls -->
+			<Button name="$parentBtnPrevPage" inherits="UIPanelButtonTemplate" text="< Prev">
+				<Size>
+					<AbsDimension x="80" y="22" />
+				</Size>
+				<Anchors>
+					<Anchor point="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="30" y="40" />
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						SOTA_PreviousAuctions_PrevPage()
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Button name="$parentBtnNextPage" inherits="UIPanelButtonTemplate" text="Next >">
+				<Size>
+					<AbsDimension x="80" y="22" />
+				</Size>
+				<Anchors>
+					<Anchor point="BOTTOMRIGHT">
+						<Offset>
+							<AbsDimension x="-30" y="40" />
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						SOTA_PreviousAuctions_NextPage()
+					</OnClick>
+				</Scripts>
+			</Button>
 			<!-- Top right corner close button -->
 			<Button name="$parentTopCloseButton" inherits="UIPanelCloseButton">
 				<Anchors>

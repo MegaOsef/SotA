@@ -11,6 +11,7 @@ function module:OnEnable()
     self.listFrame = getglobal(self.window:GetName() .. "AuctionsList")
     self.listFrame:Show()
     self.rows = {}
+    self.currentPage = 1
 
     for n = 0, MAX_AUCTIONS, 1 do
         local entry = CreateFrame("Frame", "$parentEntry" .. n, self.listFrame, "SOTA_PreviousAuction_Template");
@@ -37,6 +38,10 @@ function module:OnEnable()
         self.rows[n]:Hide()
     end
 
+    self.btnPrev = getglobal(self.window:GetName() .. "BtnPrevPage")
+    self.btnNext = getglobal(self.window:GetName() .. "BtnNextPage")
+    self.pageIndicator = getglobal(self.window:GetName() .. "PageIndicator")
+
     self.window:Hide()
 
     self:RegisterEvent("SOTA_RAVENLOGS_UPDATED", "RefreshAuctionsList")
@@ -60,8 +65,20 @@ local function sortAuctionsDescending(sourcetable, index)
 end
 
 function module:RefreshAuctionsList()
-    local auctions = SOTA:CloneTable(SOTA.db.realm.RavenLogsForApp.auctions)
-    sortAuctionsDescending(auctions)
+    self.sortedAuctions = SOTA:CloneTable(SOTA.db.realm.RavenLogsForApp.auctions)
+    sortAuctionsDescending(self.sortedAuctions)
+
+    self:RenderPage()
+end
+
+function module:RenderPage()
+    local auctions = self.sortedAuctions or {}
+    local totalAuctions = table.getn(auctions)
+    local numPages = math.ceil(totalAuctions / MAX_AUCTIONS)
+    if numPages < 1 then numPages = 1 end
+    if self.currentPage > numPages then self.currentPage = numPages end
+
+    self:UpdatePageControls(numPages)
 
     local canEdit = SOTA:CanWriteNotes()
     local id, item, bossName, winner, finalBid, bidType, officer
@@ -80,7 +97,7 @@ function module:RefreshAuctionsList()
             officer = "Officer"
             getglobal(self.rows[n].item:GetName() .. "Text"):SetTextColor(1, 0.82, 0)
         else
-            local index = n
+            local index = n + ((self.currentPage - 1) * MAX_AUCTIONS)
 
             id = ""
             item = ""
@@ -90,7 +107,7 @@ function module:RefreshAuctionsList()
             bidType = ""
             officer = ""
 
-            if table.getn(auctions) >= index then
+            if totalAuctions >= index then
                 local auc = auctions[index]
 
                 id = auc.id
@@ -155,6 +172,40 @@ function module:RefreshAuctionsList()
     end
 end
 
+function module:UpdatePageControls(numPages)
+    if numPages <= 1 then
+        self.btnPrev:Hide()
+        self.btnNext:Hide()
+        self.pageIndicator:SetText("")
+    else
+        self.btnPrev:Show()
+        self.btnNext:Show()
+        self.pageIndicator:SetText("Page " .. self.currentPage .. " / " .. numPages)
+        if self.currentPage > 1 then
+            self.btnPrev:Enable()
+        else
+            self.btnPrev:Disable()
+        end
+        if self.currentPage < numPages then
+            self.btnNext:Enable()
+        else
+            self.btnNext:Disable()
+        end
+    end
+end
+
+function module:PreviousPage()
+    if self.currentPage > 1 then
+        self.currentPage = self.currentPage - 1
+        self:RenderPage()
+    end
+end
+
+function module:NextPage()
+    self.currentPage = self.currentPage + 1
+    self:RenderPage()
+end
+
 function module:RollbackPreviousAuction(index)
     -- invalidate the auction in logs
     local ravenLogs = SOTA:GetModule("RavenLogsForApp", true)
@@ -197,6 +248,7 @@ function module:RollbackPreviousAuction(index)
 end
 
 function SOTA_OpenPreviousAuctionsUI()
+    module.currentPage = 1
     module:RefreshAuctionsList()
     module.window:Show()
 end
@@ -357,4 +409,12 @@ function module:SaveEditedAuction()
 
     SOTA_EditAuctionModal:Hide()
     self:RefreshAuctionsList()
+end
+
+function SOTA_PreviousAuctions_PrevPage()
+    module:PreviousPage()
+end
+
+function SOTA_PreviousAuctions_NextPage()
+    module:NextPage()
 end
