@@ -74,7 +74,7 @@ end
 function module:RenderPage()
     local auctions = self.sortedAuctions or {}
     local totalAuctions = table.getn(auctions)
-    local numPages = math.ceil(totalAuctions / MAX_AUCTIONS)
+    local numPages = ceil(totalAuctions / MAX_AUCTIONS)
     if numPages < 1 then numPages = 1 end
     if self.currentPage > numPages then self.currentPage = numPages end
 
