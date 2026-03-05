@@ -218,7 +218,7 @@
 					<Anchors>
 						<Anchor point="BOTTOM">
 							<Offset>
-								<AbsDimension x="0" y="46" />
+								<AbsDimension x="0" y="26" />
 							</Offset>
 						</Anchor>
 					</Anchors>
@@ -260,7 +260,7 @@
 				<Anchors>
 					<Anchor point="BOTTOMLEFT">
 						<Offset>
-							<AbsDimension x="30" y="40" />
+							<AbsDimension x="11" y="20" />
 						</Offset>
 					</Anchor>
 				</Anchors>
@@ -277,7 +277,7 @@
 				<Anchors>
 					<Anchor point="BOTTOMRIGHT">
 						<Offset>
-							<AbsDimension x="-30" y="40" />
+							<AbsDimension x="-49" y="20" />
 						</Offset>
 					</Anchor>
 				</Anchors>
