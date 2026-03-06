@@ -296,9 +296,12 @@
 			</Button>
 			<!-- Section 3: Addon Settings -->
 			<CheckButton name="$parentEnableDebug" inherits="OptionsCheckButtonTemplate">
+				<Size>
+					<AbsDimension x="20" y="20"/>
+				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
-						<Offset x="32" y="-324"/>
+						<Offset x="32" y="-320"/>
 					</Anchor>
 				</Anchors>
 				<Scripts>
@@ -310,10 +313,31 @@
 					</OnClick>
 				</Scripts>
 			</CheckButton>
-			<CheckButton name="$parentDisableDashboard" inherits="OptionsCheckButtonTemplate">
+			<CheckButton name="$parentAutoAssignLoot" inherits="OptionsCheckButtonTemplate">
+				<Size>
+					<AbsDimension x="20" y="20"/>
+				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
-						<Offset x="32" y="-354"/>
+						<Offset x="32" y="-342"/>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						getglobal(this:GetName().."Text"):SetText("Propose loot assignment on winner declaration")
+					</OnLoad>
+					<OnClick>
+						SOTA_HandleCheckbox(this);
+					</OnClick>
+				</Scripts>
+			</CheckButton>
+			<CheckButton name="$parentDisableDashboard" inherits="OptionsCheckButtonTemplate">
+				<Size>
+					<AbsDimension x="20" y="20"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset x="32" y="-364"/>
 					</Anchor>
 				</Anchors>
 				<Scripts>

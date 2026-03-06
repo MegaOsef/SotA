@@ -6,6 +6,7 @@ local ConfigurationDialogOpen	= false;
 
 function module:OnEnable()
 	getglobal("FrameConfigBiddingDisableDashboard"):SetChecked(SOTA.db.realm.DisableDashboard);
+	getglobal("FrameConfigBiddingAutoAssignLoot"):SetChecked(SOTA.db.realm.AutoAssignLoot);
 	self.prioLoadedStr = getglobal("FrameConfigBiddingPrioLoadedStr");
 	self.bossDkpLoadedStr = getglobal("FrameConfigBiddingBossDkpLoadedStr");
 	self.guildRosterRolesLoadedStr = getglobal("FrameConfigBiddingGuildRosterRolesLoadedStr");
@@ -44,7 +45,17 @@ function SOTA_HandleCheckbox(checkbox)
 	end
 
 
-	--	Store DKP in Public Notes:
+	--	Auto-assign loot to auction winner:
+	if checkboxname == "FrameConfigBiddingAutoAssignLoot" then
+		if checkbox:GetChecked() then
+			SOTA.db.realm.AutoAssignLoot = 1;
+		else
+			SOTA.db.realm.AutoAssignLoot = 0;
+		end
+		return;
+	end
+
+	--	Enable Debug Mode:
 	if checkboxname == "FrameConfigBiddingEnableDebug" then
 		if checkbox:GetChecked() then
 			SOTA:SetDebugging(true)

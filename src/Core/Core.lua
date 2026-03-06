@@ -86,6 +86,7 @@ function SOTA:OnEnable()
 			  }, ... },
 			]] --
 			NeedsToExportRavenLogs = false,
+			AutoAssignLoot = 1,
 		}
 	)
 

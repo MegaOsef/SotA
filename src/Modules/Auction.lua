@@ -750,6 +750,9 @@ function module:DeclareAuctionWinner()
 	end
 
 	local selectedBid = self:GetSelectedBid();
+	local winnerName = selectedBid and selectedBid[SELBID_COLS.PNAME] or nil
+	local itemLink = self.auctionedItemLink
+
 	if not selectedBid then
 		self:DeclareWinner()
 	else
@@ -761,6 +764,10 @@ function module:DeclareAuctionWinner()
 	end
 
 	self:EndAuctionTransaction()
+
+	if winnerName and SOTA.db.realm.AutoAssignLoot == 1 then
+		self:TryAssignLoot(itemLink, winnerName)
+	end
 end
 
 
@@ -989,6 +996,87 @@ function SOTA_GetMinimumBid(bidtype) -- Exposes globally
 	return module:GetMinimumBid(bidtype)
 end
 
+
+-- Confirmation popup for auto-assigning loot to auction winner
+StaticPopupDialogs["SOTA_CONFIRM_ASSIGNLOOT"] = {
+	text = "Assign loot to %s?\n%s",
+	button1 = "Yes",
+	button2 = "No",
+	timeout = 0,
+	whileDead = 1,
+	hideOnEscape = 1,
+	OnAccept = function()
+		module:AssignLootToWinner()
+	end,
+}
+
+function module:FindLootCandidate(slot, winnerName)
+	for i = 1, 40 do
+		local candidate = GetMasterLootCandidate(slot, i)
+		if candidate and candidate == winnerName then
+			return i
+		end
+	end
+	return nil
+end
+
+function module:TryAssignLoot(itemLink, winnerName)
+	SOTA:Debug("TryAssignLoot: itemLink=" .. tostring(itemLink) .. ", winnerName=" .. tostring(winnerName))
+
+	if not SOTA:IsMasterLoot() then
+		SOTA:Debug("TryAssignLoot: not master looter, skipping")
+		return
+	end
+
+	local numLoot = GetNumLootItems()
+	if numLoot == 0 then
+		SOTA:Debug("TryAssignLoot: no loot window open, skipping")
+		return
+	end
+
+	SOTA:Debug("TryAssignLoot: scanning " .. numLoot .. " loot slots")
+	for i = 1, numLoot do
+		local slotLink = GetLootSlotLink(i)
+		SOTA:Debug("TryAssignLoot: slot " .. i .. " link=" .. tostring(slotLink))
+		if slotLink and slotLink == itemLink then
+			SOTA:Debug("TryAssignLoot: found matching item in slot " .. i)
+			local candidateIndex = self:FindLootCandidate(i, winnerName)
+			if candidateIndex then
+				SOTA:Debug("TryAssignLoot: winner found as candidate #" .. candidateIndex .. ", showing confirmation")
+				self.assignLootSlot = i
+				self.assignLootWinner = winnerName
+				StaticPopup_Show("SOTA_CONFIRM_ASSIGNLOOT", winnerName, itemLink)
+			else
+				SOTA:Debug("TryAssignLoot: winner not a valid loot candidate for slot " .. i)
+				SOTA:Print(winnerName .. " is not eligible to receive this item (e.g. chest loot).")
+			end
+			return
+		end
+	end
+	SOTA:Debug("TryAssignLoot: item not found in loot window")
+	SOTA:Print("Could not find " .. tostring(itemLink) .. " in the loot window. Assign it manually.")
+end
+
+function module:AssignLootToWinner()
+	SOTA:Debug("AssignLootToWinner: slot=" .. tostring(self.assignLootSlot) .. ", winner=" .. tostring(self.assignLootWinner))
+
+	if not self.assignLootSlot or not self.assignLootWinner then
+		SOTA:Debug("AssignLootToWinner: missing slot or winner, aborting")
+		return
+	end
+
+	local candidateIndex = self:FindLootCandidate(self.assignLootSlot, self.assignLootWinner)
+	if candidateIndex then
+		SOTA:Debug("AssignLootToWinner: giving loot slot " .. self.assignLootSlot .. " to candidate #" .. candidateIndex)
+		GiveMasterLoot(self.assignLootSlot, candidateIndex)
+	else
+		SOTA:Debug("AssignLootToWinner: winner no longer a valid candidate")
+		SOTA:Print(self.assignLootWinner .. " is no longer a valid loot candidate. The loot window may have changed.")
+	end
+
+	self.assignLootSlot = nil
+	self.assignLootWinner = nil
+end
 
 -- Confirmation popup for removing a bid from a row close button
 StaticPopupDialogs["SOTA_CONFIRM_REMOVEBID"] = {
