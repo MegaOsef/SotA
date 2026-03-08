@@ -20,8 +20,8 @@ local AUCTION_STATE = {
 	COMPLETE = 40,
 }
 
-local AUCTION_TIME           = 7
-local AUCTION_EXTENSION_TIME = 7
+local AUCTION_TIME           = 8
+local AUCTION_EXTENSION_TIME = AUCTION_TIME
 
 local MINIMUM_BID = 10
 
@@ -264,6 +264,7 @@ function module:CheckAuctionState()
 		SOTA:Broadcast(SOTA.CHANNEL.WARN, string.format(MSG.ON_OPEN, self.auctionedItemLink))
 		SOTA:Broadcast(SOTA.CHANNEL.RAID, string.format(MSG.ON_ANNOUNCEMINBID, MINIMUM_BID))
 		self:SetAuctionState(AUCTION_STATE.RUNNING, secs)
+		state = self:GetAuctionState()
 	end
 		
 	if state == AUCTION_STATE.RUNNING then
