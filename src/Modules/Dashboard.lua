@@ -60,6 +60,7 @@ function module:RefreshLootsList()
 		end
 	end
 
+	local displayIndex = 0
 	for lootSlot = 1, GetNumLootItems(), 1 do
 		local itemLink = GetLootSlotLink(lootSlot)
 		SOTA:Debug("Loot #"..lootSlot.." link: "..tostring(itemLink))
@@ -71,53 +72,54 @@ function module:RefreshLootsList()
 			end
 			local itemName, itemSoftLink, itemRarity, _, _, _, _, _, itemTexture = GetItemInfo(itemId)
 			local itemColor = SOTA:GetQualityColor(itemRarity)
-			SOTA:Debug("Loot #" .. lootSlot .. ": itemName=" .. tostring(itemName) .. ", itemRarity=" .. tostring(itemRarity) .. ", itemTexture=" .. tostring(itemTexture) .. ", itemSoftLink=" .. tostring(itemSoftLink))
+			displayIndex = displayIndex + 1
+			SOTA:Debug("Loot #" .. lootSlot .. " (display " .. displayIndex .. "): itemName=" .. tostring(itemName) .. ", itemRarity=" .. tostring(itemRarity) .. ", itemTexture=" .. tostring(itemTexture) .. ", itemSoftLink=" .. tostring(itemSoftLink))
 
 			-- Do we need to create a new loot frame?
-			if table.getn(self.lootsFrames) < lootSlot then
-				SOTA:Debug("Loot #" .. lootSlot .. ": creating new frame (table.getn=" .. table.getn(self.lootsFrames) .. ")")
-				local entry = CreateFrame("Button", "$parentEntry" .. lootSlot, DashboardUIFrameLootsList,
+			if table.getn(self.lootsFrames) < displayIndex then
+				SOTA:Debug("Loot #" .. lootSlot .. ": creating new frame (displayIndex=" .. displayIndex .. ")")
+				local entry = CreateFrame("Button", "$parentEntry" .. displayIndex, DashboardUIFrameLootsList,
 					"SOTA_LootTemplate");
-				if lootSlot == 1 then
+				if displayIndex == 1 then
 					entry:SetPoint("TOPLEFT", 0, 0);
 				else
-					entry:SetPoint("TOP", "$parentEntry" .. (lootSlot - 1), "BOTTOM");
+					entry:SetPoint("TOP", self.lootsFrames[displayIndex - 1], "BOTTOM");
 				end
 				SOTA:Debug("Loot #" .. lootSlot .. ": frame created, name=" .. tostring(entry:GetName()) .. ", parent=" .. tostring(entry:GetParent():GetName()))
-				self.lootsFrames[lootSlot] = entry
-				self.lootsFrames[lootSlot].itemName = getglobal(self.lootsFrames[lootSlot]:GetName() .. "ItemName");
-				self.lootsFrames[lootSlot].itemTexture = getglobal(self.lootsFrames[lootSlot]:GetName() .. "ItemTexture");
-				self.lootsFrames[lootSlot].itemLink = getglobal(self.lootsFrames[lootSlot]:GetName() .. "ItemLink");
-				self.lootsFrames[lootSlot].itemSoftLink = getglobal(self.lootsFrames[lootSlot]:GetName() ..
+				self.lootsFrames[displayIndex] = entry
+				self.lootsFrames[displayIndex].itemName = getglobal(self.lootsFrames[displayIndex]:GetName() .. "ItemName");
+				self.lootsFrames[displayIndex].itemTexture = getglobal(self.lootsFrames[displayIndex]:GetName() .. "ItemTexture");
+				self.lootsFrames[displayIndex].itemLink = getglobal(self.lootsFrames[displayIndex]:GetName() .. "ItemLink");
+				self.lootsFrames[displayIndex].itemSoftLink = getglobal(self.lootsFrames[displayIndex]:GetName() ..
 				"ItemSoftLink");
-				self.lootsFrames[lootSlot].itemPrio = getglobal(self.lootsFrames[lootSlot]:GetName() .. "ItemPrio");
-				self.lootsFrames[lootSlot].itemNotes = getglobal(self.lootsFrames[lootSlot]:GetName() .. "ItemNotes");
-				SOTA:Debug("Loot #" .. lootSlot .. ": refs - itemName=" .. tostring(self.lootsFrames[lootSlot].itemName) .. ", itemTexture=" .. tostring(self.lootsFrames[lootSlot].itemTexture) .. ", itemSoftLink=" .. tostring(self.lootsFrames[lootSlot].itemSoftLink))
+				self.lootsFrames[displayIndex].itemPrio = getglobal(self.lootsFrames[displayIndex]:GetName() .. "ItemPrio");
+				self.lootsFrames[displayIndex].itemNotes = getglobal(self.lootsFrames[displayIndex]:GetName() .. "ItemNotes");
+				SOTA:Debug("Loot #" .. lootSlot .. ": refs - itemName=" .. tostring(self.lootsFrames[displayIndex].itemName) .. ", itemTexture=" .. tostring(self.lootsFrames[displayIndex].itemTexture) .. ", itemSoftLink=" .. tostring(self.lootsFrames[displayIndex].itemSoftLink))
 			else
-				SOTA:Debug("Loot #" .. lootSlot .. ": reusing existing frame, name=" .. tostring(self.lootsFrames[lootSlot]:GetName()))
+				SOTA:Debug("Loot #" .. lootSlot .. ": reusing existing frame, name=" .. tostring(self.lootsFrames[displayIndex]:GetName()))
 			end
 
-			self.lootsFrames[lootSlot]:Show()
-			self.lootsFrames[lootSlot].itemName:SetText(itemName)
-			self.lootsFrames[lootSlot].itemName:SetTextColor((itemColor[1] / 255), (itemColor[2] / 255),
+			self.lootsFrames[displayIndex]:Show()
+			self.lootsFrames[displayIndex].itemName:SetText(itemName)
+			self.lootsFrames[displayIndex].itemName:SetTextColor((itemColor[1] / 255), (itemColor[2] / 255),
 				(itemColor[3] / 255),
-				255);
-			self.lootsFrames[lootSlot].itemTexture:SetTexture(itemTexture)
-			self.lootsFrames[lootSlot].itemLink:SetText(itemLink)
-			self.lootsFrames[lootSlot].itemSoftLink:SetText(itemSoftLink)
+				1);
+			self.lootsFrames[displayIndex].itemTexture:SetTexture(itemTexture)
+			self.lootsFrames[displayIndex].itemLink:SetText(itemLink)
+			self.lootsFrames[displayIndex].itemSoftLink:SetText(itemSoftLink)
 
 			-- Debug: verify what was actually set on the frame
-			SOTA:Debug("Loot #" .. lootSlot .. ": after SetText - visible=" .. tostring(self.lootsFrames[lootSlot]:IsVisible()) .. ", nameText=" .. tostring(self.lootsFrames[lootSlot].itemName:GetText()) .. ", textureFile=" .. tostring(self.lootsFrames[lootSlot].itemTexture:GetTexture()) .. ", color=(" .. tostring(itemColor[1]) .. "," .. tostring(itemColor[2]) .. "," .. tostring(itemColor[3]) .. ")")
+			SOTA:Debug("Loot #" .. lootSlot .. " (display " .. displayIndex .. "): after SetText - visible=" .. tostring(self.lootsFrames[displayIndex]:IsVisible()) .. ", nameText=" .. tostring(self.lootsFrames[displayIndex].itemName:GetText()) .. ", textureFile=" .. tostring(self.lootsFrames[displayIndex].itemTexture:GetTexture()) .. ", color=(" .. tostring(itemColor[1]) .. "," .. tostring(itemColor[2]) .. "," .. tostring(itemColor[3]) .. ")")
 
-			self.lootsFrames[lootSlot].itemPrio:SetText("")
-			self.lootsFrames[lootSlot].itemNotes:SetText("")
+			self.lootsFrames[displayIndex].itemPrio:SetText("")
+			self.lootsFrames[displayIndex].itemNotes:SetText("")
 			local prioFound = SOTA:FindItemPriority(itemId)
 			if prioFound then
 				if prioFound.priority then
-					self.lootsFrames[lootSlot].itemPrio:SetText(string.format("Priority: %s", prioFound.priority))
+					self.lootsFrames[displayIndex].itemPrio:SetText(string.format("Priority: %s", prioFound.priority))
 				end
 				if prioFound.notes then
-					self.lootsFrames[lootSlot].itemNotes:SetText(string.format("Notes: %s", prioFound.notes))
+					self.lootsFrames[displayIndex].itemNotes:SetText(string.format("Notes: %s", prioFound.notes))
 				end
 			end
 		end
