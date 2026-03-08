@@ -1011,9 +1011,9 @@ StaticPopupDialogs["SOTA_CONFIRM_ASSIGNLOOT"] = {
 	end,
 }
 
-function module:FindLootCandidate(slot, winnerName)
+function module:FindLootCandidate(winnerName)
 	for i = 1, 40 do
-		local candidate = GetMasterLootCandidate(slot, i)
+		local candidate = GetMasterLootCandidate(i)
 		if candidate and candidate == winnerName then
 			return i
 		end
@@ -1041,7 +1041,7 @@ function module:TryAssignLoot(itemLink, winnerName)
 		SOTA:Debug("TryAssignLoot: slot " .. i .. " link=" .. tostring(slotLink))
 		if slotLink and slotLink == itemLink then
 			SOTA:Debug("TryAssignLoot: found matching item in slot " .. i)
-			local candidateIndex = self:FindLootCandidate(i, winnerName)
+			local candidateIndex = self:FindLootCandidate(winnerName)
 			if candidateIndex then
 				SOTA:Debug("TryAssignLoot: winner found as candidate #" .. candidateIndex .. ", showing confirmation")
 				self.assignLootSlot = i
@@ -1066,10 +1066,14 @@ function module:AssignLootToWinner()
 		return
 	end
 
-	local candidateIndex = self:FindLootCandidate(self.assignLootSlot, self.assignLootWinner)
+	local candidateIndex = self:FindLootCandidate(self.assignLootWinner)
 	if candidateIndex then
-		SOTA:Debug("AssignLootToWinner: giving loot slot " .. self.assignLootSlot .. " to candidate #" .. candidateIndex)
-		GiveMasterLoot(self.assignLootSlot, candidateIndex)
+		if SOTA.db.realm.DryRunAssignLoot == 1 then
+			SOTA:Print("DRY RUN: Would assign loot slot " .. self.assignLootSlot .. " to " .. self.assignLootWinner .. " (candidate #" .. candidateIndex .. ")")
+		else
+			SOTA:Debug("AssignLootToWinner: giving loot slot " .. self.assignLootSlot .. " to candidate #" .. candidateIndex)
+			GiveMasterLoot(self.assignLootSlot, candidateIndex)
+		end
 	else
 		SOTA:Debug("AssignLootToWinner: winner no longer a valid candidate")
 		SOTA:Print(self.assignLootWinner .. " is no longer a valid loot candidate. The loot window may have changed.")

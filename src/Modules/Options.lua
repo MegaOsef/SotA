@@ -7,6 +7,7 @@ local ConfigurationDialogOpen	= false;
 function module:OnEnable()
 	getglobal("FrameConfigBiddingDisableDashboard"):SetChecked(SOTA.db.realm.DisableDashboard);
 	getglobal("FrameConfigBiddingAutoAssignLoot"):SetChecked(SOTA.db.realm.AutoAssignLoot);
+	getglobal("FrameConfigBiddingDryRunAssignLoot"):SetChecked(SOTA.db.realm.DryRunAssignLoot);
 	self.prioLoadedStr = getglobal("FrameConfigBiddingPrioLoadedStr");
 	self.bossDkpLoadedStr = getglobal("FrameConfigBiddingBossDkpLoadedStr");
 	self.guildRosterRolesLoadedStr = getglobal("FrameConfigBiddingGuildRosterRolesLoadedStr");
@@ -51,6 +52,16 @@ function SOTA_HandleCheckbox(checkbox)
 			SOTA.db.realm.AutoAssignLoot = 1;
 		else
 			SOTA.db.realm.AutoAssignLoot = 0;
+		end
+		return;
+	end
+
+	--	Dry run loot assignment (print instead of assign):
+	if checkboxname == "FrameConfigBiddingDryRunAssignLoot" then
+		if checkbox:GetChecked() then
+			SOTA.db.realm.DryRunAssignLoot = 1;
+		else
+			SOTA.db.realm.DryRunAssignLoot = 0;
 		end
 		return;
 	end
