@@ -73,7 +73,7 @@ function module:RefreshLootsList()
 				SOTA:Print("Could not extract itemId from link: " .. tostring(itemLink))
 				break
 			end
-			local itemName, itemSoftLink, itemRarity, _, _, _, _, _, itemTexture = GetItemInfo(itemId)
+			local itemName, itemSoftLink, itemRarity, _, _, _, _, _, _, itemTexture = GetItemInfo(itemId)
 			local itemColor = SOTA:GetQualityColor(itemRarity)
 			displayIndex = displayIndex + 1
 			SOTA:Debug("Loot #" .. lootSlot .. " (display " .. displayIndex .. "): itemName=" .. tostring(itemName) .. ", itemRarity=" .. tostring(itemRarity) .. ", itemTexture=" .. tostring(itemTexture) .. ", itemSoftLink=" .. tostring(itemSoftLink))

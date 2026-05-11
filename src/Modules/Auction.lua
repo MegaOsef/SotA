@@ -169,7 +169,7 @@ function module:StartAuction(itemLink, raidName, bossName)
 		SOTA:Print("Item was not found: ".. itemLink);
 		return;
 	end
-	local itemName, _, itemQuality, _, _, _, _, _, itemTexture = GetItemInfo(itemId);	
+	local itemName, _, itemQuality, _, _, _, _, _, _, itemTexture = GetItemInfo(itemId);
 	
 	if self.itemFrame then
 		local rgb = SOTA:GetQualityColor(itemQuality);	
