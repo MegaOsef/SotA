@@ -37,7 +37,7 @@ function module:OnEnable()
 	self.cancelBossDkpButton:Hide()
 end
 
-function module:SOTA_RAVENLOGS_UPDATED()
+function module:SOTA_RAVENLOGS_UPDATED(_)
 	SOTA.db.realm.NeedsToExportRavenLogs = true
 end
 
@@ -130,7 +130,7 @@ function module:RefreshLootsList()
 	SOTA:Debug("RefreshLootsList: done, total frames=" .. table.getn(self.lootsFrames))
 end
 
-function module:SOTA_BOSS_KILLED(bossName, dkpValue)
+function module:SOTA_BOSS_KILLED(_, bossName, dkpValue)
 	self.bossDkpFrame.name:SetText(bossName)
 	self.bossDkpFrame.dkpValue:SetText("Dkp Value: " .. tostring(dkpValue))
 	self.bossDkpFrame.numericDkpValue = dkpValue

@@ -44,7 +44,7 @@ function module:OnEnable()
 
     self.window:Hide()
 
-    self:RegisterMessage("SOTA_RAVENLOGS_UPDATED", "RefreshAuctionsList")
+    self:RegisterMessage("SOTA_RAVENLOGS_UPDATED")
 end
 
 local function sortAuctionsDescending(sourcetable, index)
@@ -62,6 +62,10 @@ local function sortAuctionsDescending(sourcetable, index)
         end
     end
     return sourcetable;
+end
+
+function module:SOTA_RAVENLOGS_UPDATED(_)
+    self:RefreshAuctionsList()
 end
 
 function module:RefreshAuctionsList()

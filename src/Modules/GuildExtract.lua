@@ -9,7 +9,7 @@ function module:OnEnable()
     self:RegisterMessage("SOTA_GUILDEXTRACT_REQUEST")
 end
 
-function module:SOTA_GUILDROSTER_UPDATED()
+function module:SOTA_GUILDROSTER_UPDATED(_)
     if self.extractRequested == false then
         return
     end
@@ -46,7 +46,7 @@ function module:SOTA_GUILDROSTER_UPDATED()
     SOTA:OpenTextModalReadOnly(result)
 end
 
-function module:SOTA_GUILDEXTRACT_REQUEST()
+function module:SOTA_GUILDEXTRACT_REQUEST(_)
     SOTA:RequestUpdateGuildRoster()
 
     self.extractRequested = true

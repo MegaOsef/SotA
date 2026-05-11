@@ -49,7 +49,7 @@ function module:CheckEntry(entry)
     return true
 end
 
-function module:SOTA_GUILDROSTER_UPDATED()
+function module:SOTA_GUILDROSTER_UPDATED(_)
     if self.importRequested == false then
         return
     end
@@ -111,7 +111,7 @@ function module:SOTA_GUILDROSTER_UPDATED()
     self.importStr = ""
 end
 
-function module:SOTA_IMPORTTOEXEC_REQUEST()
+function module:SOTA_IMPORTTOEXEC_REQUEST(_)
     SOTA:OpenTextModal(function(text)
         module.importRequested = true
         module.importStr = text

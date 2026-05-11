@@ -17,7 +17,7 @@ function module:OnEnable()
     self:RegisterMessage("SOTA_EXPORTRAVENLOGS_REQUEST")
 end
 
-function module:SOTA_EXPORTRAVENLOGS_REQUEST()
+function module:SOTA_EXPORTRAVENLOGS_REQUEST(_)
     local exportObject = {
         auctions = SOTA.db.realm.RavenLogsForApp.auctions,
         -- dkpTransactions = SOTA.db.realm.RavenLogsForApp.dkpTransactions, -- For staging purposes.

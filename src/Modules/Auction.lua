@@ -139,7 +139,7 @@ function module:SetAuctionState(auctionState, seconds)
 	self:SetSecondsCounter(seconds);
 end
 
-function module:SOTA_REQUEST_AUCTION(itemLink, raidName, bossName)
+function module:SOTA_REQUEST_AUCTION(_, itemLink, raidName, bossName)
 	if self:GetAuctionState() == AUCTION_STATE.NONE then
 		self:StartAuction(itemLink, raidName, bossName);
 	else
