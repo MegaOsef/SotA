@@ -141,15 +141,13 @@
 	</Button>
 
 	<!-- SotA Dashboard -->
-	<Frame name="DashboardUIFrame" parent="UIParent" toplevel="true" hidden="true">
+	<Frame name="DashboardUIFrame"
+		movable="true"
+		enableMouse="true"
+		clampedToScreen="true">
 		<Size>
 			<AbsDimension x="296" y="40" />
 		</Size>
-		<Anchors>
-			<Anchor point="TOPLEFT">
-				<Offset x="0" y="0" />
-			</Anchor>
-		</Anchors>
 		<Frames>
 			<!-- Current item frame -->
 			<Frame name="$parentItem" enableMouse="true">
@@ -181,6 +179,17 @@
 					<OnLeave>
 						SOTA_OnDashboardLeave();
 					</OnLeave>
+					<OnLoad>
+						self:RegisterForDrag("LeftButton")
+						self:GetParent():ClearAllPoints()
+						self:GetParent():SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+					</OnLoad>
+					<OnDragStart>
+						self:GetParent():StartMoving()
+					</OnDragStart>
+					<OnDragStop>
+						self:GetParent():StopMovingOrSizing()
+					</OnDragStop>
 				</Scripts>
 				<!-- "buttons" -->
 				<Frames>
@@ -540,15 +549,15 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				this:SetMovable(true)
-				this:SetUserPlaced(true)
-				this:RegisterForDrag("LeftButton")
+				self:RegisterForDrag("LeftButton")
+				self:ClearAllPoints()
+				self:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
 			</OnLoad>
 			<OnDragStart>
-				this:StartMoving()
+				self:StartMoving()
 			</OnDragStart>
 			<OnDragStop>
-				this:StopMovingOrSizing()
+				self:StopMovingOrSizing()
 			</OnDragStop>
 		</Scripts>
 	</Frame>
