@@ -1,6 +1,9 @@
 local SOTA = SOTAG
 
-local module = SOTA:NewModule("MinimapButton", "AceEvent-2.0")
+local module = SOTA:NewModule("MinimapButton",
+	"AceEvent-3.0",
+	"AceTimer-3.0"
+)
 
 local BUTTON_RADIUS = 80
 
@@ -42,11 +45,14 @@ function SOTAMinimapButton_OnClick()
 end
 
 function SOTAMinimapButton_OnDragStart()
-	module:ScheduleRepeatingEvent("SOTA_MinimapButtonDrag", module.OnDragUpdate, 0.04, module)
+	module.MinimapButtonDragTimer = module:ScheduleRepeatingTimer(module.OnDragUpdate, 0.01, module)
 end
 
 function SOTAMinimapButton_OnDragStop()
-	module:CancelScheduledEvent("SOTA_MinimapButtonDrag")
+	if module.MinimapButtonDragTimer then
+		module:CancelTimer(module.MinimapButtonDragTimer)
+		module.MinimapButtonDragTimer = nil
+	end
 end
 
 function module:OnDragUpdate()

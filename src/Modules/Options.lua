@@ -1,6 +1,6 @@
 local SOTA = SOTAG
 
-local module = SOTA:NewModule("Options", "AceEvent-2.0")
+local module = SOTA:NewModule("Options", "AceEvent-3.0")
 
 local ConfigurationDialogOpen	= false;
 
@@ -12,7 +12,7 @@ function module:OnEnable()
 	self.bossDkpLoadedStr = getglobal("FrameConfigBiddingBossDkpLoadedStr");
 	self.guildRosterRolesLoadedStr = getglobal("FrameConfigBiddingGuildRosterRolesLoadedStr");
 
-	getglobal("FrameConfigBiddingEnableDebug"):SetChecked(SOTA:IsDebugging());
+	getglobal("FrameConfigBiddingEnableDebug"):SetChecked(SOTA.db.realm.IsDebugging);
 
 	self:RefreshStrings()
 end
@@ -69,9 +69,9 @@ function SOTA_HandleCheckbox(checkbox)
 	--	Enable Debug Mode:
 	if checkboxname == "FrameConfigBiddingEnableDebug" then
 		if checkbox:GetChecked() then
-			SOTA:SetDebugging(true)
+			SOTA.db.realm.IsDebugging = true
 		else
-			SOTA:SetDebugging(false)
+			SOTA.db.realm.IsDebugging = false
 		end
 		return;
 	end
@@ -149,11 +149,11 @@ end
 --- Guild Extract Module
 
 function SOTA_Conf_ExportPlayersDKP_open()
-	module:TriggerEvent("SOTA_GUILDEXTRACT_REQUEST")
+	module:SendMessage("SOTA_GUILDEXTRACT_REQUEST")
 end
 
 -------------------------------
 --- Transaction Import Module
 function SOTA_Conf_TransactionImport_open()
-	module:TriggerEvent("SOTA_IMPORTTOEXEC_REQUEST")
+	module:SendMessage("SOTA_IMPORTTOEXEC_REQUEST")
 end

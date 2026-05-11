@@ -1,18 +1,10 @@
+## Interface: 30300
 ## Title: SOTA
-## Version: 2.0.0
+## Version: 3.0.0
 ## Author: Raven
-## Interface: 11200
 ## SavedVariables: SOTADB
 
-Libs\AceLibrary\AceLibrary.lua
-
-Libs\AceAddon-2.0\AceAddon-2.0.lua
-Libs\AceOO-2.0\AceOO-2.0.lua
-Libs\AceDebug-2.0\AceDebug-2.0.lua
-Libs\AceConsole-2.0\AceConsole-2.0.lua
-Libs\AceEvent-2.0\AceEvent-2.0.lua
-Libs\AceModuleCore-2.0\AceModuleCore-2.0.lua
-Libs\AceDB-2.0\AceDB-2.0.lua
+embeds.xml
 
 src\Core\Core.lua
 src\Core\Json.lua

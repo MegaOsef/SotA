@@ -9,7 +9,10 @@
 
 local SOTA = SOTAG
 
-local module = SOTA:NewModule("Auctions", "AceEvent-2.0")
+local module = SOTA:NewModule("Auctions",
+	"AceEvent-3.0",
+	"AceTimer-3.0"
+)
 
 --	State machine:
 local AUCTION_STATE = {
@@ -103,11 +106,11 @@ function module:OnEnable()
 
 	self:SetAuctionState(AUCTION_STATE.NONE, 0);
 
-	self:ScheduleRepeatingEvent("SOTA_CheckAuctionState", self.CheckAuctionState, 1, self) -- TODO Put it back to 1sec ? 0.9 is for the lag.
+	self.CheckAuctionStateTimer = self:ScheduleRepeatingTimer(self.CheckAuctionState, 1, self) -- TODO Put it back to 1sec ? 0.9 is for the lag.
 
 	self:RegisterEvent("CHAT_MSG_RAID")
 	self:RegisterEvent("CHAT_MSG_RAID_LEADER", "CHAT_MSG_RAID")
-	self:RegisterEvent("SOTA_REQUEST_AUCTION")
+	self:RegisterMessage("SOTA_REQUEST_AUCTION")
 
 	self:AuctionUIInit()
 

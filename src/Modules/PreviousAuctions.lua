@@ -2,7 +2,7 @@ local SOTA = SOTAG
 
 local RAIDS_INFO = SOTA.RAIDS_INFO
 
-local module = SOTA:NewModule("PreviousAuctions", "AceEvent-2.0")
+local module = SOTA:NewModule("PreviousAuctions", "AceEvent-3.0")
 
 local MAX_AUCTIONS = 24
 
@@ -44,7 +44,7 @@ function module:OnEnable()
 
     self.window:Hide()
 
-    self:RegisterEvent("SOTA_RAVENLOGS_UPDATED", "RefreshAuctionsList")
+    self:RegisterMessage("SOTA_RAVENLOGS_UPDATED", "RefreshAuctionsList")
 end
 
 local function sortAuctionsDescending(sourcetable, index)

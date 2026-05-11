@@ -9,7 +9,7 @@
 
 local SOTA = SOTAG
 
-local module = SOTA:NewModule("LogsUI", "AceEvent-2.0")
+local module = SOTA:NewModule("LogsUI", "AceEvent-3.0")
 
 local SOTA_COLOUR_INTRO				= "|c80F0F0F0"
 local SOTA_COLOUR_CHAT				= "|c8040A0F8"

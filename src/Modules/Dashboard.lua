@@ -1,6 +1,9 @@
 local SOTA = SOTAG
 
-local module = SOTA:NewModule("Dashboard", "AceEvent-2.0")
+local module = SOTA:NewModule("Dashboard",
+	"AceEvent-3.0",
+	"AceTimer-3.0"
+)
 
 function module:OnEnable()
 	self.lootsFrames = {}
@@ -10,13 +13,13 @@ function module:OnEnable()
 	self.currentLootedMobName = nil
 	self.warnedPlayers = {}
 
-	self:RegisterEvent("SOTA_RAVENLOGS_UPDATED")
-	self:RegisterEvent("SOTA_BOSS_KILLED")
+	self:RegisterMessage("SOTA_RAVENLOGS_UPDATED")
+	self:RegisterMessage("SOTA_BOSS_KILLED")
 	self:RegisterEvent("LOOT_OPENED")
 	self:RegisterEvent("LOOT_SLOT_CLEARED", "RefreshLootsList")
 	self:RegisterEvent("LOOT_CLOSED")
 	self:RegisterEvent("RAID_ROSTER_UPDATE", "OnRaidRosterUpdate")
-	self:ScheduleRepeatingEvent("SOTA_OnSecondTimer", self.OnSecondTimer, 1, self)
+	self.OnSecondTimerTimer = self:ScheduleRepeatingTimer(self.OnSecondTimer, 1, self)
 
 	self:OnSecondTimer()
 
@@ -187,7 +190,7 @@ function SOTA_OnLootClick(object)
 	if not itemLink or itemLink == "" then
 		return;
 	end
-	module:TriggerEvent("SOTA_REQUEST_AUCTION", itemLink, SOTA:RealZoneToRaidName(GetRealZoneText()), module.currentLootedMobName);
+	module:SendMessage("SOTA_REQUEST_AUCTION", itemLink, SOTA:RealZoneToRaidName(GetRealZoneText()), module.currentLootedMobName);
 end
 
 function SOTA_OnEarnBossDkp()
@@ -210,7 +213,7 @@ end
 
 
 function SOTA_ExportRavenLogsButton_OnClick()
-	module:TriggerEvent("SOTA_EXPORTRAVENLOGS_REQUEST")
+	module:SendMessage("SOTA_EXPORTRAVENLOGS_REQUEST")
 	SOTA.db.realm.NeedsToExportRavenLogs = false
 end
 

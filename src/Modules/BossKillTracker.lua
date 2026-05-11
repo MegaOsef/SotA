@@ -1,6 +1,6 @@
 local SOTA = SOTAG
 
-local module = SOTA:NewModule("BossKillTracker", "AceEvent-2.0")
+local module = SOTA:NewModule("BossKillTracker", "AceEvent-3.0")
 
 function module:OnEnable()
 	self:RegisterEvent("CHAT_MSG_COMBAT_HOSTILE_DEATH")
@@ -20,7 +20,7 @@ function module:CHAT_MSG_COMBAT_HOSTILE_DEATH(msg)
 			bossDkpListItem and bossDkpListItem.bossName or "unknown",
 				bossDkpListItem and bossDkpListItem.dkpValue or "N/A")
 			if bossDkpListItem then
-				self:TriggerEvent("SOTA_BOSS_KILLED", tostring(bossDkpListItem.bossName), tonumber(bossDkpListItem.dkpValue))
+				self:SendMessage("SOTA_BOSS_KILLED", tostring(bossDkpListItem.bossName), tonumber(bossDkpListItem.dkpValue))
 				return
 			end
 		end

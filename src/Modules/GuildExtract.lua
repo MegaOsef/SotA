@@ -1,12 +1,12 @@
 local SOTA = SOTAG
 
-local module = SOTA:NewModule("GuildExtract", "AceEvent-2.0")
+local module = SOTA:NewModule("GuildExtract", "AceEvent-3.0")
 
 function module:OnEnable()
     self.extractRequested = false
 
-    self:RegisterEvent("SOTA_GUILDROSTER_UPDATED")
-    self:RegisterEvent("SOTA_GUILDEXTRACT_REQUEST")
+    self:RegisterMessage("SOTA_GUILDROSTER_UPDATED")
+    self:RegisterMessage("SOTA_GUILDEXTRACT_REQUEST")
 end
 
 function module:SOTA_GUILDROSTER_UPDATED()

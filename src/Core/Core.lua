@@ -1,9 +1,10 @@
-SOTAG                      = AceLibrary("AceAddon-2.0"):new(
-	"AceEvent-2.0",
-	"AceConsole-2.0",
-	"AceDB-2.0",
-	"AceModuleCore-2.0",
-	"AceDebug-2.0"
+SOTAG                      = LibStub("AceAddon-3.0"):NewAddon("SotA",
+	"AceEvent-3.0",
+	"AceConsole-3.0",
+	"AceTimer-3.0"
+--"AceDB-3.0"
+--"AceModuleCore-2.0",
+--"AceDebug-2.0"
 )
 
 local SOTA                 = SOTAG
@@ -20,7 +21,11 @@ SOTA_GUILDNOTE             = {
 	USEPUBLIC = 1,
 }
 
-
+function SOTA:Debug(...)
+	if SOTA.db.realm.IsDebugging then
+		self:Print("|cff33ff99dbg|r:", ...)
+	end
+end
 
 function SOTA:OnInitialize()
 	--	List of {jobname,name,dkp} tables
@@ -45,17 +50,15 @@ function SOTA:OnInitialize()
 		WHISPER = "WHISPER",
 	}
 
-	self.MAX_DKP = 99999
+	self.MAX_DKP          = 99999
 end
 
 function SOTA:OnEnable()
-	self:SetDebugging(SOTA_DEBUG_ENABLED)
 	self:Print(string.format("Loot Distribution Addon version %s by %s", GetAddOnMetadata("SOTA", "Version"),
 		GetAddOnMetadata("SOTA", "Author")));
 
-	SOTA:RegisterDB("SOTADB")
-	SOTA:RegisterDefaults("realm",
-		{
+	self.db = LibStub("AceDB-3.0"):New("SOTADB", {
+		realm = {
 			DisableDashboard = 0,
 			MinimapButtonAngle = 225,
 			UseGuildNotes = SOTA_GUILDNOTE.USEOFFICER,
@@ -72,7 +75,7 @@ function SOTA:OnEnable()
 				bossName= "Onyxia", -->> only for "boss" type
 				officer = "OfficerName",
 				dkpChanges = { { id = "20260201160343003", player = "PlayerName1", change = 20  },
-							   { id = "20260201160343004", player = "PlayerName2", change = -30 } } 
+							   { id = "20260201160343004", player = "PlayerName2", change = -30 } }
 			}, ... },
 			  auctions = { {
 			  	id = "20260201160343001", -->> Last 3 digits is to avoid collisions, first ones are timestamp
@@ -80,7 +83,7 @@ function SOTA:OnEnable()
 				bossName = "Onyxia",
 				winner = "PlayerName", --> doesn't exist if no winner
 				finalBid = 500, --> doesn't exist if no winner
-				bidType = "MS", --> "MS" | "OS" 
+				bidType = "MS", --> "MS" | "OS"
 				officer = "OfficerName",
 				valid = true, -- has to be taken by RavenWebapp or not
 			  }, ... },
@@ -88,17 +91,18 @@ function SOTA:OnEnable()
 			NeedsToExportRavenLogs = false,
 			AutoAssignLoot = 1,
 			DryRunAssignLoot = 1,
-		}
-	)
+			IsDebugging = false,
+		},
+	})
 
-	self:RegisterChatCommand({ "/SOTA" }, function(input) self:HandleSOTACommand(input) end)
+	self:RegisterChatCommand("SOTA", function(input) self:HandleSOTACommand(input) end)
 
 	self:RegisterEvent("GUILD_ROSTER_UPDATE");
 	self:RegisterEvent("RAID_ROSTER_UPDATE", "RefreshRaidRoster");
 
 	self:RequestUpdateGuildRoster()
 
-	self:ScheduleRepeatingEvent("SOTA_RefreshGuildRoster", GuildRoster, 5)
+	self.RefreshGuildTimer = self:ScheduleRepeatingTimer(GuildRoster, 5)
 end
 
 --[[
@@ -112,7 +116,7 @@ function SOTA:HandleSOTACommand(msg)
 	--	Syntax: "<itemlink>"
 	local _, _, itemId = string.find(msg, "item:(%d+):")
 	if itemId then
-		self:TriggerEvent("SOTA_REQUEST_AUCTION", msg, self:RealZoneToRaidName(GetRealZoneText()), nil)
+		self:SendMessage("SOTA_REQUEST_AUCTION", msg, self:RealZoneToRaidName(GetRealZoneText()), nil)
 		return
 	end
 

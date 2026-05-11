@@ -8,13 +8,13 @@ SOTA.LOGTYPE = {
     RAID = "raid",
 }
 
-local module = SOTA:NewModule("RavenLogsForApp", "AceEvent-2.0")
+local module = SOTA:NewModule("RavenLogsForApp", "AceEvent-3.0")
 
 function module:OnEnable()
     self.TsId = 0
     self.LastTs = 0
 
-    self:RegisterEvent("SOTA_EXPORTRAVENLOGS_REQUEST")
+    self:RegisterMessage("SOTA_EXPORTRAVENLOGS_REQUEST")
 end
 
 function module:SOTA_EXPORTRAVENLOGS_REQUEST()
@@ -110,7 +110,7 @@ function module:LogAuction(itemId, raidName, bossName, winner, finalBid, bidType
         valid = true
     })
 
-    self:TriggerEvent("SOTA_RAVENLOGS_UPDATED")
+    self:SendMessage("SOTA_RAVENLOGS_UPDATED")
 
     return uniqueAuctionId
 end

@@ -1,13 +1,13 @@
 local SOTA = SOTAG
 
-local module = SOTA:NewModule("ImportToExec", "AceEvent-2.0")
+local module = SOTA:NewModule("ImportToExec", "AceEvent-3.0")
 
 function module:OnEnable()
     self.importRequested = false
     self.importStr = ""
 
-    self:RegisterEvent("SOTA_IMPORTTOEXEC_REQUEST")
-    self:RegisterEvent("SOTA_GUILDROSTER_UPDATED")
+    self:RegisterMessage("SOTA_IMPORTTOEXEC_REQUEST")
+    self:RegisterMessage("SOTA_GUILDROSTER_UPDATED")
 end
 
 function module:CheckEntry(entry)
