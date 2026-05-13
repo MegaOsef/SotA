@@ -41,17 +41,17 @@ function module:SOTA_RAVENLOGS_UPDATED(_)
 	SOTA.db.realm.NeedsToExportRavenLogs = true
 end
 
-function module:LOOT_OPENED()
+function module:LOOT_OPENED(_)
 	self.currentLootedMobName = UnitName("target")
 	self:RefreshLootsList()
 end
 
-function module:LOOT_CLOSED()
+function module:LOOT_CLOSED(_)
 	self.currentLootedMobName = nil
 	self:RefreshLootsList()
 end
 
-function module:RefreshLootsList()
+function module:RefreshLootsList(_)
 	SOTA:Debug("RefreshLootsList: start, existing frames=" .. table.getn(self.lootsFrames) .. ", numLootItems=" .. GetNumLootItems())
 
 	-- Hide all existing lootsFrames
@@ -306,7 +306,7 @@ end
 -------------------------------
 --- Guild Roster Roles Validation
 
-function module:OnRaidRosterUpdate()
+function module:OnRaidRosterUpdate(_)
 	self:CheckRaidAgainstConfig()
 end
 

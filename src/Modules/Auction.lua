@@ -232,14 +232,14 @@ end
 --[[
 --	There's a message in the Raid channel - investigate that!
 --]]
-function module:CHAT_MSG_RAID(message, sender)
+function module:CHAT_MSG_RAID(_, message, sender)
 	if (not message) or (message == "") then
 		return;
 	end
 	
 	if SOTA:IsMasterLoot() then
 		-- Parse RavenDKP bid messages: [RavenDKP] |c<color>spec dkp|r
-		local a,_,bidtype,dkp = string.find(message, "%[RavenDKP%] |c%x%x%x%x%x%x%x%x(%a+) (%d+)|r")
+		local a,_,bidtype,dkp = string.find(message, "%[RavenDKP%] (%a+) (%d+)")
 		if bidtype and dkp then
 			local bidMessage = string.lower(bidtype) .. " " .. dkp;
 			SOTA:Debug("Received bid message from "..sender..": "..bidMessage)

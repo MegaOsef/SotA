@@ -26,7 +26,7 @@ function SOTA:RequestUpdateGuildRoster()
     end
 end
 
-function SOTA:GUILD_ROSTER_UPDATE()
+function SOTA:GUILD_ROSTER_UPDATE(_)
     self:RefreshGuildRoster();
     if self:IsInRaid(true) then
         self:RefreshRaidRoster()

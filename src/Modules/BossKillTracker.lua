@@ -6,7 +6,7 @@ function module:OnEnable()
 	self:RegisterEvent("CHAT_MSG_COMBAT_HOSTILE_DEATH")
 end
 
-function module:CHAT_MSG_COMBAT_HOSTILE_DEATH(msg)
+function module:CHAT_MSG_COMBAT_HOSTILE_DEATH(_, msg)
 	-- Example boss kill message: "Onyxia dies." — handle when that's contained in a longer message
 	local lowerMsg = string.lower(msg)
 	local findStr = " dies."

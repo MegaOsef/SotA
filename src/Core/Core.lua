@@ -98,11 +98,15 @@ function SOTA:OnEnable()
 	self:RegisterChatCommand("SOTA", function(input) self:HandleSOTACommand(input) end)
 
 	self:RegisterEvent("GUILD_ROSTER_UPDATE");
-	self:RegisterEvent("RAID_ROSTER_UPDATE", "RefreshRaidRoster");
+	self:RegisterEvent("RAID_ROSTER_UPDATE");
 
 	self:RequestUpdateGuildRoster()
 
 	self.RefreshGuildTimer = self:ScheduleRepeatingTimer(GuildRoster, 5)
+end
+
+function SOTA:RAID_ROSTER_UPDATE(_)
+	self:RefreshRaidRoster()
 end
 
 --[[
