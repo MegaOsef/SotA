@@ -2,35 +2,6 @@ local SOTA = SOTAG
 
 SOTA.RAIDS_INFO = {
 	{
-		name = "Blackwing Lair",
-		bosses = {
-			"Razorgore the Untamed",
-			"Vaelastrasz the Corrupt",
-			"Broodlord Lashlayer",
-			"Firemaw",
-			"Ebonroc",
-			"Flamegor",
-			"Chromaggus",
-			"Nefarian",
-			"Trashs",
-		},
-	},
-	{
-		name = "Ahn'Qiraj",
-		bosses = {
-			"The Prophet Skeram",
-			"The Bug Family",
-			"Battleguard Sartura",
-			"Fankriss the Unyielding",
-			"Viscidus",
-			"Princess Huhuran",
-			"The Twin Emperors",
-			"Ouro",
-			"C'Thun",
-			"Trashs",
-		},
-	},
-	{
 		name = "Naxxramas",
 		bosses = {
 			"Anub'Rekhan",
@@ -51,26 +22,6 @@ SOTA.RAIDS_INFO = {
 			"Trashs",
 		}
 	},
-	{
-		name = "Emerald Sanctum",
-		bosses = {
-			"Solnius the Awakener",
-			"Trashs",
-		}
-	},
-	{
-		name = "Upper Karazhan Halls",
-		bosses = {
-			"Keeper Gnarlmoon",
-			"Ley-Watcher Incantagos",
-			"Anomalus",
-			"Echo of Medivh",
-			"King (Chess fight)",
-			"Rupturan the Broken",
-			"Sanv Tas'dal",
-			"Kruul",
-			"Mephistroth",
-			"Trashs",
-		}
-	},
+	{ name = "Eye of Eternity",  bosses = { "Malygos", "Trashs" } },
+	{ name = "Obsidian Sanctum", bosses = { "Sartharion", "Trashs" } },
 }
